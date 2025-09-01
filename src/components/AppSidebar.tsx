@@ -56,12 +56,6 @@ export function AppSidebar() {
                 src={settings.logo_url} 
                 alt="Company Logo" 
                 className={`object-contain rounded ${open ? 'h-12 w-auto max-w-full' : 'h-10 w-10'}`}
-                style={{ 
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-                  background: 'rgba(255,255,255,0.1)',
-                  padding: '4px',
-                  borderRadius: '8px'
-                }}
                 onError={(e) => {
                   console.log('Logo failed to load:', settings.logo_url);
                   e.currentTarget.style.display = 'none';
