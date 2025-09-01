@@ -10,139 +10,403 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
-      ai_transcripts: {
+      campaign_answers: {
         Row: {
-          created_at: string | null
-          deal_id: string | null
-          id: number
-          lead_phone: string
-          messages: Json | null
-        }
-        Insert: {
-          created_at?: string | null
-          deal_id?: string | null
-          id?: number
-          lead_phone: string
-          messages?: Json | null
-        }
-        Update: {
-          created_at?: string | null
-          deal_id?: string | null
-          id?: number
-          lead_phone?: string
-          messages?: Json | null
-        }
-        Relationships: []
-      }
-      "intake_state (delete later)": {
-        Row: {
-          answered_questions: Json | null
-          answers: Json | null
-          freshsales_deal_id: string | null
-          last_question_id: number
-          lead_email: string | null
-          lead_phone: string
-          side_convo_streak: number | null
-          skipped_questions: Json | null
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          answered_questions?: Json | null
-          answers?: Json | null
-          freshsales_deal_id?: string | null
-          last_question_id?: number
-          lead_email?: string | null
-          lead_phone: string
-          side_convo_streak?: number | null
-          skipped_questions?: Json | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          answered_questions?: Json | null
-          answers?: Json | null
-          freshsales_deal_id?: string | null
-          last_question_id?: number
-          lead_email?: string | null
-          lead_phone?: string
-          side_convo_streak?: number | null
-          skipped_questions?: Json | null
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      leads: {
-        Row: {
-          answered_questions: Json
-          answers: Json
-          awaiting_other_for: number | null
-          client_id: string | null
-          contact_id: string | null
+          answered_at: string
+          campaign_id: string
+          confidence: number | null
+          confirmation_message: string | null
+          confirmed_at: string | null
+          contact_id: string
           created_at: string
-          freshsales_deal_id: string | null
           id: string
-          last_question_id: number
-          lead_email: string | null
-          lead_fName: string | null
-          lead_phone: string
+          interpreted_value: string | null
+          is_confirmed: boolean
+          option_letter: string | null
+          question_code: string | null
+          question_id: string
+          questionnaire_id: string
+          raw_text: string | null
+          structured_json: Json | null
+          updated_at: string
+          value_json: Json | null
+          value_text: string | null
+        }
+        Insert: {
+          answered_at?: string
+          campaign_id: string
+          confidence?: number | null
+          confirmation_message?: string | null
+          confirmed_at?: string | null
+          contact_id: string
+          created_at?: string
+          id?: string
+          interpreted_value?: string | null
+          is_confirmed?: boolean
+          option_letter?: string | null
+          question_code?: string | null
+          question_id: string
+          questionnaire_id: string
+          raw_text?: string | null
+          structured_json?: Json | null
+          updated_at?: string
+          value_json?: Json | null
+          value_text?: string | null
+        }
+        Update: {
+          answered_at?: string
+          campaign_id?: string
+          confidence?: number | null
+          confirmation_message?: string | null
+          confirmed_at?: string | null
+          contact_id?: string
+          created_at?: string
+          id?: string
+          interpreted_value?: string | null
+          is_confirmed?: boolean
+          option_letter?: string | null
+          question_code?: string | null
+          question_id?: string
+          questionnaire_id?: string
+          raw_text?: string | null
+          structured_json?: Json | null
+          updated_at?: string
+          value_json?: Json | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_answers_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_answers_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_answers_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_questionnaires: {
+        Row: {
+          assigned_at: string
+          campaign_id: string
+          completed_at: string | null
+          id: string
+          questionnaire_id: string
+          started_at: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          campaign_id: string
+          completed_at?: string | null
+          id?: string
+          questionnaire_id: string
+          started_at?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          campaign_id?: string
+          completed_at?: string | null
+          id?: string
+          questionnaire_id?: string
+          started_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_questionnaires_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_questionnaires_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          answered_questions: number[] | null
+          answers: Json | null
+          awaiting_other_for: number | null
+          calendly_event_type: string | null
+          calendly_payload_json: Json | null
+          consent_received_at: string | null
+          contact_id: string
+          created_at: string
+          external_conversation_sid: string | null
+          id: string
+          last_question_id: number | null
+          name: string | null
+          notes: string | null
           pending_other_field: string | null
-          side_convo_streak: number
-          skipped_questions: Json
+          scheduled_end: string | null
+          scheduled_start: string | null
+          skipped_questions: number[] | null
           status: string
+          twilio_conversation_sid: string | null
           updated_at: string
         }
         Insert: {
-          answered_questions?: Json
-          answers?: Json
+          answered_questions?: number[] | null
+          answers?: Json | null
           awaiting_other_for?: number | null
-          client_id?: string | null
-          contact_id?: string | null
+          calendly_event_type?: string | null
+          calendly_payload_json?: Json | null
+          consent_received_at?: string | null
+          contact_id: string
           created_at?: string
-          freshsales_deal_id?: string | null
+          external_conversation_sid?: string | null
           id?: string
-          last_question_id?: number
-          lead_email?: string | null
-          lead_fName?: string | null
-          lead_phone: string
+          last_question_id?: number | null
+          name?: string | null
+          notes?: string | null
           pending_other_field?: string | null
-          side_convo_streak?: number
-          skipped_questions?: Json
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          skipped_questions?: number[] | null
           status?: string
+          twilio_conversation_sid?: string | null
           updated_at?: string
         }
         Update: {
-          answered_questions?: Json
-          answers?: Json
+          answered_questions?: number[] | null
+          answers?: Json | null
           awaiting_other_for?: number | null
-          client_id?: string | null
-          contact_id?: string | null
+          calendly_event_type?: string | null
+          calendly_payload_json?: Json | null
+          consent_received_at?: string | null
+          contact_id?: string
           created_at?: string
-          freshsales_deal_id?: string | null
+          external_conversation_sid?: string | null
           id?: string
-          last_question_id?: number
-          lead_email?: string | null
-          lead_fName?: string | null
-          lead_phone?: string
+          last_question_id?: number | null
+          name?: string | null
+          notes?: string | null
           pending_other_field?: string | null
-          side_convo_streak?: number
-          skipped_questions?: Json
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          skipped_questions?: number[] | null
           status?: string
+          twilio_conversation_sid?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone_e164: string | null
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone_e164?: string | null
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone_e164?: string | null
+          source?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          campaign_id: string
+          created_at: string
+          external_message_sid: string | null
+          id: string
+          meta: Json | null
+          sender_display: string | null
+          sender_type: string
+          sent_at: string
+        }
+        Insert: {
+          body: string
+          campaign_id: string
+          created_at?: string
+          external_message_sid?: string | null
+          id?: string
+          meta?: Json | null
+          sender_display?: string | null
+          sender_type: string
+          sent_at?: string
+        }
+        Update: {
+          body?: string
+          campaign_id?: string
+          created_at?: string
+          external_message_sid?: string | null
+          id?: string
+          meta?: Json | null
+          sender_display?: string | null
+          sender_type?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questionnaires: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          code: string
+          confirm_template: string | null
+          created_at: string
+          id: string
+          options_json: Json | null
+          ordinal: number
+          questionnaire_id: string
+          requires_confirmation: boolean
+          section: string | null
+          text: string
+          type: string
+        }
+        Insert: {
+          code: string
+          confirm_template?: string | null
+          created_at?: string
+          id?: string
+          options_json?: Json | null
+          ordinal: number
+          questionnaire_id: string
+          requires_confirmation?: boolean
+          section?: string | null
+          text: string
+          type: string
+        }
+        Update: {
+          code?: string
+          confirm_template?: string | null
+          created_at?: string
+          id?: string
+          options_json?: Json | null
+          ordinal?: number
+          questionnaire_id?: string
+          requires_confirmation?: boolean
+          section?: string | null
+          text?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_questionnaire_id_fkey"
+            columns: ["questionnaire_id"]
+            isOneToOne: false
+            referencedRelation: "questionnaires"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_questionnaire_with_questions: {
+        Args: { p_name: string; p_questions: Json }
+        Returns: string
+      }
+      upsert_contact: {
+        Args: {
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_phone_e164: string
+          p_source?: string
+        }
+        Returns: {
+          created_at: string
+          email: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone_e164: string | null
+          source: string | null
+          updated_at: string
+        }
+      }
     }
     Enums: {
       [_ in never]: never
