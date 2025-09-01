@@ -100,8 +100,10 @@ const CampaignDetail = () => {
         const parsed = JSON.parse(val);
         if (Array.isArray(parsed)) return parsed as string[];
         if (parsed && typeof parsed === 'object') {
-          if (Array.isArray((parsed as any).selected)) return (parsed as any).selected as string[];
-          if (Array.isArray((parsed as any).values)) return (parsed as any).values as string[];
+          // Handle the specific structure with selected_values
+          if (Array.isArray(parsed.selected_values)) return parsed.selected_values as string[];
+          if (Array.isArray(parsed.selected)) return parsed.selected as string[];
+          if (Array.isArray(parsed.values)) return parsed.values as string[];
           const truthy = Object.entries(parsed as Record<string, any>)
             .filter(([_, v]) => !!v)
             .map(([k]) => k);
@@ -111,8 +113,9 @@ const CampaignDetail = () => {
       return null;
     }
     if (typeof val === 'object') {
-      if (Array.isArray((val as any).selected)) return (val as any).selected as string[];
-      if (Array.isArray((val as any).values)) return (val as any).values as string[];
+      if (Array.isArray(val.selected_values)) return val.selected_values as string[];
+      if (Array.isArray(val.selected)) return val.selected as string[];
+      if (Array.isArray(val.values)) return val.values as string[];
       const truthy = Object.entries(val as Record<string, any>)
         .filter(([_, v]) => !!v)
         .map(([k]) => k);
@@ -128,7 +131,7 @@ const CampaignDetail = () => {
     const values = normalizeValueJson(answer.value_json);
     if (values && values.length) {
       const selectedValues = values.map((value: string) => {
-        if (value === 'other') {
+        if (value === 'Other?' || value === 'other') {
           let otherFieldCode = '';
           if (answer.question_code === 'current_focus') {
             otherFieldCode = 'current_focus_other';
@@ -138,13 +141,13 @@ const CampaignDetail = () => {
           if (otherFieldCode) {
             const otherAnswer = allAnswers.find((a) => a.question_code === otherFieldCode);
             const otherText = typeof otherAnswer?.value_text === 'string' ? otherAnswer.value_text.trim() : '';
-            return otherText || 'Other (no details provided)';
+            return otherText ? `Other?: ${otherText}` : 'Other? (no details provided)';
           }
-          return 'Other';
+          return 'Other?';
         }
         return value;
       });
-      return selectedValues.join(', ');
+      return selectedValues.join('\n');
     }
 
     return 'No answer provided';
