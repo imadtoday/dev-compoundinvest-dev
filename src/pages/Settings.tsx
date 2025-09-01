@@ -82,28 +82,34 @@ const Settings = () => {
       const fileExt = logoFile.name.split('.').pop();
       const fileName = `logo.${fileExt}`;
       
-      // Upload file to Supabase Storage
+      // Upload file to Supabase Storage with cache busting
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('company-assets')
         .upload(fileName, logoFile, {
-          cacheControl: '3600',
+          cacheControl: '0',
           upsert: true
         });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
+      // Get public URL with timestamp to avoid caching
+      const timestamp = Date.now();
       const { data: { publicUrl } } = supabase.storage
         .from('company-assets')
         .getPublicUrl(fileName);
+      
+      const cacheBustedUrl = `${publicUrl}?v=${timestamp}`;
 
       // Update settings with new logo URL
-      await updateSettings.mutateAsync({ logo_url: publicUrl });
+      await updateSettings.mutateAsync({ logo_url: cacheBustedUrl });
+      
+      // Force refresh of company settings in sidebar
+      queryClient.invalidateQueries({ queryKey: ['company-settings'] });
       
       setLogoFile(null);
       toast({
         title: "Logo Uploaded",
-        description: "Company logo has been successfully uploaded.",
+        description: "Company logo has been successfully uploaded and will appear shortly.",
       });
     } catch (error) {
       toast({

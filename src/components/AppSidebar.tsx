@@ -51,11 +51,32 @@ export function AppSidebar() {
       <div className="px-6 py-4 border-b border-sidebar-border">
         <div className="flex items-center justify-center">
           {settings?.logo_url ? (
-            <img 
-              src={settings.logo_url} 
-              alt="Company Logo" 
-              className={`object-contain rounded ${open ? 'h-12 w-auto max-w-full' : 'h-10 w-10'}`}
-            />
+            <div className="relative">
+              <img 
+                src={settings.logo_url} 
+                alt="Company Logo" 
+                className={`object-contain rounded ${open ? 'h-12 w-auto max-w-full' : 'h-10 w-10'}`}
+                style={{ 
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                  background: 'rgba(255,255,255,0.1)',
+                  padding: '4px',
+                  borderRadius: '8px'
+                }}
+                onError={(e) => {
+                  console.log('Logo failed to load:', settings.logo_url);
+                  e.currentTarget.style.display = 'none';
+                }}
+                onLoad={() => {
+                  console.log('Logo loaded successfully:', settings.logo_url);
+                }}
+              />
+              {/* Debug info - remove this later */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="absolute -bottom-8 left-0 text-xs text-white bg-black/50 p-1 rounded">
+                  Logo loaded
+                </div>
+              )}
+            </div>
           ) : (
             <div className={`bg-primary rounded flex items-center justify-center ${open ? 'h-12 w-12' : 'h-10 w-10'}`}>
               <span className={`text-primary-foreground font-bold ${open ? 'text-lg' : 'text-sm'}`}>CI</span>
