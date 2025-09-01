@@ -349,8 +349,8 @@ const CampaignDetail = () => {
                       }`}>
                          <div className="flex items-center gap-2 mb-1">
                            <span className="text-xs font-medium">
-                             {message.sender_type === 'user' 
-                               ? (campaign.contacts?.first_name || 'User')
+                             {(message.sender_type === 'user' || (message.sender_display || '').toLowerCase() === 'you')
+                               ? (campaign.contacts?.first_name || 'Contact')
                                : (message.sender_display || message.sender_type)}
                            </span>
                           <span className="text-xs opacity-70">
