@@ -34,9 +34,16 @@ const ContactDetail = () => {
       
       if (!contactData) return null;
       
+      // Fetch campaigns for this contact
+      const { data: campaignsData } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('contact_id', id)
+        .order('created_at', { ascending: false });
+      
       const contact: any = {
         ...contactData,
-        campaigns: [] // Empty campaigns array for now
+        campaigns: campaignsData || []
       };
       
       if (contact) {
@@ -229,14 +236,32 @@ const ContactDetail = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Megaphone className="h-5 w-5" />
-                  Campaigns (0)
+                  Campaigns ({contact?.campaigns?.length || 0})
                 </CardTitle>
                 <CardDescription>
                   Associated campaigns for this contact
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-sm">No campaigns associated with this contact.</p>
+                {contact?.campaigns?.length > 0 ? (
+                  <div className="space-y-3">
+                    {contact.campaigns.map((campaign: any) => (
+                      <div key={campaign.id} className="p-3 border rounded-lg bg-muted/50">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium">{campaign.name || 'Unnamed Campaign'}</h4>
+                            <p className="text-sm text-muted-foreground">Status: {campaign.status}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Created: {new Date(campaign.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">No campaigns associated with this contact.</p>
+                )}
               </CardContent>
             </Card>
 
