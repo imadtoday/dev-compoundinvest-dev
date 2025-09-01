@@ -296,7 +296,7 @@ const CampaignDetail = () => {
                     <div key={section} className="space-y-4">
                       <div className="flex items-center gap-2 mb-4">
                         <h3 className="text-lg font-semibold text-foreground">
-                          🚀 {section}
+                          {getSectionEmoji(section)} {section}
                         </h3>
                       </div>
                       {sectionAnswers.map((answer: any) => (
