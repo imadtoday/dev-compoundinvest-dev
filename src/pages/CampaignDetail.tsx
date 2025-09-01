@@ -90,7 +90,26 @@ const CampaignDetail = () => {
     }
   };
 
-  const formatQuestionText = (text: string) => (text ? text.replace(/\\n/g, '\n') : '');
+  const formatQuestionText = (text: string) => {
+    if (!text) return '';
+    // Remove newlines and clean up the text
+    let cleanText = text.replace(/\\n/g, '\n');
+    
+    // Remove multiple choice options (A), B), C), etc.) and everything after them
+    const lines = cleanText.split('\n');
+    const questionLines = [];
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      // Stop at the first line that looks like a multiple choice option
+      if (/^[A-Z]\)\s/.test(trimmedLine)) {
+        break;
+      }
+      questionLines.push(line);
+    }
+    
+    return questionLines.join('\n').trim();
+  };
 
   const normalizeValueJson = (val: any): string[] | null => {
     if (val == null) return null;
