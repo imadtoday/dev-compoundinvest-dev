@@ -30,7 +30,6 @@ export function AppSidebar() {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarTrigger className="m-2 self-end" />
       
       {/* Company Name Section */}
       <div className="px-6 py-4 border-b border-sidebar-border">
