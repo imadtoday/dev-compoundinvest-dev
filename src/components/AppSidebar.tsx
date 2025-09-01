@@ -1,5 +1,7 @@
-import { LayoutDashboard, Users, Home, Megaphone } from "lucide-react";
+import { LayoutDashboard, Users, Home, Megaphone, Settings } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
   SidebarContent,
@@ -17,12 +19,26 @@ const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Contacts", url: "/contacts", icon: Users },
   { title: "Campaigns", url: "/campaigns", icon: Megaphone },
+  { title: "Settings", url: "/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
   const { open, setOpen } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+
+  // Fetch company settings for logo and name
+  const { data: settings } = useQuery({
+    queryKey: ['company-settings'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('company_settings')
+        .select('*')
+        .limit(1)
+        .single();
+      return data;
+    }
+  });
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -36,15 +52,33 @@ export function AppSidebar() {
         <div className="flex items-center gap-3 min-w-0">
           {open ? (
             <div className="flex items-center gap-2 min-w-0">
+              {settings?.logo_url ? (
+                <img 
+                  src={settings.logo_url} 
+                  alt="Company Logo" 
+                  className="h-8 w-8 flex-shrink-0 object-contain rounded"
+                />
+              ) : (
+                <div className="h-8 w-8 bg-primary rounded flex-shrink-0 flex items-center justify-center">
+                  <span className="text-primary-foreground font-bold text-sm">CI</span>
+                </div>
+              )}
+              <h2 className="text-lg font-bold text-sidebar-foreground truncate">
+                {settings?.company_name || 'CompoundInvest'}
+              </h2>
+            </div>
+          ) : (
+            settings?.logo_url ? (
+              <img 
+                src={settings.logo_url} 
+                alt="Company Logo" 
+                className="h-8 w-8 flex-shrink-0 object-contain rounded"
+              />
+            ) : (
               <div className="h-8 w-8 bg-primary rounded flex-shrink-0 flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">CI</span>
               </div>
-              <h2 className="text-lg font-bold text-sidebar-foreground truncate">CompoundInvest</h2>
-            </div>
-          ) : (
-            <div className="h-8 w-8 bg-primary rounded flex-shrink-0 flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">CI</span>
-            </div>
+            )
           )}
         </div>
       </div>
