@@ -78,9 +78,12 @@ const CampaignsList = () => {
                   {campaigns.map((campaign: any) => (
                     <TableRow key={campaign.id}>
                       <TableCell>
-                        <div className="font-medium">
+                        <Link 
+                          to={`/campaigns/${campaign.id}`}
+                          className="font-medium text-primary hover:underline"
+                        >
                           {campaign.name || 'Unnamed Campaign'}
-                        </div>
+                        </Link>
                       </TableCell>
                       <TableCell>
                         {campaign.contacts ? (
