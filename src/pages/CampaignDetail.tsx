@@ -46,6 +46,7 @@ const CampaignDetail = () => {
         .select(`
           *,
           questions (
+            id,
             text,
             code,
             section,
@@ -222,7 +223,7 @@ const CampaignDetail = () => {
                   .map((answer: any, index: number) => (
                     <div key={answer.id} className="border-l-4 border-primary/20 pl-4 py-2">
                       <div className="mb-2">
-                        <h4 className="font-medium text-foreground">
+                        <h4 className="font-medium text-foreground whitespace-pre-wrap">
                           {answer.questions?.text}
                         </h4>
                         {answer.questions?.section && (
