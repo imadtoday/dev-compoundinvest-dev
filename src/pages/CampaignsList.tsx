@@ -40,16 +40,17 @@ const CampaignsList = () => {
     return matchesSearch;
   });
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeStyle = (status: string) => {
     switch (status.toLowerCase()) {
       case 'complete':
-        return 'default';
+        return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
       case 'new':
-        return 'secondary';
+        return 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200';
       case 'in_progress':
-        return 'outline';
+      case 'intake_in_progress':
+        return 'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200';
       default:
-        return 'secondary';
+        return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
     }
   };
 
@@ -137,10 +138,9 @@ const CampaignsList = () => {
                         </TableCell>
                         <TableCell>
                           <Badge 
-                            variant={getStatusBadgeVariant(campaign.status)}
-                            className="bg-accent/10 text-accent border-accent/20"
+                            className={`font-medium px-3 py-1 transition-colors duration-200 ${getStatusBadgeStyle(campaign.status)}`}
                           >
-                            {campaign.status}
+                            {campaign.status.replace('_', ' ').toUpperCase()}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
