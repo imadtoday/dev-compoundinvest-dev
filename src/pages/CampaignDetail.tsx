@@ -130,16 +130,11 @@ const CampaignDetail = () => {
 
     const values = normalizeValueJson(answer.value_json);
     if (values && values.length) {
-      console.log('Processing answer:', answer.question_code, 'values:', values);
-      console.log('All answers for debugging:', allAnswers.map(a => ({ code: a.question_code, text: a.value_text })));
-      
       const selectedValues = values.map((value: string) => {
         if (value === 'Other?' || value === 'other' || value === 'Other') {
           // Try to find the corresponding "other" field for any question
           const otherFieldCode = `${answer.question_code}_other`;
-          console.log('Looking for other field:', otherFieldCode);
           const otherAnswer = allAnswers.find((a) => a.question_code === otherFieldCode);
-          console.log('Found other answer:', otherAnswer);
           const otherText = typeof otherAnswer?.value_text === 'string' ? otherAnswer.value_text.trim() : '';
           return otherText ? `Other: ${otherText}` : 'Other';
         }
@@ -149,6 +144,23 @@ const CampaignDetail = () => {
     }
 
     return 'No answer provided';
+  };
+
+  const getSectionEmoji = (section: string) => {
+    const sectionLower = section?.toLowerCase() || '';
+    if (sectionLower.includes('focus')) return '🎯';
+    if (sectionLower.includes('timeframe') || sectionLower.includes('time')) return '⏳';
+    if (sectionLower.includes('portfolio') || sectionLower.includes('property')) return '🏘️';
+    if (sectionLower.includes('preference')) return '💡';
+    if (sectionLower.includes('location') || sectionLower.includes('cities')) return '📍';
+    if (sectionLower.includes('budget') || sectionLower.includes('finance')) return '💰';
+    if (sectionLower.includes('support') || sectionLower.includes('help')) return '🤝';
+    return '📋';
+  };
+
+  const getQuestionEmoji = (ordinal: number) => {
+    const emojiMap = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+    return ordinal <= 10 ? emojiMap[ordinal - 1] : '📝';
   };
 
   if (isLoading) {
@@ -244,36 +256,51 @@ const CampaignDetail = () => {
           </CardHeader>
           <CardContent>
             {answers && answers.length > 0 ? (
-              <div className="space-y-4">
-                {answers
-                  .filter(answer => answer.questions && !answer.question_code?.endsWith('_other')) // Filter out "other" follow-up questions
-                  .sort((a, b) => (a.questions?.ordinal || 0) - (b.questions?.ordinal || 0))
-                  .map((answer: any, index: number) => (
-                    <div key={answer.id} className="border-l-4 border-primary/20 pl-4 py-2">
-                      <div className="mb-2">
-                        <h4 className="font-medium text-foreground whitespace-pre-wrap">
-                          {formatQuestionText(answer.questions?.text || '')}
-                        </h4>
-                        {answer.questions?.section && (
-                          <p className="text-xs text-muted-foreground">
-                            Section: {answer.questions.section}
-                          </p>
-                        )}
+              <div className="space-y-6">
+                {(() => {
+                  const filteredAnswers = answers
+                    .filter(answer => answer.questions && !answer.question_code?.endsWith('_other'))
+                    .sort((a, b) => (a.questions?.ordinal || 0) - (b.questions?.ordinal || 0));
+
+                  const groupedBySection = filteredAnswers.reduce((acc: any, answer) => {
+                    const section = answer.questions?.section || 'Other';
+                    if (!acc[section]) acc[section] = [];
+                    acc[section].push(answer);
+                    return acc;
+                  }, {});
+
+                  return Object.entries(groupedBySection).map(([section, sectionAnswers]: [string, any]) => (
+                    <div key={section} className="space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <h3 className="text-lg font-semibold text-foreground">
+                          {getSectionEmoji(section)} *{section}*
+                        </h3>
                       </div>
-                      <div className="bg-muted/30 rounded-md p-3">
-                        <p className="text-foreground whitespace-pre-wrap">
-                          {renderAnswerValue(answer, answers)}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Answered: {formatInTimeZone(
-                            new Date(answer.answered_at),
-                            'Australia/Sydney',
-                            'dd/MM/yyyy HH:mm'
-                          )}
-                        </p>
-                      </div>
+                      {sectionAnswers.map((answer: any) => (
+                        <div key={answer.id} className="border-l-4 border-primary/20 pl-4 py-2">
+                          <div className="mb-2">
+                            <h4 className="font-medium text-foreground whitespace-pre-wrap flex items-start gap-2">
+                              <span className="text-lg">{getQuestionEmoji(answer.questions?.ordinal || 1)}</span>
+                              <span>{formatQuestionText(answer.questions?.text || '')}</span>
+                            </h4>
+                          </div>
+                          <div className="bg-muted/30 rounded-md p-3 ml-8">
+                            <p className="text-foreground whitespace-pre-wrap">
+                              {renderAnswerValue(answer, answers)}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Answered: {formatInTimeZone(
+                                new Date(answer.answered_at),
+                                'Australia/Sydney',
+                                'dd/MM/yyyy HH:mm'
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ));
+                })()}
               </div>
             ) : (
               <p className="text-muted-foreground">No questions answered yet.</p>
