@@ -105,6 +105,10 @@ const CampaignDetail = () => {
       if (/^[A-Z]\)\s/.test(trimmedLine)) {
         break;
       }
+      // Skip lines that contain "Reply Yes or No" instructions
+      if (trimmedLine.toLowerCase().includes('reply yes or no')) {
+        continue;
+      }
       questionLines.push(line);
     }
     
