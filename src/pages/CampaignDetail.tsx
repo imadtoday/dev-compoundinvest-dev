@@ -90,33 +90,60 @@ const CampaignDetail = () => {
     }
   };
 
-  const renderAnswerValue = (answer: any, allAnswers: any[]) => {
-    // If value_text exists, use it
-    if (answer.value_text) {
-      return answer.value_text;
-    }
+  const formatQuestionText = (text: string) => (text ? text.replace(/\\n/g, '\n') : '');
 
-    // If value_json exists (multi-select), process it
-    if (answer.value_json && Array.isArray(answer.value_json)) {
-      const selectedValues = answer.value_json.map((value: string) => {
+  const normalizeValueJson = (val: any): string[] | null => {
+    if (val == null) return null;
+    if (Array.isArray(val)) return val as string[];
+    if (typeof val === 'string') {
+      try {
+        const parsed = JSON.parse(val);
+        if (Array.isArray(parsed)) return parsed as string[];
+        if (parsed && typeof parsed === 'object') {
+          if (Array.isArray((parsed as any).selected)) return (parsed as any).selected as string[];
+          if (Array.isArray((parsed as any).values)) return (parsed as any).values as string[];
+          const truthy = Object.entries(parsed as Record<string, any>)
+            .filter(([_, v]) => !!v)
+            .map(([k]) => k);
+          return truthy.length ? truthy : null;
+        }
+      } catch {}
+      return null;
+    }
+    if (typeof val === 'object') {
+      if (Array.isArray((val as any).selected)) return (val as any).selected as string[];
+      if (Array.isArray((val as any).values)) return (val as any).values as string[];
+      const truthy = Object.entries(val as Record<string, any>)
+        .filter(([_, v]) => !!v)
+        .map(([k]) => k);
+      return truthy.length ? truthy : null;
+    }
+    return null;
+  };
+
+  const renderAnswerValue = (answer: any, allAnswers: any[]) => {
+    const text = typeof answer.value_text === 'string' ? answer.value_text.trim() : '';
+    if (text) return text;
+
+    const values = normalizeValueJson(answer.value_json);
+    if (values && values.length) {
+      const selectedValues = values.map((value: string) => {
         if (value === 'other') {
-          // Find the "other" field answer based on question code
           let otherFieldCode = '';
           if (answer.question_code === 'current_focus') {
             otherFieldCode = 'current_focus_other';
           } else if (answer.question_code === 'cities') {
             otherFieldCode = 'cities_other';
           }
-          
           if (otherFieldCode) {
-            const otherAnswer = allAnswers.find(a => a.question_code === otherFieldCode);
-            return otherAnswer?.value_text || 'Other (no details provided)';
+            const otherAnswer = allAnswers.find((a) => a.question_code === otherFieldCode);
+            const otherText = typeof otherAnswer?.value_text === 'string' ? otherAnswer.value_text.trim() : '';
+            return otherText || 'Other (no details provided)';
           }
           return 'Other';
         }
         return value;
       });
-      
       return selectedValues.join(', ');
     }
 
@@ -224,7 +251,7 @@ const CampaignDetail = () => {
                     <div key={answer.id} className="border-l-4 border-primary/20 pl-4 py-2">
                       <div className="mb-2">
                         <h4 className="font-medium text-foreground whitespace-pre-wrap">
-                          {answer.questions?.text}
+                          {formatQuestionText(answer.questions?.text || '')}
                         </h4>
                         {answer.questions?.section && (
                           <p className="text-xs text-muted-foreground">
@@ -233,7 +260,7 @@ const CampaignDetail = () => {
                         )}
                       </div>
                       <div className="bg-muted/30 rounded-md p-3">
-                        <p className="text-foreground">
+                        <p className="text-foreground whitespace-pre-wrap">
                           {renderAnswerValue(answer, answers)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
