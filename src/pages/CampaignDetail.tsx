@@ -246,7 +246,7 @@ const CampaignDetail = () => {
             {answers && answers.length > 0 ? (
               <div className="space-y-4">
                 {answers
-                  .filter(answer => answer.questions) // Only show answers with associated questions
+                  .filter(answer => answer.questions && !answer.question_code?.endsWith('_other')) // Filter out "other" follow-up questions
                   .sort((a, b) => (a.questions?.ordinal || 0) - (b.questions?.ordinal || 0))
                   .map((answer: any, index: number) => (
                     <div key={answer.id} className="border-l-4 border-primary/20 pl-4 py-2">
