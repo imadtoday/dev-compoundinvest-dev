@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
-import ContactsList from "./pages/ContactsList";
+import ContactsListPage from "./pages/ContactsList";
 import ContactDetail from "./pages/ContactDetail";
 import CampaignsList from "./pages/CampaignsList";
 import NotFound from "./pages/NotFound";
@@ -29,7 +29,7 @@ const App = () => (
               <main className="flex-1">
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
-                  <Route path="/contacts" element={<ContactsList />} />
+                  <Route path="/contacts" element={<ContactsListPage />} />
                   <Route path="/contacts/:id" element={<ContactDetail />} />
                   <Route path="/campaigns" element={<CampaignsList />} />
                   <Route path="*" element={<NotFound />} />
