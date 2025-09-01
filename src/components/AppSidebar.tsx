@@ -64,15 +64,25 @@ export function AppSidebar() {
         </div>
       </div>
 
-      <SidebarContent>
+      <SidebarContent className="px-2">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavCls}>
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                    <NavLink 
+                      to={item.url} 
+                      end 
+                      className={({ isActive }) => 
+                        `sidebar-nav-item flex items-center gap-3 px-3 py-3 text-sm font-medium transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-lg active' 
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+                        }`
+                      }
+                    >
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
                       {open && <span className="truncate">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>

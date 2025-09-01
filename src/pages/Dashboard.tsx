@@ -51,84 +51,106 @@ const Dashboard = () => {
 
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-8">
         <div className="border-b border-border pb-6">
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Overview of your contacts and campaigns</p>
+          <h1 className="text-4xl font-bold text-gradient-primary">Dashboard</h1>
+          <p className="text-muted-foreground text-lg mt-2">Overview of your contacts and campaigns</p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards with premium styling */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Contacts</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+          <div className="premium-card animate-slide-up">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Contacts</CardTitle>
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalContacts || 0}</div>
+              <div className="text-3xl font-bold text-gradient-primary">{stats?.totalContacts || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">Active contacts in system</p>
             </CardContent>
-          </Card>
+          </div>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
-              <UserCheck className="h-4 w-4 text-muted-foreground" />
+          <div className="premium-card animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Campaigns</CardTitle>
+              <div className="p-2 bg-accent/10 rounded-lg">
+                <UserCheck className="h-5 w-5 text-accent" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.totalCampaigns || 0}</div>
+              <div className="text-3xl font-bold text-gradient-gold">{stats?.totalCampaigns || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">Marketing campaigns</p>
             </CardContent>
-          </Card>
+          </div>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Workflow 1 Complete</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          <div className="premium-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Workflow 1 Complete</CardTitle>
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.completedWorkflows || 0}</div>
+              <div className="text-3xl font-bold text-green-600">{stats?.completedWorkflows || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">Successfully completed</p>
             </CardContent>
-          </Card>
+          </div>
         </div>
 
-        {/* Latest Contacts */}
-        <Card>
+        {/* Latest Contacts with premium styling */}
+        <div className="premium-card animate-slide-up" style={{ animationDelay: '0.3s' }}>
           <CardHeader>
-            <CardTitle>Latest Contacts</CardTitle>
-            <CardDescription>Your most recent 5 contacts</CardDescription>
+            <CardTitle className="text-xl font-semibold text-gradient-primary">Latest Contacts</CardTitle>
+            <CardDescription className="text-muted-foreground">Your most recent 5 contacts</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {latestContacts?.map((contact) => (
-                  <TableRow key={contact.id}>
-                    <TableCell>
-                      <Link 
-                        to={`/contacts/${contact.id}`}
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {contact.first_name} {contact.last_name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{contact.email || 'N/A'}</TableCell>
-                    <TableCell>{contact.phone_e164 || 'N/A'}</TableCell>
-                    <TableCell>
-                      {new Date(contact.created_at).toLocaleDateString()}
-                    </TableCell>
+            <div className="overflow-hidden rounded-lg border border-border">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold">Name</TableHead>
+                    <TableHead className="font-semibold">Email</TableHead>
+                    <TableHead className="font-semibold">Phone</TableHead>
+                    <TableHead className="font-semibold">Created</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {latestContacts?.map((contact, index) => (
+                    <TableRow 
+                      key={contact.id} 
+                      className="hover:bg-muted/30 transition-colors duration-200"
+                      style={{ animationDelay: `${0.4 + index * 0.1}s` }}
+                    >
+                      <TableCell>
+                        <Link 
+                          to={`/contacts/${contact.id}`}
+                          className="font-medium text-primary hover:text-accent transition-colors duration-200 hover:underline"
+                        >
+                          {contact.first_name} {contact.last_name}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{contact.email || 'N/A'}</TableCell>
+                      <TableCell className="text-muted-foreground">{contact.phone_e164 || 'N/A'}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {new Date(contact.created_at).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {(!latestContacts || latestContacts.length === 0) && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                        No contacts found. <Link to="/contacts" className="text-primary hover:underline">Add your first contact</Link>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   );
