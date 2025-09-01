@@ -51,87 +51,102 @@ const ContactsList = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="border-b border-border pb-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-8 w-8 text-primary" />
+    <div className="min-h-screen p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="border-b border-border pb-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <Users className="h-8 w-8 text-primary" />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Contacts</h1>
-              <p className="text-muted-foreground">Manage and view all your contacts</p>
+              <h1 className="text-4xl font-bold text-gradient-primary">Contacts</h1>
+              <p className="text-muted-foreground text-lg mt-2">Manage and view all your contacts</p>
             </div>
           </div>
         </div>
 
         {/* Search */}
-        <div className="flex gap-4 flex-col sm:flex-row">
+        <div className="flex gap-4 flex-col sm:flex-row animate-slide-up">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
             <Input
               placeholder="Search contacts by name, email, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="input-premium pl-12 h-12 text-base"
             />
           </div>
         </div>
 
         {/* Contacts Table */}
-        <Card>
+        <div className="premium-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
           <CardHeader>
-            <CardTitle>All Contacts ({filteredContacts?.length || 0})</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl font-semibold text-gradient-primary">
+              All Contacts ({filteredContacts?.length || 0})
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
               Click on a contact name to view detailed information
             </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-8">Loading contacts...</div>
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p className="text-muted-foreground mt-4">Loading contacts...</p>
+              </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>First Name</TableHead>
-                    <TableHead>Last Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Campaigns</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredContacts?.map((contact) => (
-                    <TableRow key={contact.id}>
-                      <TableCell>
-                        <Link 
-                          to={`/contacts/${contact.id}`}
-                          className="font-medium text-primary hover:underline"
-                        >
-                          {contact.first_name || 'N/A'}
-                        </Link>
-                      </TableCell>
-                      <TableCell>{contact.last_name || 'N/A'}</TableCell>
-                      <TableCell>{contact.email || 'N/A'}</TableCell>
-                      <TableCell>{contact.phone_e164 || 'N/A'}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{contact.campaignCount}</span>
-                          <span className="text-xs text-muted-foreground">campaigns</span>
-                        </div>
-                      </TableCell>
+              <div className="overflow-hidden rounded-lg border border-border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="font-semibold">First Name</TableHead>
+                      <TableHead className="font-semibold">Last Name</TableHead>
+                      <TableHead className="font-semibold">Email</TableHead>
+                      <TableHead className="font-semibold">Phone</TableHead>
+                      <TableHead className="font-semibold">Campaigns</TableHead>
                     </TableRow>
-                  ))}
-                  {filteredContacts?.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                        No contacts found matching your criteria
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredContacts?.map((contact, index) => (
+                      <TableRow 
+                        key={contact.id}
+                        className="hover:bg-muted/30 transition-colors duration-200"
+                        style={{ animationDelay: `${0.3 + index * 0.05}s` }}
+                      >
+                        <TableCell>
+                          <Link 
+                            to={`/contacts/${contact.id}`}
+                            className="font-medium text-primary hover:text-accent transition-colors duration-200 hover:underline"
+                          >
+                            {contact.first_name || 'N/A'}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{contact.last_name || 'N/A'}</TableCell>
+                        <TableCell className="text-muted-foreground">{contact.email || 'N/A'}</TableCell>
+                        <TableCell className="text-muted-foreground">{contact.phone_e164 || 'N/A'}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium bg-accent/10 text-accent px-2 py-1 rounded-full">
+                              {contact.campaignCount}
+                            </span>
+                            <span className="text-xs text-muted-foreground">campaigns</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {filteredContacts?.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                          No contacts found matching your criteria
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   );

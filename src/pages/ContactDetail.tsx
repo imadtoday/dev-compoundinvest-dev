@@ -131,95 +131,102 @@ const ContactDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center gap-4">
+    <div className="min-h-screen p-6 animate-fade-in">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="flex items-center gap-4 animate-slide-up">
           <Button 
             variant="outline" 
             onClick={() => navigate('/contacts')}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 btn-premium"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Contacts
           </Button>
-          <div className="flex items-center gap-3">
-            <User className="h-8 w-8 text-primary" />
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <User className="h-8 w-8 text-primary" />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-4xl font-bold text-gradient-primary">
                 {contact?.first_name} {contact?.last_name || ''}
               </h1>
-              <p className="text-muted-foreground">Contact Details</p>
+              <p className="text-muted-foreground text-lg">Contact Details</p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Information Form */}
           <div className="lg:col-span-2">
-            <Card>
+            <div className="premium-card animate-slide-up" style={{ animationDelay: '0.1s' }}>
               <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
+                <CardTitle className="text-xl font-semibold text-gradient-primary">Contact Information</CardTitle>
                 <CardDescription>
                   Edit and update contact details
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="first_name">First Name</Label>
+                      <Label htmlFor="first_name" className="text-sm font-medium">First Name</Label>
                       <Input
                         id="first_name"
                         value={formData.first_name}
                         onChange={(e) => handleInputChange('first_name', e.target.value)}
                         placeholder="Enter first name"
+                        className="input-premium mt-2"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="last_name">Last Name</Label>
+                      <Label htmlFor="last_name" className="text-sm font-medium">Last Name</Label>
                       <Input
                         id="last_name"
                         value={formData.last_name}
                         onChange={(e) => handleInputChange('last_name', e.target.value)}
                         placeholder="Enter last name"
+                        className="input-premium mt-2"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="Enter email address"
+                      className="input-premium mt-2"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="phone_e164">Phone</Label>
+                    <Label htmlFor="phone_e164" className="text-sm font-medium">Phone</Label>
                     <Input
                       id="phone_e164"
                       value={formData.phone_e164}
                       onChange={(e) => handleInputChange('phone_e164', e.target.value)}
                       placeholder="Enter phone number"
+                      className="input-premium mt-2"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="source">Source</Label>
+                    <Label htmlFor="source" className="text-sm font-medium">Source</Label>
                     <Input
                       id="source"
                       value={formData.source}
                       onChange={(e) => handleInputChange('source', e.target.value)}
                       placeholder="Enter contact source"
+                      className="input-premium mt-2"
                     />
                   </div>
 
                   <Button 
                     type="submit" 
-                    className="flex items-center gap-2"
+                    className="btn-premium flex items-center gap-2"
                     disabled={updateContact.isPending}
                   >
                     <Save className="h-4 w-4" />
@@ -227,14 +234,15 @@ const ContactDetail = () => {
                   </Button>
                 </form>
               </CardContent>
-            </Card>
+            </div>
           </div>
 
-          {/* Campaigns Section */}
-          <div>
-            <Card>
+          {/* Campaigns and Metadata Section */}
+          <div className="space-y-6">
+            {/* Campaigns Section */}
+            <div className="premium-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold text-gradient-primary flex items-center gap-2">
                   <Megaphone className="h-5 w-5" />
                   Campaigns ({contact?.campaigns?.length || 0})
                 </CardTitle>
@@ -244,49 +252,54 @@ const ContactDetail = () => {
               </CardHeader>
               <CardContent>
                 {contact?.campaigns?.length > 0 ? (
-                  <div className="space-y-3">
-                     {contact.campaigns.map((campaign: any) => (
-                       <Link 
-                         key={campaign.id} 
-                         to={`/campaigns/${campaign.id}`}
-                         className="block hover:bg-muted/70 transition-colors"
-                       >
-                         <div className="p-3 border rounded-lg bg-muted/50">
-                           <div className="flex justify-between items-start">
-                             <div>
-                               <h4 className="font-medium text-primary hover:underline">{campaign.name || 'Unnamed Campaign'}</h4>
-                               <p className="text-sm text-muted-foreground">Status: {campaign.status}</p>
-                               <p className="text-sm text-muted-foreground">
-                                 Created: {new Date(campaign.created_at).toLocaleDateString()}
-                               </p>
-                             </div>
-                           </div>
-                         </div>
-                       </Link>
+                  <div className="space-y-4">
+                    {contact.campaigns.map((campaign: any, index: number) => (
+                      <Link 
+                        key={campaign.id} 
+                        to={`/campaigns/${campaign.id}`}
+                        className="block hover:bg-muted/70 transition-colors animate-scale-in"
+                        style={{ animationDelay: `${0.3 + index * 0.1}s` }}
+                      >
+                        <div className="p-4 border rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-medium text-primary hover:underline">{campaign.name || 'Unnamed Campaign'}</h4>
+                              <p className="text-sm text-muted-foreground mt-1">Status: <span className="font-medium">{campaign.status}</span></p>
+                              <p className="text-sm text-muted-foreground">
+                                Created: {new Date(campaign.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-muted-foreground text-sm">No campaigns associated with this contact.</p>
+                  <p className="text-muted-foreground text-sm text-center py-8">No campaigns associated with this contact.</p>
                 )}
               </CardContent>
-            </Card>
+            </div>
 
             {/* Contact Metadata */}
-            <Card className="mt-6">
+            <div className="premium-card animate-slide-up" style={{ animationDelay: '0.3s' }}>
               <CardHeader>
-                <CardTitle>Contact Metadata</CardTitle>
+                <CardTitle className="text-lg font-semibold text-gradient-primary">Contact Metadata</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="text-sm">
-                  <span className="font-medium">Created:</span>{' '}
-                  {new Date(contact?.created_at || '').toLocaleString()}
+              <CardContent className="space-y-4">
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <span className="text-sm font-medium text-foreground">Created:</span>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {new Date(contact?.created_at || '').toLocaleString()}
+                  </p>
                 </div>
-                <div className="text-sm">
-                  <span className="font-medium">Updated:</span>{' '}
-                  {new Date(contact?.updated_at || '').toLocaleString()}
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <span className="text-sm font-medium text-foreground">Updated:</span>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {new Date(contact?.updated_at || '').toLocaleString()}
+                  </p>
                 </div>
               </CardContent>
-            </Card>
+            </div>
           </div>
         </div>
       </div>
