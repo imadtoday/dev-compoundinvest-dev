@@ -7,7 +7,7 @@ const Navigation = () => {
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: BarChart3 },
-    { name: 'Leads', href: '/leads', icon: Users },
+    { name: 'Contacts', href: '/contacts', icon: Users },
   ];
 
   return (
@@ -16,7 +16,7 @@ const Navigation = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <h2 className="text-xl font-bold text-foreground">Lead Manager</h2>
+              <h2 className="text-xl font-bold text-foreground">Contact Manager</h2>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navigation.map((item) => {

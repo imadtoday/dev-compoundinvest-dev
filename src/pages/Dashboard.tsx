@@ -119,10 +119,10 @@ const Dashboard = () => {
                 {latestLeads?.map((lead) => (
                   <TableRow key={lead.id}>
                     <TableCell>
-                      <Link 
-                        to={`/leads/${lead.id}`}
-                        className="font-medium text-primary hover:underline"
-                      >
+                  <Link 
+                    to={`/contacts/${lead.id}`}
+                    className="font-medium text-primary hover:underline"
+                  >
                         {lead.lead_fName || 'N/A'}
                       </Link>
                     </TableCell>
