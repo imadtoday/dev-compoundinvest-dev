@@ -7,17 +7,31 @@ import { Link } from "react-router-dom";
 import { Users, UserCheck, Clock, CheckCircle } from "lucide-react";
 
 const Dashboard = () => {
-  // Fetch contacts stats
+  // Fetch dashboard stats
   const { data: stats } = useQuery({
-    queryKey: ['contacts-stats'],
+    queryKey: ['dashboard-stats'],
     queryFn: async () => {
+      // Get total contacts
       const { data: allContacts } = await supabase
         .from('contacts')
         .select('id');
       
-      const total = allContacts?.length || 0;
+      // Get total campaigns
+      const { data: allCampaigns } = await supabase
+        .from('campaigns')
+        .select('id');
       
-      return { total, inProgress: 0, handover: 0, complete: 0 };
+      // Get completed campaigns
+      const { data: completedCampaigns } = await supabase
+        .from('campaigns')
+        .select('id')
+        .eq('status', 'complete');
+      
+      return { 
+        totalContacts: allContacts?.length || 0,
+        totalCampaigns: allCampaigns?.length || 0,
+        completedWorkflows: completedCampaigns?.length || 0
+      };
     }
   });
 
@@ -45,14 +59,34 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Contacts</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.total || 0}</div>
+              <div className="text-2xl font-bold">{stats?.totalContacts || 0}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Campaigns</CardTitle>
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.totalCampaigns || 0}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Workflow 1 Complete</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.completedWorkflows || 0}</div>
             </CardContent>
           </Card>
         </div>
