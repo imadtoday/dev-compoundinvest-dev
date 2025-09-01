@@ -274,7 +274,7 @@ const CampaignDetail = () => {
           <CardHeader>
             <CardTitle>Questions & Answers</CardTitle>
             <CardDescription>
-              {answers?.length || 0} questions answered
+              {answers?.filter(answer => answer.questions && !answer.question_code?.endsWith('_other')).length || 0} questions answered
             </CardDescription>
           </CardHeader>
           <CardContent>
