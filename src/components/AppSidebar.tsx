@@ -31,13 +31,24 @@ export function AppSidebar() {
   return (
     <Sidebar variant="sidebar" collapsible="icon">
       
-      {/* Company Name Section */}
+      {/* Company Logo Section */}
       <div className="px-6 py-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3 min-w-0">
-          {open && (
-            <div className="flex-1 min-w-0">
+          {open ? (
+            <div className="flex items-center gap-2 min-w-0">
+              <img 
+                src="/src/assets/company-logo.png" 
+                alt="CompoundInvest Logo" 
+                className="h-8 w-auto flex-shrink-0"
+              />
               <h2 className="text-lg font-bold text-sidebar-foreground truncate">CompoundInvest</h2>
             </div>
+          ) : (
+            <img 
+              src="/src/assets/company-logo.png" 
+              alt="CompoundInvest Logo" 
+              className="h-8 w-8 flex-shrink-0 object-contain"
+            />
           )}
         </div>
       </div>
