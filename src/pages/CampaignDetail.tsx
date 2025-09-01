@@ -294,17 +294,11 @@ const CampaignDetail = () => {
 
                   return Object.entries(groupedBySection).map(([section, sectionAnswers]: [string, any]) => (
                     <div key={section} className="space-y-4">
-                      <div className="flex items-center gap-2 mb-4">
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {getSectionEmoji(section)} {section}
-                        </h3>
-                      </div>
                       {sectionAnswers.map((answer: any) => (
                         <div key={answer.id} className="border-l-4 border-primary/20 pl-4 py-2">
                           <div className="mb-2">
-                            <h4 className="font-medium text-foreground whitespace-pre-wrap flex items-start gap-2">
-                              <span className="text-lg">{getQuestionEmoji(answer.questions?.ordinal || 1)} ✅</span>
-                              <span>{formatQuestionText(answer.questions?.text || '')}</span>
+                            <h4 className="font-medium text-foreground whitespace-pre-wrap">
+                              {formatQuestionText(answer.questions?.text || '')}
                             </h4>
                           </div>
                           <div className="bg-muted/30 rounded-md p-3 ml-8">
