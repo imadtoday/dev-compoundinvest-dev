@@ -13,7 +13,7 @@ const ContactsList = () => {
   const { data: contacts, isLoading } = useQuery({
     queryKey: ['contacts-list'],
     queryFn: async () => {
-      // Get all contacts without campaigns for now
+      // Get all contacts
       const { data: contactsData } = await supabase
         .from('contacts')
         .select('id, first_name, last_name, email, phone_e164')
@@ -21,11 +21,22 @@ const ContactsList = () => {
       
       if (!contactsData) return [];
       
-      // Add a static campaign count of 0 for now
-      return contactsData.map((contact: any) => ({
-        ...contact,
-        campaignCount: 0
-      }));
+      // Get campaign counts for each contact
+      const contactsWithCampaigns = await Promise.all(
+        contactsData.map(async (contact: any) => {
+          const { count } = await supabase
+            .from('campaigns')
+            .select('*', { count: 'exact', head: true })
+            .eq('contact_id', contact.id);
+          
+          return {
+            ...contact,
+            campaignCount: count || 0
+          };
+        })
+      );
+      
+      return contactsWithCampaigns;
     }
   });
 
