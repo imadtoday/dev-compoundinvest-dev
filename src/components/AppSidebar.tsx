@@ -11,7 +11,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import companyLogo from "/lovable-uploads/43e159b0-4acf-4c7e-a548-7cf26ee89e00.png";
+
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -31,14 +31,9 @@ export function AppSidebar() {
     <Sidebar variant="sidebar" collapsible="icon">
       <SidebarTrigger className="m-2 self-end" />
       
-      {/* Logo Section */}
+      {/* Company Name Section */}
       <div className="px-6 py-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3 min-w-0">
-          <img 
-            src={companyLogo} 
-            alt="CompoundInvest" 
-            className={!open ? "h-8 w-8 object-contain" : "h-10 w-10 object-contain flex-shrink-0"}
-          />
           {open && (
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold text-sidebar-foreground truncate">CompoundInvest</h2>
