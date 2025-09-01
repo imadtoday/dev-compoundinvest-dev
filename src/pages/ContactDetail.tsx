@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -245,18 +245,24 @@ const ContactDetail = () => {
               <CardContent>
                 {contact?.campaigns?.length > 0 ? (
                   <div className="space-y-3">
-                    {contact.campaigns.map((campaign: any) => (
-                      <div key={campaign.id} className="p-3 border rounded-lg bg-muted/50">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-medium">{campaign.name || 'Unnamed Campaign'}</h4>
-                            <p className="text-sm text-muted-foreground">Status: {campaign.status}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Created: {new Date(campaign.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                     {contact.campaigns.map((campaign: any) => (
+                       <Link 
+                         key={campaign.id} 
+                         to={`/campaigns/${campaign.id}`}
+                         className="block hover:bg-muted/70 transition-colors"
+                       >
+                         <div className="p-3 border rounded-lg bg-muted/50">
+                           <div className="flex justify-between items-start">
+                             <div>
+                               <h4 className="font-medium text-primary hover:underline">{campaign.name || 'Unnamed Campaign'}</h4>
+                               <p className="text-sm text-muted-foreground">Status: {campaign.status}</p>
+                               <p className="text-sm text-muted-foreground">
+                                 Created: {new Date(campaign.created_at).toLocaleDateString()}
+                               </p>
+                             </div>
+                           </div>
+                         </div>
+                       </Link>
                     ))}
                   </div>
                 ) : (
