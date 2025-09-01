@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Home } from "lucide-react";
+import { LayoutDashboard, Users, Home, Megaphone } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -16,6 +16,7 @@ import {
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Contacts", url: "/contacts", icon: Users },
+  { title: "Campaigns", url: "/campaigns", icon: Megaphone },
 ];
 
 export function AppSidebar() {

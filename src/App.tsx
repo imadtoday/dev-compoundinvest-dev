@@ -8,6 +8,7 @@ import { AppSidebar } from "./components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
 import ContactsList from "./pages/ContactsList";
 import ContactDetail from "./pages/ContactDetail";
+import CampaignsList from "./pages/CampaignsList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/contacts" element={<ContactsList />} />
                   <Route path="/contacts/:id" element={<ContactDetail />} />
+                  <Route path="/campaigns" element={<CampaignsList />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
