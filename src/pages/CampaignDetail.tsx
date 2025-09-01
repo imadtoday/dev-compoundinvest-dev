@@ -132,18 +132,11 @@ const CampaignDetail = () => {
     if (values && values.length) {
       const selectedValues = values.map((value: string) => {
         if (value === 'Other?' || value === 'other') {
-          let otherFieldCode = '';
-          if (answer.question_code === 'current_focus') {
-            otherFieldCode = 'current_focus_other';
-          } else if (answer.question_code === 'cities') {
-            otherFieldCode = 'cities_other';
-          }
-          if (otherFieldCode) {
-            const otherAnswer = allAnswers.find((a) => a.question_code === otherFieldCode);
-            const otherText = typeof otherAnswer?.value_text === 'string' ? otherAnswer.value_text.trim() : '';
-            return otherText ? `Other?: ${otherText}` : 'Other? (no details provided)';
-          }
-          return 'Other?';
+          // Try to find the corresponding "other" field for any question
+          const otherFieldCode = `${answer.question_code}_other`;
+          const otherAnswer = allAnswers.find((a) => a.question_code === otherFieldCode);
+          const otherText = typeof otherAnswer?.value_text === 'string' ? otherAnswer.value_text.trim() : '';
+          return otherText ? `Other: ${otherText}` : 'Other';
         }
         return value;
       });
