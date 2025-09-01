@@ -85,7 +85,7 @@ const ContactsList = () => {
               All Contacts ({filteredContacts?.length || 0})
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Click on a contact name to view detailed information
+              Click on any row to view detailed contact information
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -110,16 +110,14 @@ const ContactsList = () => {
                     {filteredContacts?.map((contact, index) => (
                       <TableRow 
                         key={contact.id}
-                        className="hover:bg-muted/30 transition-colors duration-200"
+                        className="hover:bg-muted/30 transition-colors duration-200 cursor-pointer"
                         style={{ animationDelay: `${0.3 + index * 0.05}s` }}
+                        onClick={() => window.location.href = `/contacts/${contact.id}`}
                       >
                         <TableCell>
-                          <Link 
-                            to={`/contacts/${contact.id}`}
-                            className="font-medium text-primary hover:text-accent transition-colors duration-200 hover:underline"
-                          >
+                          <span className="font-medium text-primary">
                             {contact.first_name || 'N/A'}
-                          </Link>
+                          </span>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{contact.last_name || 'N/A'}</TableCell>
                         <TableCell className="text-muted-foreground">{contact.email || 'N/A'}</TableCell>
