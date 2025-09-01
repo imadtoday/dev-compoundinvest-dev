@@ -36,19 +36,15 @@ export function AppSidebar() {
         <div className="flex items-center gap-3 min-w-0">
           {open ? (
             <div className="flex items-center gap-2 min-w-0">
-              <img 
-                src="/src/assets/company-logo.png" 
-                alt="CompoundInvest Logo" 
-                className="h-8 w-auto flex-shrink-0"
-              />
+              <div className="h-8 w-8 bg-primary rounded flex-shrink-0 flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">CI</span>
+              </div>
               <h2 className="text-lg font-bold text-sidebar-foreground truncate">CompoundInvest</h2>
             </div>
           ) : (
-            <img 
-              src="/src/assets/company-logo.png" 
-              alt="CompoundInvest Logo" 
-              className="h-8 w-8 flex-shrink-0 object-contain"
-            />
+            <div className="h-8 w-8 bg-primary rounded flex-shrink-0 flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">CI</span>
+            </div>
           )}
         </div>
       </div>
