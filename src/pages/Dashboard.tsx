@@ -5,7 +5,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Users, UserCheck, Clock, CheckCircle } from "lucide-react";
-import logo from "@/assets/logo.png";
 
 const Dashboard = () => {
   // Fetch contacts stats
@@ -41,13 +40,8 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="border-b border-border pb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <img src={logo} alt="CompoundInvest" className="h-12 w-auto" />
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Contacts Dashboard</h1>
-              <p className="text-muted-foreground">Overview of your contacts and campaigns</p>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground">Overview of your contacts and campaigns</p>
         </div>
 
         {/* Stats Cards */}
