@@ -11,7 +11,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import companyLogo from "@/assets/company-logo.png";
+import companyLogo from "/lovable-uploads/43e159b0-4acf-4c7e-a548-7cf26ee89e00.png";
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
