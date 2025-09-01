@@ -15,8 +15,8 @@ const ContactsList = () => {
     queryFn: async () => {
       // Get all contacts without campaigns for now
       const { data: contactsData } = await supabase
-        .from('leads')
-        .select('id, lead_fName, lead_lName, lead_email, lead_phone')
+        .from('contacts')
+        .select('id, first_name, last_name, email, phone_e164')
         .order('created_at', { ascending: false });
       
       if (!contactsData) return [];
@@ -31,10 +31,10 @@ const ContactsList = () => {
 
   const filteredContacts = contacts?.filter(contact => {
     const matchesSearch = !searchTerm || 
-      (contact.lead_fName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (contact.lead_lName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (contact.lead_email?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (contact.lead_phone?.includes(searchTerm));
+      (contact.first_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (contact.last_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (contact.email?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (contact.phone_e164?.includes(searchTerm));
     
     return matchesSearch;
   });
@@ -95,12 +95,12 @@ const ContactsList = () => {
                           to={`/contacts/${contact.id}`}
                           className="font-medium text-primary hover:underline"
                         >
-                          {contact.lead_fName || 'N/A'}
+                          {contact.first_name || 'N/A'}
                         </Link>
                       </TableCell>
-                      <TableCell>{contact.lead_lName || 'N/A'}</TableCell>
-                      <TableCell>{contact.lead_email || 'N/A'}</TableCell>
-                      <TableCell>{contact.lead_phone}</TableCell>
+                      <TableCell>{contact.last_name || 'N/A'}</TableCell>
+                      <TableCell>{contact.email || 'N/A'}</TableCell>
+                      <TableCell>{contact.phone_e164 || 'N/A'}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">{contact.campaignCount}</span>

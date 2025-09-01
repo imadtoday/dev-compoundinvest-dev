@@ -5,8 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Save, User, Megaphone } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -18,22 +16,18 @@ const ContactDetail = () => {
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
-    lead_fName: "",
-    lead_lName: "",
-    lead_email: "",
-    lead_phone: "",
-    status: "",
-    freshsales_deal_id: "",
-    contact_id: "",
-    client_id: "",
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone_e164: "",
+    source: "",
   });
 
   const { data: contact, isLoading } = useQuery({
     queryKey: ['contact-detail', id],
     queryFn: async () => {
-      // Get contact data only (no campaigns for now)
       const { data: contactData } = await supabase
-        .from('leads')
+        .from('contacts')
         .select('*')
         .eq('id', id)
         .maybeSingle();
@@ -47,14 +41,11 @@ const ContactDetail = () => {
       
       if (contact) {
         setFormData({
-          lead_fName: contact.lead_fName || "",
-          lead_lName: contact.lead_lName || "",
-          lead_email: contact.lead_email || "",
-          lead_phone: contact.lead_phone || "",
-          status: contact.status || "",
-          freshsales_deal_id: contact.freshsales_deal_id || "",
-          contact_id: contact.contact_id || "",
-          client_id: contact.client_id || "",
+          first_name: contact.first_name || "",
+          last_name: contact.last_name || "",
+          email: contact.email || "",
+          phone_e164: contact.phone_e164 || "",
+          source: contact.source || "",
         });
       }
       
@@ -66,7 +57,7 @@ const ContactDetail = () => {
   const updateContact = useMutation({
     mutationFn: async (updatedData: any) => {
       const { data, error } = await supabase
-        .from('leads')
+        .from('contacts')
         .update(updatedData)
         .eq('id', id)
         .select()
@@ -148,7 +139,7 @@ const ContactDetail = () => {
             <User className="h-8 w-8 text-primary" />
             <div>
               <h1 className="text-3xl font-bold text-foreground">
-                {contact?.lead_fName} {contact?.lead_lName || ''}
+                {contact?.first_name} {contact?.last_name || ''}
               </h1>
               <p className="text-muted-foreground">Contact Details</p>
             </div>
@@ -169,89 +160,54 @@ const ContactDetail = () => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="lead_fName">First Name</Label>
+                      <Label htmlFor="first_name">First Name</Label>
                       <Input
-                        id="lead_fName"
-                        value={formData.lead_fName}
-                        onChange={(e) => handleInputChange('lead_fName', e.target.value)}
+                        id="first_name"
+                        value={formData.first_name}
+                        onChange={(e) => handleInputChange('first_name', e.target.value)}
                         placeholder="Enter first name"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lead_lName">Last Name</Label>
+                      <Label htmlFor="last_name">Last Name</Label>
                       <Input
-                        id="lead_lName"
-                        value={formData.lead_lName}
-                        onChange={(e) => handleInputChange('lead_lName', e.target.value)}
+                        id="last_name"
+                        value={formData.last_name}
+                        onChange={(e) => handleInputChange('last_name', e.target.value)}
                         placeholder="Enter last name"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="lead_email">Email</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
-                      id="lead_email"
+                      id="email"
                       type="email"
-                      value={formData.lead_email}
-                      onChange={(e) => handleInputChange('lead_email', e.target.value)}
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="Enter email address"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="lead_phone">Phone</Label>
+                    <Label htmlFor="phone_e164">Phone</Label>
                     <Input
-                      id="lead_phone"
-                      value={formData.lead_phone}
-                      onChange={(e) => handleInputChange('lead_phone', e.target.value)}
+                      id="phone_e164"
+                      value={formData.phone_e164}
+                      onChange={(e) => handleInputChange('phone_e164', e.target.value)}
                       placeholder="Enter phone number"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="status">Status</Label>
-                    <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="in_progress">In Progress</SelectItem>
-                        <SelectItem value="handover">Handover</SelectItem>
-                        <SelectItem value="complete">Complete</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="freshsales_deal_id">Freshsales Deal ID</Label>
+                    <Label htmlFor="source">Source</Label>
                     <Input
-                      id="freshsales_deal_id"
-                      value={formData.freshsales_deal_id}
-                      onChange={(e) => handleInputChange('freshsales_deal_id', e.target.value)}
-                      placeholder="Enter Freshsales Deal ID"
+                      id="source"
+                      value={formData.source}
+                      onChange={(e) => handleInputChange('source', e.target.value)}
+                      placeholder="Enter contact source"
                     />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="contact_id">Contact ID</Label>
-                      <Input
-                        id="contact_id"
-                        value={formData.contact_id}
-                        onChange={(e) => handleInputChange('contact_id', e.target.value)}
-                        placeholder="Enter contact ID"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="client_id">Client ID</Label>
-                      <Input
-                        id="client_id"
-                        value={formData.client_id}
-                        onChange={(e) => handleInputChange('client_id', e.target.value)}
-                        placeholder="Enter client ID"
-                      />
-                    </div>
                   </div>
 
                   <Button 
@@ -273,33 +229,14 @@ const ContactDetail = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Megaphone className="h-5 w-5" />
-                  Campaigns ({contact?.campaigns?.length || 0})
+                  Campaigns (0)
                 </CardTitle>
                 <CardDescription>
                   Associated campaigns for this contact
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {contact?.campaigns && contact.campaigns.length > 0 ? (
-                  <div className="space-y-3">
-                    {contact.campaigns.map((campaign: any) => (
-                      <div
-                        key={campaign.id}
-                        className="p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="font-medium text-sm">{campaign.name || `Campaign ${campaign.id}`}</div>
-                        <div className="text-xs text-muted-foreground">
-                          Status: {campaign.status || 'N/A'}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Created: {new Date(campaign.created_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">No campaigns associated with this contact.</p>
-                )}
+                <p className="text-muted-foreground text-sm">No campaigns associated with this contact.</p>
               </CardContent>
             </Card>
 
@@ -316,10 +253,6 @@ const ContactDetail = () => {
                 <div className="text-sm">
                   <span className="font-medium">Updated:</span>{' '}
                   {new Date(contact?.updated_at || '').toLocaleString()}
-                </div>
-                <div className="text-sm">
-                  <span className="font-medium">Last Question ID:</span>{' '}
-                  {contact?.last_question_id}
                 </div>
               </CardContent>
             </Card>
