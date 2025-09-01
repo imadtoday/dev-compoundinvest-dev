@@ -49,36 +49,17 @@ export function AppSidebar() {
       
       {/* Company Logo Section */}
       <div className="px-6 py-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-3 min-w-0">
-          {open ? (
-            <div className="flex items-center gap-2 min-w-0">
-              {settings?.logo_url ? (
-                <img 
-                  src={settings.logo_url} 
-                  alt="Company Logo" 
-                  className="h-8 w-8 flex-shrink-0 object-contain rounded"
-                />
-              ) : (
-                <div className="h-8 w-8 bg-primary rounded flex-shrink-0 flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">CI</span>
-                </div>
-              )}
-              <h2 className="text-lg font-bold text-sidebar-foreground truncate">
-                {settings?.company_name || 'CompoundInvest'}
-              </h2>
-            </div>
+        <div className="flex items-center justify-center">
+          {settings?.logo_url ? (
+            <img 
+              src={settings.logo_url} 
+              alt="Company Logo" 
+              className={`object-contain rounded ${open ? 'h-12 w-auto max-w-full' : 'h-10 w-10'}`}
+            />
           ) : (
-            settings?.logo_url ? (
-              <img 
-                src={settings.logo_url} 
-                alt="Company Logo" 
-                className="h-8 w-8 flex-shrink-0 object-contain rounded"
-              />
-            ) : (
-              <div className="h-8 w-8 bg-primary rounded flex-shrink-0 flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">CI</span>
-              </div>
-            )
+            <div className={`bg-primary rounded flex items-center justify-center ${open ? 'h-12 w-12' : 'h-10 w-10'}`}>
+              <span className={`text-primary-foreground font-bold ${open ? 'text-lg' : 'text-sm'}`}>CI</span>
+            </div>
           )}
         </div>
       </div>
