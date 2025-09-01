@@ -347,10 +347,12 @@ const CampaignDetail = () => {
                           ? 'bg-primary text-primary-foreground ml-auto' 
                           : 'bg-muted'
                       }`}>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-medium">
-                            {message.sender_display || message.sender_type}
-                          </span>
+                         <div className="flex items-center gap-2 mb-1">
+                           <span className="text-xs font-medium">
+                             {message.sender_type === 'user' 
+                               ? (campaign.contacts?.first_name || 'User')
+                               : (message.sender_display || message.sender_type)}
+                           </span>
                           <span className="text-xs opacity-70">
                             {formatInTimeZone(
                               new Date(message.sent_at),
