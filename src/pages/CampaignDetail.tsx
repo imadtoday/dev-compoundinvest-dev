@@ -130,11 +130,16 @@ const CampaignDetail = () => {
 
     const values = normalizeValueJson(answer.value_json);
     if (values && values.length) {
+      console.log('Processing answer:', answer.question_code, 'values:', values);
+      console.log('All answers for debugging:', allAnswers.map(a => ({ code: a.question_code, text: a.value_text })));
+      
       const selectedValues = values.map((value: string) => {
-        if (value === 'Other?' || value === 'other') {
+        if (value === 'Other?' || value === 'other' || value === 'Other') {
           // Try to find the corresponding "other" field for any question
           const otherFieldCode = `${answer.question_code}_other`;
+          console.log('Looking for other field:', otherFieldCode);
           const otherAnswer = allAnswers.find((a) => a.question_code === otherFieldCode);
+          console.log('Found other answer:', otherAnswer);
           const otherText = typeof otherAnswer?.value_text === 'string' ? otherAnswer.value_text.trim() : '';
           return otherText ? `Other: ${otherText}` : 'Other';
         }
