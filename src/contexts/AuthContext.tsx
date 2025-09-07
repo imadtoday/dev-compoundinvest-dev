@@ -53,7 +53,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               
               if (error) {
                 console.error('Error fetching profile:', error);
+                // If profile doesn't exist, try to create it
+                if (error.code === 'PGRST116') {
+                  const { data: newProfile, error: createError } = await supabase
+                    .from('profiles')
+                    .insert({
+                      user_id: session.user.id,
+                      first_name: session.user.user_metadata?.first_name || null,
+                      last_name: session.user.user_metadata?.last_name || null,
+                      role: session.user.email === 'sam@datatube.app' ? 'super_admin' : 'client'
+                    })
+                    .select()
+                    .single();
+                  
+                  if (!createError) {
+                    setProfile(newProfile);
+                  }
+                }
               } else {
+                console.log('Profile loaded:', profileData);
                 setProfile(profileData);
               }
             } catch (error) {
