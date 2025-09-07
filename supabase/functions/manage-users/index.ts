@@ -88,7 +88,15 @@ const handler = async (req: Request): Promise<Response> => {
           email_confirm: true
         });
 
-        if (authError) throw authError;
+        if (authError) {
+          console.error('Auth error:', authError);
+          return new Response(JSON.stringify({ 
+            error: authError.message || 'Failed to create user in auth system'
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
 
         // Create profile
         const { error: profileError } = await supabaseAdmin
@@ -100,7 +108,15 @@ const handler = async (req: Request): Promise<Response> => {
             role: body.role
           });
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile error:', profileError);
+          return new Response(JSON.stringify({ 
+            error: 'User created but failed to create profile: ' + profileError.message
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
 
         // Add role to user_roles table
         const { error: roleError } = await supabaseAdmin
@@ -110,7 +126,15 @@ const handler = async (req: Request): Promise<Response> => {
             role: body.role
           });
 
-        if (roleError) throw roleError;
+        if (roleError) {
+          console.error('Role error:', roleError);
+          return new Response(JSON.stringify({ 
+            error: 'User created but failed to assign role: ' + roleError.message
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
 
         return new Response(JSON.stringify({ success: true, user: authUser.user }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
