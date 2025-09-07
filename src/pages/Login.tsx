@@ -95,36 +95,24 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 px-4 py-8">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 -right-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-1/2 -left-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-      </div>
-      
+    <div className="min-h-screen flex items-center justify-center bg-primary px-4 py-8">
       <div className="w-full max-w-md space-y-8 relative z-10 animate-fade-in">
         {/* Company Logo */}
         <div className="flex justify-center">
           {settings?.logo_url ? (
             <div className="relative group">
-              <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-6 shadow-2xl border border-primary/20 hover-scale">
-                <img 
-                  src={settings.logo_url} 
-                  alt="Company Logo" 
-                  className="h-20 w-auto object-contain filter brightness-0 invert"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 rounded-2xl blur-xl opacity-30 -z-10 group-hover:opacity-40 transition-opacity"></div>
+              <img 
+                src={settings.logo_url} 
+                alt="Company Logo" 
+                className="h-20 w-auto object-contain filter brightness-0 invert hover-scale transition-all duration-300"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
             </div>
           ) : (
             <div className="relative group">
-              <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-6 shadow-2xl border border-primary/20 hover-scale">
-                <span className="text-primary-foreground font-bold text-3xl">CI</span>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 rounded-2xl blur-xl opacity-30 -z-10 group-hover:opacity-40 transition-opacity"></div>
+              <span className="text-primary-foreground font-bold text-4xl hover-scale transition-all duration-300">CI</span>
             </div>
           )}
         </div>
