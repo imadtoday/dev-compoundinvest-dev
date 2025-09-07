@@ -329,6 +329,36 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       questionnaires: {
         Row: {
           created_at: string
@@ -412,6 +442,14 @@ export type Database = {
         Args: { p_name: string; p_questions: Json }
         Returns: string
       }
+      get_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
+      is_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       upsert_contact: {
         Args: {
           p_email: string
@@ -433,7 +471,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "super_admin" | "client"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -560,6 +598,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["super_admin", "client"],
+    },
   },
 } as const

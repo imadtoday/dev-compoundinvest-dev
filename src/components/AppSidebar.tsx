@@ -1,7 +1,8 @@
-import { LayoutDashboard, Users, Home, Megaphone, Settings } from "lucide-react";
+import { LayoutDashboard, Users, Home, Megaphone, Settings, LogOut } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -16,16 +17,18 @@ import {
 
 
 const items = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Contacts", url: "/contacts", icon: Users },
   { title: "Campaigns", url: "/campaigns", icon: Megaphone },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Users", url: "/users", icon: Users, requireSuperAdmin: true },
+  { title: "Settings", url: "/settings", icon: Settings, requireSuperAdmin: true },
 ];
 
 export function AppSidebar() {
   const { open, setOpen } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { isSuperAdmin, signOut, profile } = useAuth();
 
   // Fetch company settings for logo and name
   const { data: settings } = useQuery({
@@ -83,7 +86,9 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
-              {items.map((item) => (
+              {items
+                .filter(item => !item.requireSuperAdmin || isSuperAdmin)
+                .map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
@@ -106,6 +111,37 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* User Profile Section */}
+        <div className="mt-auto p-4 border-t border-sidebar-border">
+          {open && (
+            <div className="space-y-2">
+              <div className="text-sm">
+                <p className="font-medium text-sidebar-foreground">
+                  {profile?.first_name} {profile?.last_name}
+                </p>
+                <p className="text-sidebar-muted-foreground text-xs">
+                  {profile?.role === 'super_admin' ? 'Super Admin' : 'Client'}
+                </p>
+              </div>
+              <button
+                onClick={signOut}
+                className="flex items-center w-full text-sm text-sidebar-muted-foreground hover:text-sidebar-foreground transition-colors"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </button>
+            </div>
+          )}
+          {!open && (
+            <button
+              onClick={signOut}
+              className="flex items-center justify-center w-full text-sidebar-muted-foreground hover:text-sidebar-foreground transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </SidebarContent>
     </Sidebar>
   );
