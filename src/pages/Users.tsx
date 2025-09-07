@@ -59,27 +59,14 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No session found');
+
+      const { data, error } = await supabase.functions.invoke('manage-users?action=list');
+
+      if (error) {
+        throw new Error(error.message || 'Failed to fetch users');
       }
 
-      const response = await fetch('/functions/v1/manage-users?action=list', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch users');
-      }
-
-      setUsers(result.users || []);
+      setUsers((data as any)?.users || []);
     } catch (error: any) {
       console.error('Error fetching users:', error);
       toast({
@@ -103,30 +90,18 @@ export default function Users() {
         return;
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No session found');
-      }
-
-      const response = await fetch('/functions/v1/manage-users?action=create', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('manage-users?action=create', {
+        body: {
           email: formData.email,
           password: formData.password,
           first_name: formData.first_name,
           last_name: formData.last_name,
-          role: formData.role
-        }),
+          role: formData.role,
+        },
       });
 
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to create user');
+      if (error) {
+        throw new Error(error.message || 'Failed to create user');
       }
 
       toast({
@@ -151,30 +126,18 @@ export default function Users() {
     if (!editingUser) return;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No session found');
-      }
-
-      const response = await fetch('/functions/v1/manage-users?action=update', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('manage-users?action=update', {
+        body: {
           user_id: editingUser.user_id,
           email: formData.email !== editingUser.email ? formData.email : undefined,
           first_name: formData.first_name,
           last_name: formData.last_name,
-          role: formData.role
-        }),
+          role: formData.role,
+        },
       });
 
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to update user');
+      if (error) {
+        throw new Error(error.message || 'Failed to update user');
       }
 
       toast({
@@ -199,27 +162,15 @@ export default function Users() {
     if (!userToResetPassword) return;
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No session found');
-      }
-
-      const response = await fetch('/functions/v1/manage-users?action=update', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('manage-users?action=update', {
+        body: {
           user_id: userToResetPassword.user_id,
-          password: formData.password
-        }),
+          password: formData.password,
+        },
       });
 
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to reset password');
+      if (error) {
+        throw new Error(error.message || 'Failed to reset password');
       }
 
       toast({
@@ -246,26 +197,14 @@ export default function Users() {
     }
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('No session found');
-      }
-
-      const response = await fetch('/functions/v1/manage-users?action=delete', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
+      const { data, error } = await supabase.functions.invoke('manage-users?action=delete', {
+        body: {
+          user_id: user.user_id,
         },
-        body: JSON.stringify({
-          user_id: user.user_id
-        }),
       });
 
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to delete user');
+      if (error) {
+        throw new Error(error.message || 'Failed to delete user');
       }
 
       toast({
