@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X } from "lucide-react";
+import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2 } from "lucide-react";
 import { formatInTimeZone } from "date-fns-tz";
 import { Separator } from "@/components/ui/separator";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +18,9 @@ const CampaignDetail = () => {
   const { toast } = useToast();
   const [editingAnswer, setEditingAnswer] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [editingNotes, setEditingNotes] = useState<{ [key: string]: boolean }>({});
+  const [editingNoteValues, setEditingNoteValues] = useState<{ [key: string]: string }>({});
+  const [newNoteContent, setNewNoteContent] = useState("");
 
   const { data: campaign, isLoading } = useQuery({
     queryKey: ['campaign-detail', id],
@@ -82,6 +86,24 @@ const CampaignDetail = () => {
       return data || [];
     },
     enabled: !!id
+  });
+
+  // Fetch campaign notes
+  const { data: notes = [], isLoading: notesLoading } = useQuery({
+    queryKey: ["campaign-notes", id],
+    queryFn: async () => {
+      if (!id) return [];
+      
+      const { data, error } = await supabase
+        .from("campaign_notes")
+        .select("*")
+        .eq("campaign_id", id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
   });
 
   const getStatusBadgeVariant = (status: string) => {
@@ -239,6 +261,124 @@ const CampaignDetail = () => {
     setEditValue("");
   };
 
+  // Notes mutations
+  const createNoteMutation = useMutation({
+    mutationFn: async (content: string) => {
+      const { data, error } = await supabase
+        .from("campaign_notes")
+        .insert({ campaign_id: id, content })
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-notes", id] });
+      setNewNoteContent("");
+      toast({
+        title: "Note Added",
+        description: "The note has been successfully added.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to add note.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateNoteMutation = useMutation({
+    mutationFn: async ({ noteId, content }: { noteId: string; content: string }) => {
+      const { data, error } = await supabase
+        .from("campaign_notes")
+        .update({ content })
+        .eq("id", noteId)
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-notes", id] });
+      toast({
+        title: "Note Updated",
+        description: "The note has been successfully updated.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update note.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: async (noteId: string) => {
+      const { error } = await supabase
+        .from("campaign_notes")
+        .delete()
+        .eq("id", noteId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-notes", id] });
+      toast({
+        title: "Note Deleted",
+        description: "The note has been successfully deleted.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete note.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Notes handlers
+  const handleAddNote = () => {
+    if (!newNoteContent.trim()) return;
+    createNoteMutation.mutate(newNoteContent);
+  };
+
+  const handleEditNote = (noteId: string, currentContent: string) => {
+    setEditingNotes(prev => ({ ...prev, [noteId]: true }));
+    setEditingNoteValues(prev => ({ ...prev, [noteId]: currentContent }));
+  };
+
+  const handleSaveNote = (noteId: string) => {
+    const content = editingNoteValues[noteId];
+    if (!content.trim()) return;
+    
+    updateNoteMutation.mutate({ noteId, content }, {
+      onSuccess: () => {
+        setEditingNotes(prev => ({ ...prev, [noteId]: false }));
+        setEditingNoteValues(prev => ({ ...prev, [noteId]: "" }));
+      }
+    });
+  };
+
+  const handleCancelNoteEdit = (noteId: string) => {
+    setEditingNotes(prev => ({ ...prev, [noteId]: false }));
+    setEditingNoteValues(prev => ({ ...prev, [noteId]: "" }));
+  };
+
+  const handleDeleteNote = (noteId: string) => {
+    if (confirm("Are you sure you want to delete this note?")) {
+      deleteNoteMutation.mutate(noteId);
+    }
+  };
+
+  const formatSydneyTime = (date: string) => {
+    return formatInTimeZone(new Date(date), 'Australia/Sydney', 'MMM d, yyyy h:mm a');
+  };
+
   const getSectionEmoji = (section: string) => {
     const sectionLower = section?.toLowerCase() || '';
     if (sectionLower.includes('focus')) return '🎯';
@@ -339,15 +479,17 @@ const CampaignDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Questions and Answers */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Questions & Answers</CardTitle>
-            <CardDescription>
-              {answers?.filter(answer => answer.questions && !answer.question_code?.endsWith('_other')).length || 0} questions answered
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        {/* Questions and Answers with Notes */}
+        <ResizablePanelGroup direction="horizontal" className="min-h-[600px]">
+          <ResizablePanel defaultSize={65} minSize={40}>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle>Questions & Answers</CardTitle>
+                <CardDescription>
+                  {answers?.filter(answer => answer.questions && !answer.question_code?.endsWith('_other')).length || 0} questions answered
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="overflow-y-auto max-h-[calc(100vh-16rem)]">
             {answers && answers.length > 0 ? (
               <div className="space-y-6">
                 {(() => {
@@ -434,8 +576,124 @@ const CampaignDetail = () => {
             ) : (
               <p className="text-muted-foreground">No questions answered yet.</p>
             )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
+          {/* Notes Section */}
+          <ResizablePanel defaultSize={35} minSize={25}>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    📝 Notes
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {notes.length} notes
+                    </span>
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 overflow-y-auto max-h-[calc(100vh-16rem)]">
+                {/* Add new note */}
+                <div className="space-y-2">
+                  <Textarea
+                    placeholder="Add a new note..."
+                    value={newNoteContent}
+                    onChange={(e) => setNewNoteContent(e.target.value)}
+                    className="min-h-[80px]"
+                  />
+                  <Button 
+                    onClick={handleAddNote}
+                    disabled={!newNoteContent.trim() || createNoteMutation.isPending}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Note
+                  </Button>
+                </div>
+
+                {/* Notes list */}
+                {notesLoading ? (
+                  <div className="text-center text-muted-foreground">Loading notes...</div>
+                ) : notes.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    No notes yet. Add your first note above.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {notes.map((note: any) => (
+                      <div key={note.id} className="border rounded-lg p-3 bg-background">
+                        {editingNotes[note.id] ? (
+                          <div className="space-y-2">
+                            <Textarea
+                              value={editingNoteValues[note.id]}
+                              onChange={(e) => setEditingNoteValues(prev => ({ 
+                                ...prev, 
+                                [note.id]: e.target.value 
+                              }))}
+                              className="min-h-[80px]"
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleSaveNote(note.id)}
+                                disabled={updateNoteMutation.isPending}
+                              >
+                                <Save className="h-3 w-3 mr-1" />
+                                Save
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleCancelNoteEdit(note.id)}
+                              >
+                                <X className="h-3 w-3 mr-1" />
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-sm whitespace-pre-wrap mb-2">{note.content}</p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs text-muted-foreground">
+                                {formatSydneyTime(note.created_at)}
+                                {note.updated_at !== note.created_at && (
+                                  <span className="ml-1">(edited {formatSydneyTime(note.updated_at)})</span>
+                                )}
+                              </span>
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleEditNote(note.id, note.content)}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDeleteNote(note.id)}
+                                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                  disabled={deleteNoteMutation.isPending}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </ResizablePanel>
+        </ResizablePanelGroup>
 
         {/* Conversation Transcript */}
         <Card>
