@@ -180,15 +180,6 @@ export default function Login() {
               </Button>
             </form>
             
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/50" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Need help?</span>
-              </div>
-            </div>
-            
             <div className="text-center">
               <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
                 <DialogTrigger asChild>
