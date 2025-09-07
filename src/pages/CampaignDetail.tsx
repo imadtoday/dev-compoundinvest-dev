@@ -161,7 +161,7 @@ const CampaignDetail = () => {
     const values = normalizeValueJson(answer.value_json);
     if (values && values.length) {
       const selectedValues = values.map((value: string) => {
-        if (value === 'Other?' || value === 'other' || value === 'Other') {
+        if (value === 'Other?' || value === 'other' || value === 'Other' || value === '*Other?*') {
           // Try to find the corresponding "other" field for any question
           const otherFieldCode = `${answer.question_code}_other`;
           const otherAnswer = allAnswers.find((a) => a.question_code === otherFieldCode);
@@ -178,11 +178,15 @@ const CampaignDetail = () => {
 
   const formatTextWithBold = (text: string) => {
     if (!text) return text;
-    // Split by ** and make every odd index bold
-    const parts = text.split('**');
-    return parts.map((part, index) => 
-      index % 2 === 1 ? <strong key={index}>{part}</strong> : part
-    );
+    
+    // First handle double asterisks ** for bold
+    let result = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Then handle single asterisks * for bold (but not if they're already part of double asterisks)
+    result = result.replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<strong>$1</strong>');
+    
+    // Return JSX with dangerouslySetInnerHTML to render the HTML
+    return <span dangerouslySetInnerHTML={{ __html: result }} />;
   };
 
   const updateAnswer = useMutation({
