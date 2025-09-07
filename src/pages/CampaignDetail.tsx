@@ -160,9 +160,14 @@ const CampaignDetail = () => {
 
     const values = normalizeValueJson(answer.value_json);
     if (values && values.length) {
-      const selectedValues = values.map((value: string) => {
-        if (value === 'Other?' || value === 'other' || value === 'Other' || value === '*Other?*') {
-          // Try to find the corresponding "other" field for any question
+      const selectedValues = values.map((raw: string) => {
+        const value = typeof raw === 'string' ? raw.trim() : String(raw);
+        const normalized = value
+          .toLowerCase()
+          .replace(/\*/g, '')
+          .replace(/[?!.]/g, '')
+          .trim();
+        if (normalized === 'other' || normalized.startsWith('other')) {
           const otherFieldCode = `${answer.question_code}_other`;
           const otherAnswer = allAnswers.find((a) => a.question_code === otherFieldCode);
           const otherText = typeof otherAnswer?.value_text === 'string' ? otherAnswer.value_text.trim() : '';
