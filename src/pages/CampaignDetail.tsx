@@ -597,20 +597,23 @@ const CampaignDetail = () => {
               </CardHeader>
               <CardContent className="space-y-4 overflow-y-auto max-h-[calc(100vh-16rem)]">
                 {/* Add new note */}
-                <div className="space-y-2">
-                  <Textarea
-                    placeholder="Add a new note..."
-                    value={newNoteContent}
-                    onChange={(e) => setNewNoteContent(e.target.value)}
-                    className="min-h-[80px]"
-                  />
+                <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-dashed border-border">
+                  <div className="relative">
+                    <Textarea
+                      placeholder="Add a new note..."
+                      value={newNoteContent}
+                      onChange={(e) => setNewNoteContent(e.target.value)}
+                      className="min-h-[100px] resize-none border-0 bg-background/50 focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary/50 placeholder:text-muted-foreground/60"
+                    />
+                  </div>
                   <Button 
                     onClick={handleAddNote}
                     disabled={!newNoteContent.trim() || createNoteMutation.isPending}
-                    className="w-full"
+                    className="w-full h-10"
+                    size="sm"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Note
+                    {createNoteMutation.isPending ? "Adding..." : "Add Note"}
                   </Button>
                 </div>
 
@@ -624,22 +627,23 @@ const CampaignDetail = () => {
                 ) : (
                   <div className="space-y-3">
                     {notes.map((note: any) => (
-                      <div key={note.id} className="border rounded-lg p-3 bg-background">
+                      <div key={note.id} className="bg-card border border-border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
                         {editingNotes[note.id] ? (
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             <Textarea
                               value={editingNoteValues[note.id]}
                               onChange={(e) => setEditingNoteValues(prev => ({ 
                                 ...prev, 
                                 [note.id]: e.target.value 
                               }))}
-                              className="min-h-[80px]"
+                              className="min-h-[100px] resize-none focus-visible:ring-1 focus-visible:ring-primary/50"
                             />
                             <div className="flex gap-2">
                               <Button
                                 size="sm"
                                 onClick={() => handleSaveNote(note.id)}
                                 disabled={updateNoteMutation.isPending}
+                                className="h-8"
                               >
                                 <Save className="h-3 w-3 mr-1" />
                                 Save
@@ -648,6 +652,7 @@ const CampaignDetail = () => {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleCancelNoteEdit(note.id)}
+                                className="h-8"
                               >
                                 <X className="h-3 w-3 mr-1" />
                                 Cancel
@@ -655,21 +660,21 @@ const CampaignDetail = () => {
                             </div>
                           </div>
                         ) : (
-                          <div>
-                            <p className="text-sm whitespace-pre-wrap mb-2">{note.content}</p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-muted-foreground">
-                                {formatSydneyTime(note.created_at)}
+                          <div className="group">
+                            <p className="text-sm text-foreground whitespace-pre-wrap mb-3 leading-relaxed">{note.content}</p>
+                            <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                              <div className="text-xs text-muted-foreground">
+                                <div>{formatSydneyTime(note.created_at)}</div>
                                 {note.updated_at !== note.created_at && (
-                                  <span className="ml-1">(edited {formatSydneyTime(note.updated_at)})</span>
+                                  <div className="text-muted-foreground/70">Edited {formatSydneyTime(note.updated_at)}</div>
                                 )}
-                              </span>
-                              <div className="flex gap-1">
+                              </div>
+                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => handleEditNote(note.id, note.content)}
-                                  className="h-6 w-6 p-0"
+                                  className="h-7 w-7 p-0 hover:bg-muted"
                                 >
                                   <Edit3 className="h-3 w-3" />
                                 </Button>
@@ -677,7 +682,7 @@ const CampaignDetail = () => {
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => handleDeleteNote(note.id)}
-                                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                  className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
                                   disabled={deleteNoteMutation.isPending}
                                 >
                                   <Trash2 className="h-3 w-3" />
