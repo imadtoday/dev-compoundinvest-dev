@@ -60,33 +60,26 @@ export default function Users() {
     try {
       setIsLoading(true);
       
-      // Fetch profiles with user emails from auth.users
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (profilesError) {
-        throw profilesError;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No session found');
       }
 
-      // Get user emails from auth metadata
-      const usersWithEmails: UserWithEmail[] = [];
+      const response = await fetch('/functions/v1/manage-users?action=list', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
       
-      for (const profile of profiles || []) {
-        // Try to get user data from auth.users via RPC or direct query
-        // Since we can't directly query auth.users, we'll use the admin API
-        const { data: authUser } = await supabase.auth.admin.getUserById(profile.user_id);
-        
-        if (authUser.user) {
-          usersWithEmails.push({
-            ...profile,
-            email: authUser.user.email || 'Unknown'
-          });
-        }
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch users');
       }
 
-      setUsers(usersWithEmails);
+      setUsers(result.users || []);
     } catch (error: any) {
       console.error('Error fetching users:', error);
       toast({
@@ -110,33 +103,30 @@ export default function Users() {
         return;
       }
 
-      // Create user in auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: formData.email,
-        password: formData.password,
-        user_metadata: {
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-        },
-        email_confirm: true
-      });
-
-      if (authError) {
-        throw authError;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No session found');
       }
 
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: authData.user.id,
-          first_name: formData.first_name || null,
-          last_name: formData.last_name || null,
+      const response = await fetch('/functions/v1/manage-users?action=create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
           role: formData.role
-        });
+        }),
+      });
 
-      if (profileError) {
-        throw profileError;
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create user');
       }
 
       toast({
@@ -161,30 +151,30 @@ export default function Users() {
     if (!editingUser) return;
 
     try {
-      // Update profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          first_name: formData.first_name || null,
-          last_name: formData.last_name || null,
-          role: formData.role
-        })
-        .eq('user_id', editingUser.user_id);
-
-      if (profileError) {
-        throw profileError;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No session found');
       }
 
-      // Update email in auth if changed
-      if (formData.email !== editingUser.email) {
-        const { error: authError } = await supabase.auth.admin.updateUserById(
-          editingUser.user_id,
-          { email: formData.email }
-        );
+      const response = await fetch('/functions/v1/manage-users?action=update', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: editingUser.user_id,
+          email: formData.email !== editingUser.email ? formData.email : undefined,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          role: formData.role
+        }),
+      });
 
-        if (authError) {
-          throw authError;
-        }
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update user');
       }
 
       toast({
@@ -209,13 +199,27 @@ export default function Users() {
     if (!userToResetPassword) return;
 
     try {
-      const { error } = await supabase.auth.admin.updateUserById(
-        userToResetPassword.user_id,
-        { password: formData.password }
-      );
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No session found');
+      }
 
-      if (error) {
-        throw error;
+      const response = await fetch('/functions/v1/manage-users?action=update', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userToResetPassword.user_id,
+          password: formData.password
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to reset password');
       }
 
       toast({
@@ -242,11 +246,26 @@ export default function Users() {
     }
 
     try {
-      // Delete from auth (this will cascade to profiles due to foreign key)
-      const { error } = await supabase.auth.admin.deleteUser(user.user_id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No session found');
+      }
 
-      if (error) {
-        throw error;
+      const response = await fetch('/functions/v1/manage-users?action=delete', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user.user_id
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete user');
       }
 
       toast({

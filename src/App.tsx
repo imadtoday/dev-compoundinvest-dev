@@ -19,13 +19,16 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+import { ProfileDropdown } from "./components/ProfileDropdown";
+
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <SidebarProvider>
     <div className="min-h-screen flex w-full">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
-        <header className="h-12 flex items-center border-b border-border bg-background">
-          <SidebarTrigger className="ml-2" />
+        <header className="h-12 flex items-center justify-between border-b border-border bg-background px-4">
+          <SidebarTrigger />
+          <ProfileDropdown />
         </header>
         <main className="flex-1 p-6">
           {children}

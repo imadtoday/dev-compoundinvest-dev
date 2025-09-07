@@ -124,22 +124,7 @@ export function AppSidebar() {
                   {profile?.role === 'super_admin' ? 'Super Admin' : 'Client'}
                 </p>
               </div>
-              <button
-                onClick={signOut}
-                className="flex items-center w-full text-sm text-sidebar-muted-foreground hover:text-sidebar-foreground transition-colors"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </button>
             </div>
-          )}
-          {!open && (
-            <button
-              onClick={signOut}
-              className="flex items-center justify-center w-full text-sidebar-muted-foreground hover:text-sidebar-foreground transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
           )}
         </div>
       </SidebarContent>
