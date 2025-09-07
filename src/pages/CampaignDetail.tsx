@@ -1,15 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Megaphone, MessageCircle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X } from "lucide-react";
 import { formatInTimeZone } from "date-fns-tz";
 import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const CampaignDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [editingAnswer, setEditingAnswer] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   const { data: campaign, isLoading } = useQuery({
     queryKey: ['campaign-detail', id],
@@ -169,6 +176,60 @@ const CampaignDetail = () => {
     return 'No answer provided';
   };
 
+  const formatTextWithBold = (text: string) => {
+    if (!text) return text;
+    // Split by ** and make every odd index bold
+    const parts = text.split('**');
+    return parts.map((part, index) => 
+      index % 2 === 1 ? <strong key={index}>{part}</strong> : part
+    );
+  };
+
+  const updateAnswer = useMutation({
+    mutationFn: async ({ answerId, newValue }: { answerId: string, newValue: string }) => {
+      const { data, error } = await supabase
+        .from('campaign_answers')
+        .update({ value_text: newValue })
+        .eq('id', answerId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaign-answers', id] });
+      setEditingAnswer(null);
+      setEditValue("");
+      toast({
+        title: "Answer Updated",
+        description: "The answer has been successfully updated.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update the answer.",
+        variant: "destructive",
+      });
+      console.error("Update error:", error);
+    }
+  });
+
+  const handleEditAnswer = (answer: any, allAnswers: any[]) => {
+    setEditingAnswer(answer.id);
+    setEditValue(renderAnswerValue(answer, allAnswers));
+  };
+
+  const handleSaveAnswer = (answerId: string) => {
+    updateAnswer.mutate({ answerId, newValue: editValue });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingAnswer(null);
+    setEditValue("");
+  };
+
   const getSectionEmoji = (section: string) => {
     const sectionLower = section?.toLowerCase() || '';
     if (sectionLower.includes('focus')) return '🎯';
@@ -298,13 +359,55 @@ const CampaignDetail = () => {
                         <div key={answer.id} className="border-l-4 border-primary/20 pl-4 py-2">
                           <div className="mb-2">
                             <h4 className="font-medium text-foreground whitespace-pre-wrap">
-                              {formatQuestionText(answer.questions?.text || '')}
+                              {formatTextWithBold(formatQuestionText(answer.questions?.text || ''))}
                             </h4>
                           </div>
-                          <div className="bg-muted/30 rounded-md p-3 ml-8">
-                            <p className="text-foreground whitespace-pre-wrap">
-                              {renderAnswerValue(answer, answers)}
-                            </p>
+                          <div className="bg-muted/30 rounded-md p-3 ml-8 relative group">
+                            {editingAnswer === answer.id ? (
+                              <div className="space-y-3">
+                                <Textarea
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  className="min-h-[80px] resize-none"
+                                  placeholder="Enter answer..."
+                                />
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleSaveAnswer(answer.id)}
+                                    disabled={updateAnswer.isPending}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Save className="h-3 w-3" />
+                                    {updateAnswer.isPending ? 'Saving...' : 'Save'}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleCancelEdit}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <X className="h-3 w-3" />
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="text-foreground whitespace-pre-wrap">
+                                  {formatTextWithBold(renderAnswerValue(answer, answers))}
+                                </p>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleEditAnswer(answer, answers)}
+                                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 h-8 px-2"
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                  Edit
+                                </Button>
+                              </>
+                            )}
                             <p className="text-xs text-muted-foreground mt-2">
                               Answered: {formatInTimeZone(
                                 new Date(answer.answered_at),
@@ -361,7 +464,7 @@ const CampaignDetail = () => {
                             )}
                           </span>
                         </div>
-                        <p className="text-sm whitespace-pre-wrap">{message.body}</p>
+                        <p className="text-sm whitespace-pre-wrap">{formatTextWithBold(message.body)}</p>
                       </div>
                     </div>
                     {index < messages.length - 1 && <Separator className="my-2" />}
