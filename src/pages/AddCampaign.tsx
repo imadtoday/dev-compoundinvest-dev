@@ -111,6 +111,11 @@ const AddCampaign = () => {
   };
 
   const getOptionText = (question: any, letter: string) => {
+    // For Yes/No questions, just show Yes or No
+    if (['own_properties', 'finance_status'].includes(question.code)) {
+      return letter === 'Yes' ? 'Yes' : 'No';
+    }
+    
     // Map letters to actual option text based on question content
     const questionText = question.text;
     const lines = questionText.split('\n');
@@ -121,13 +126,33 @@ const AddCampaign = () => {
       }
     }
     
-    // Fallback for common options
-    const commonMappings: { [key: string]: { [key: string]: string } } = {
+    // Fallback mappings for specific questions
+    const specificMappings: { [key: string]: { [key: string]: string } } = {
       'current_focus': {
         'A': 'Building – just getting started or buying your first 1–2 properties',
         'B': 'Consolidating – own a few and strengthening your position', 
         'C': 'Expanding – scaling up the portfolio with new acquisitions',
         'D': 'Other'
+      },
+      'timeframe': {
+        'A': '0–5 years',
+        'B': '5–10 years', 
+        'C': '10–15 years',
+        'D': '15–25 years',
+        'E': 'Over 25 years'
+      },
+      'investment_timing': {
+        'A': 'Immediately',
+        'B': 'Within 3 months',
+        'C': '3–6 months', 
+        'D': '6+ months'
+      },
+      'budget_range': {
+        'A': 'Under $500k',
+        'B': '$500k–$750k',
+        'C': '$750k–$1m',
+        'D': '$1m–$1.5m',
+        'E': '$1.5m+'
       },
       'cities': {
         'A': 'Sydney', 'B': 'Melbourne', 'C': 'Brisbane', 'D': 'Adelaide',
@@ -136,7 +161,7 @@ const AddCampaign = () => {
       }
     };
     
-    return commonMappings[question.code]?.[letter] || `Option ${letter}`;
+    return specificMappings[question.code]?.[letter] || `Option ${letter}`;
   };
 
   const handleAnswerChange = (questionCode: string, values: string[], letters?: string[], text?: string) => {
