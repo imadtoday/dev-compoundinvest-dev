@@ -264,6 +264,7 @@ export type Database = {
         Row: {
           company_name: string | null
           created_at: string
+          favicon_url: string | null
           id: string
           logo_url: string | null
           updated_at: string
@@ -271,6 +272,7 @@ export type Database = {
         Insert: {
           company_name?: string | null
           created_at?: string
+          favicon_url?: string | null
           id?: string
           logo_url?: string | null
           updated_at?: string
@@ -278,6 +280,7 @@ export type Database = {
         Update: {
           company_name?: string | null
           created_at?: string
+          favicon_url?: string | null
           id?: string
           logo_url?: string | null
           updated_at?: string

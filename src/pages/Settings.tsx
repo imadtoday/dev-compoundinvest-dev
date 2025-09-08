@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 const Settings = () => {
   const [companyName, setCompanyName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [faviconFile, setFaviconFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -33,7 +34,7 @@ const Settings = () => {
   });
 
   const updateSettings = useMutation({
-    mutationFn: async (updatedData: { company_name?: string; logo_url?: string }) => {
+    mutationFn: async (updatedData: { company_name?: string; logo_url?: string; favicon_url?: string }) => {
       if (!settings?.id) {
         // Insert new settings if none exist
         const { data, error } = await supabase
@@ -115,6 +116,58 @@ const Settings = () => {
       toast({
         title: "Upload Failed",
         description: "Failed to upload logo. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Upload error:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFaviconUpload = async () => {
+    if (!faviconFile) return;
+
+    setIsUploading(true);
+    try {
+      const fileExt = faviconFile.name.split('.').pop();
+      const fileName = `favicon.${fileExt}`;
+      
+      // Upload file to Supabase Storage with cache busting
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('company-assets')
+        .upload(fileName, faviconFile, {
+          cacheControl: '0',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL with timestamp to avoid caching
+      const timestamp = Date.now();
+      const { data: { publicUrl } } = supabase.storage
+        .from('company-assets')
+        .getPublicUrl(fileName);
+      
+      const cacheBustedUrl = `${publicUrl}?v=${timestamp}`;
+
+      // Update settings with new favicon URL
+      await updateSettings.mutateAsync({ favicon_url: cacheBustedUrl });
+      
+      // Update the actual favicon in the document
+      const faviconLink = document.querySelector("link[rel='icon']") as HTMLLinkElement;
+      if (faviconLink) {
+        faviconLink.href = cacheBustedUrl;
+      }
+      
+      setFaviconFile(null);
+      toast({
+        title: "Favicon Uploaded",
+        description: "Favicon has been successfully uploaded and updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload favicon. Please try again.",
         variant: "destructive",
       });
       console.error("Upload error:", error);
@@ -219,6 +272,47 @@ const Settings = () => {
               >
                 <Upload className="h-4 w-4" />
                 {isUploading ? 'Uploading...' : 'Upload Logo'}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Favicon Upload */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Website Favicon</CardTitle>
+              <CardDescription>
+                Upload your website favicon (PNG, ICO, or JPG)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {settings?.favicon_url && (
+                <div className="border rounded-lg p-4 bg-muted/50">
+                  <p className="text-sm text-muted-foreground mb-2">Current Favicon:</p>
+                  <img 
+                    src={settings.favicon_url} 
+                    alt="Website Favicon" 
+                    className="h-8 w-8 object-contain"
+                  />
+                </div>
+              )}
+              
+              <div>
+                <Label htmlFor="favicon-upload">Choose Favicon File</Label>
+                <Input
+                  id="favicon-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setFaviconFile(e.target.files?.[0] || null)}
+                />
+              </div>
+              
+              <Button 
+                onClick={handleFaviconUpload}
+                disabled={!faviconFile || isUploading}
+                className="flex items-center gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                {isUploading ? 'Uploading...' : 'Upload Favicon'}
               </Button>
             </CardContent>
           </Card>
