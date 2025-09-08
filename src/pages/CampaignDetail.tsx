@@ -452,7 +452,7 @@ const CampaignDetail = () => {
             <CardTitle>Campaign Overview</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground">Campaign Name</h4>
                 <p className="text-foreground">{campaign.name || 'Unnamed Campaign'}</p>
@@ -471,16 +471,18 @@ const CampaignDetail = () => {
                 )}
               </div>
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground">Home Address</h4>
-                <p className="text-foreground">{campaign.contacts?.address || 'Not provided'}</p>
-              </div>
-              <div>
                 <h4 className="font-medium text-sm text-muted-foreground">Status</h4>
                 <Badge variant={getStatusBadgeVariant(campaign.status)}>
                   {campaign.status}
                 </Badge>
               </div>
             </div>
+            {campaign.contacts?.address && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <h4 className="font-medium text-sm text-muted-foreground mb-2">Home Address</h4>
+                <p className="text-foreground">{campaign.contacts.address}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
