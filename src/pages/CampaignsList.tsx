@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Megaphone, Search } from "lucide-react";
+import { Megaphone, Search, Plus } from "lucide-react";
 import { useState } from "react";
 import { formatInTimeZone } from "date-fns-tz";
 
@@ -69,7 +70,7 @@ const CampaignsList = () => {
           </div>
         </div>
 
-        {/* Search */}
+        {/* Search and Add Button */}
         <div className="flex gap-4 flex-col sm:flex-row animate-slide-up">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
@@ -80,6 +81,12 @@ const CampaignsList = () => {
               className="input-premium pl-12 h-12 text-base"
             />
           </div>
+          <Link to="/campaigns/add">
+            <Button className="h-12 px-6 flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Add Campaign
+            </Button>
+          </Link>
         </div>
 
         {/* Campaigns Table */}

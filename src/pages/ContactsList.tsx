@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Search, Users } from "lucide-react";
+import { Search, Users, Plus } from "lucide-react";
 
 const ContactsList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,7 +66,7 @@ const ContactsList = () => {
           </div>
         </div>
 
-        {/* Search */}
+        {/* Search and Add Button */}
         <div className="flex gap-4 flex-col sm:flex-row animate-slide-up">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
@@ -76,6 +77,12 @@ const ContactsList = () => {
               className="input-premium pl-12 h-12 text-base"
             />
           </div>
+          <Link to="/contacts/add">
+            <Button className="h-12 px-6 flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Add Contact
+            </Button>
+          </Link>
         </div>
 
         {/* Contacts Table */}

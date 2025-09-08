@@ -15,6 +15,8 @@ import ContactsListPage from "./pages/ContactsList";
 import ContactDetail from "./pages/ContactDetail";
 import CampaignsList from "./pages/CampaignsList";
 import CampaignDetail from "./pages/CampaignDetail";
+import AddCampaign from "./pages/AddCampaign";
+import AddContact from "./pages/AddContact";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -104,6 +106,16 @@ const App = () => (
               } 
             />
             <Route 
+              path="/contacts/add" 
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <AddContact />
+                  </AppLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/contacts/:id" 
               element={
                 <ProtectedRoute>
@@ -119,6 +131,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <CampaignsList />
+                  </AppLayout>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/campaigns/add" 
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <AddCampaign />
                   </AppLayout>
                 </ProtectedRoute>
               } 
