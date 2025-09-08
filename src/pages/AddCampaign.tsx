@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Plus, Megaphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,7 +27,7 @@ const AddCampaign = () => {
     notes: ""
   });
 
-  const [answers, setAnswers] = useState<{ [key: string]: { value: string, letter?: string } }>({});
+  const [answers, setAnswers] = useState<{ [key: string]: { values: string[], letters?: string[], text?: string } }>({});
 
   // Fetch contacts for the dropdown
   const { data: contacts } = useQuery({
@@ -109,11 +110,58 @@ const AddCampaign = () => {
     return question.options_json.options;
   };
 
-  const handleAnswerChange = (questionCode: string, value: string, letter?: string) => {
+  const getOptionText = (question: any, letter: string) => {
+    // Map letters to actual option text based on question content
+    const questionText = question.text;
+    const lines = questionText.split('\n');
+    
+    for (const line of lines) {
+      if (line.trim().startsWith(`${letter})`)) {
+        return line.replace(`${letter})`, '').replace(/\*/g, '').trim();
+      }
+    }
+    
+    // Fallback for common options
+    const commonMappings: { [key: string]: { [key: string]: string } } = {
+      'current_focus': {
+        'A': 'Building – just getting started or buying your first 1–2 properties',
+        'B': 'Consolidating – own a few and strengthening your position', 
+        'C': 'Expanding – scaling up the portfolio with new acquisitions',
+        'D': 'Other'
+      },
+      'cities': {
+        'A': 'Sydney', 'B': 'Melbourne', 'C': 'Brisbane', 'D': 'Adelaide',
+        'E': 'Perth', 'F': 'Canberra', 'G': 'Hobart', 'H': 'Darwin',
+        'I': 'Regional areas', 'J': 'Other'
+      }
+    };
+    
+    return commonMappings[question.code]?.[letter] || `Option ${letter}`;
+  };
+
+  const handleAnswerChange = (questionCode: string, values: string[], letters?: string[], text?: string) => {
     setAnswers(prev => ({
       ...prev,
-      [questionCode]: { value, letter }
+      [questionCode]: { values, letters, text }
     }));
+  };
+
+  const handleCheckboxChange = (questionCode: string, optionLetter: string, optionValue: string, checked: boolean) => {
+    const currentAnswer = answers[questionCode] || { values: [], letters: [] };
+    let newValues = [...(currentAnswer.values || [])];
+    let newLetters = [...(currentAnswer.letters || [])];
+
+    if (checked) {
+      if (!newValues.includes(optionValue)) {
+        newValues.push(optionValue);
+        newLetters.push(optionLetter);
+      }
+    } else {
+      newValues = newValues.filter(v => v !== optionValue);
+      newLetters = newLetters.filter(l => l !== optionLetter);
+    }
+
+    handleAnswerChange(questionCode, newValues, newLetters, currentAnswer.text);
   };
 
   const createCampaignMutation = useMutation({
@@ -145,7 +193,7 @@ const AddCampaign = () => {
         
         for (const [questionCode, answerData] of Object.entries(campaignData.answers)) {
           const question = questions?.find(q => q.code === questionCode);
-          if (question && (answerData as any).value) {
+          if (question && (answerData as any).values && (answerData as any).values.length > 0) {
             const answerEntry: any = {
               campaign_id: campaign.id,
               contact_id: campaignData.contact_id,
@@ -156,16 +204,16 @@ const AddCampaign = () => {
               is_confirmed: true
             };
 
-            if (question.type === 'choice' && (answerData as any).letter) {
+            if (question.type === 'choice' && (answerData as any).letters) {
               // Format as value_json for choice questions
               answerEntry.value_json = {
-                selected_letters: [(answerData as any).letter],
-                selected_values: [(answerData as any).value]
+                selected_letters: (answerData as any).letters,
+                selected_values: (answerData as any).values
               };
-              answerEntry.interpreted_value = (answerData as any).letter;
+              answerEntry.interpreted_value = (answerData as any).letters.join(',');
             } else {
-              // Text answer
-              answerEntry.value_text = (answerData as any).value;
+              // Text answer (for "other" fields)
+              answerEntry.value_text = (answerData as any).text || (answerData as any).values[0];
             }
 
             answersToInsert.push(answerEntry);
@@ -354,47 +402,87 @@ const AddCampaign = () => {
                       <p className="text-sm text-muted-foreground">These questions can be filled out now or edited later</p>
                     </div>
                     
-                    {questions.map((question, index) => (
-                      <div key={question.id} className="space-y-3 p-4 border border-border rounded-lg">
-                        <div>
-                          <Label className="text-sm font-medium">
-                            {index + 1}. {formatQuestionText(question.text)}
-                          </Label>
-                        </div>
+                    {questions
+                      .filter(q => !['current_focus_other', 'cities_other'].includes(q.code)) // Hide Q8 and Q9
+                      .map((question, index) => {
+                        const visibleIndex = questions.filter(q => !['current_focus_other', 'cities_other'].includes(q.code)).indexOf(question) + 1;
+                        const currentAnswer = answers[question.code] || { values: [], letters: [] };
                         
-                        {question.type === 'choice' ? (
-                          <div className="space-y-2">
-                            <Select 
-                              value={answers[question.code]?.letter || ""}
-                              onValueChange={(letter) => {
-                                const options = getQuestionOptions(question);
-                                const optionIndex = options.indexOf(letter);
-                                const value = optionIndex >= 0 ? `Option ${letter}` : letter;
-                                handleAnswerChange(question.code, value, letter);
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select an option..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {getQuestionOptions(question).map((option) => (
-                                  <SelectItem key={option} value={option}>
-                                    {option}) Option {option}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                        return (
+                          <div key={question.id}>
+                            <div className="space-y-3 p-4 border border-border rounded-lg">
+                              <div>
+                                <Label className="text-sm font-medium">
+                                  {visibleIndex}. {formatQuestionText(question.text)}
+                                </Label>
+                              </div>
+                              
+                              {question.type === 'choice' ? (
+                                <div className="space-y-3">
+                                  {getQuestionOptions(question).map((option) => {
+                                    const optionValue = `Option ${option}`;
+                                    const isChecked = currentAnswer.letters?.includes(option) || false;
+                                    
+                                    return (
+                                      <div key={option} className="flex items-center space-x-2">
+                                        <Checkbox
+                                          id={`${question.code}-${option}`}
+                                          checked={isChecked}
+                                          onCheckedChange={(checked) => 
+                                            handleCheckboxChange(question.code, option, optionValue, checked === true)
+                                          }
+                                        />
+                                        <Label 
+                                          htmlFor={`${question.code}-${option}`}
+                                          className="text-sm font-normal cursor-pointer"
+                                        >
+                                          {option}) {getOptionText(question, option)}
+                                        </Label>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <Textarea
+                                  value={currentAnswer.text || ""}
+                                  onChange={(e) => handleAnswerChange(question.code, [e.target.value], [], e.target.value)}
+                                  placeholder="Enter your answer..."
+                                  rows={3}
+                                />
+                              )}
+                            </div>
+                            
+                            {/* Show conditional "other" questions */}
+                            {question.code === 'current_focus' && currentAnswer.letters?.includes('D') && (
+                              <div className="ml-8 mt-4 space-y-3 p-4 border border-border rounded-lg bg-muted/30">
+                                <Label className="text-sm font-medium">
+                                  Please describe your other current focus:
+                                </Label>
+                                <Textarea
+                                  value={answers['current_focus_other']?.text || ""}
+                                  onChange={(e) => handleAnswerChange('current_focus_other', [e.target.value], [], e.target.value)}
+                                  placeholder="Describe your other focus..."
+                                  rows={3}
+                                />
+                              </div>
+                            )}
+                            
+                            {question.code === 'cities' && currentAnswer.letters?.includes('J') && (
+                              <div className="ml-8 mt-4 space-y-3 p-4 border border-border rounded-lg bg-muted/30">
+                                <Label className="text-sm font-medium">
+                                  Which other cities or areas did you have in mind?
+                                </Label>
+                                <Textarea
+                                  value={answers['cities_other']?.text || ""}
+                                  onChange={(e) => handleAnswerChange('cities_other', [e.target.value], [], e.target.value)}
+                                  placeholder="Enter cities or areas..."
+                                  rows={3}
+                                />
+                              </div>
+                            )}
                           </div>
-                        ) : (
-                          <Textarea
-                            value={answers[question.code]?.value || ""}
-                            onChange={(e) => handleAnswerChange(question.code, e.target.value)}
-                            placeholder="Enter your answer..."
-                            rows={3}
-                          />
-                        )}
-                      </div>
-                    ))}
+                        );
+                      })}
                   </div>
                 </>
               )}
