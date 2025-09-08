@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { formatInTimeZone } from "date-fns-tz";
 import { Separator } from "@/components/ui/separator";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const CampaignDetail = () => {
@@ -21,6 +22,19 @@ const CampaignDetail = () => {
   const [editingNotes, setEditingNotes] = useState<{ [key: string]: boolean }>({});
   const [editingNoteValues, setEditingNoteValues] = useState<{ [key: string]: string }>({});
   const [newNoteContent, setNewNoteContent] = useState("");
+  const [editingFees, setEditingFees] = useState(false);
+  const [engagementFee, setEngagementFee] = useState("");
+  const [successFee, setSuccessFee] = useState("");
+
+  const formatCurrency = (value: number | string) => {
+    if (!value) return "";
+    const numValue = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+    return numValue.toLocaleString('en-US');
+  };
+
+  const parseCurrency = (value: string) => {
+    return parseFloat(value.replace(/,/g, '')) || 0;
+  };
 
   const { data: campaign, isLoading } = useQuery({
     queryKey: ['campaign-detail', id],
@@ -47,6 +61,13 @@ const CampaignDetail = () => {
     },
     enabled: !!id
   });
+
+  useEffect(() => {
+    if (campaign) {
+      setEngagementFee(campaign.engagement_fee ? formatCurrency(campaign.engagement_fee) : "");
+      setSuccessFee(campaign.success_fee ? formatCurrency(campaign.success_fee) : "");
+    }
+  }, [campaign]);
 
   const { data: answers } = useQuery({
     queryKey: ['campaign-answers', id],
@@ -376,6 +397,70 @@ const CampaignDetail = () => {
     }
   };
 
+  // Fees mutation
+  const updateFeesMutation = useMutation({
+    mutationFn: async ({ engagementFee, successFee }: { engagementFee: number | null, successFee: number | null }) => {
+      const { data, error } = await supabase
+        .from("campaigns")
+        .update({ 
+          engagement_fee: engagementFee,
+          success_fee: successFee
+        })
+        .eq("id", id)
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
+      setEditingFees(false);
+      toast({
+        title: "Fees Updated",
+        description: "The fees have been successfully updated.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update fees.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEditFees = () => {
+    setEditingFees(true);
+  };
+
+  const handleSaveFees = () => {
+    const engagementValue = engagementFee ? parseCurrency(engagementFee) : null;
+    const successValue = successFee ? parseCurrency(successFee) : null;
+    updateFeesMutation.mutate({ engagementFee: engagementValue, successFee: successValue });
+  };
+
+  const handleCancelFeesEdit = () => {
+    setEditingFees(false);
+    // Reset values to original
+    if (campaign) {
+      setEngagementFee(campaign.engagement_fee ? formatCurrency(campaign.engagement_fee) : "");
+      setSuccessFee(campaign.success_fee ? formatCurrency(campaign.success_fee) : "");
+    }
+  };
+
+  const handleCurrencyInput = (value: string, setter: (val: string) => void) => {
+    // Remove any non-digit characters
+    const numericValue = value.replace(/[^\d]/g, '');
+    
+    // Format with commas
+    if (numericValue) {
+      const formatted = parseInt(numericValue).toLocaleString('en-US');
+      setter(formatted);
+    } else {
+      setter('');
+    }
+  };
+
   const formatSydneyTime = (date: string) => {
     return formatInTimeZone(new Date(date), 'Australia/Sydney', 'MMM d, yyyy h:mm a');
   };
@@ -486,7 +571,7 @@ const CampaignDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Questions and Answers with Notes */}
+        {/* Questions and Answers with Fees and Notes */}
         <ResizablePanelGroup direction="horizontal" className="min-h-[600px]">
           <ResizablePanel defaultSize={65} minSize={40}>
             <Card className="h-full">
@@ -589,19 +674,104 @@ const CampaignDetail = () => {
 
           <ResizableHandle withHandle />
 
-          {/* Notes Section */}
+          {/* Fees and Notes Section */}
           <ResizablePanel defaultSize={35} minSize={25}>
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    📝 Notes
-                    <span className="text-sm font-normal text-muted-foreground">
-                      {notes.length} notes
+            <div className="h-full space-y-4">
+              {/* Fees Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      💰 Fees
                     </span>
-                  </span>
-                </CardTitle>
-              </CardHeader>
+                    {!editingFees && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleEditFees}
+                        className="flex items-center gap-1"
+                      >
+                        <Edit3 className="h-3 w-3" />
+                        Edit
+                      </Button>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {editingFees ? (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Engagement Fee</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                          <Input
+                            value={engagementFee}
+                            onChange={(e) => handleCurrencyInput(e.target.value, setEngagementFee)}
+                            placeholder="0"
+                            className="pl-8"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Success Fee</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
+                          <Input
+                            value={successFee}
+                            onChange={(e) => handleCurrencyInput(e.target.value, setSuccessFee)}
+                            placeholder="0"
+                            className="pl-8"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleSaveFees}
+                          disabled={updateFeesMutation.isPending}
+                          className="flex items-center gap-1"
+                        >
+                          <Save className="h-3 w-3" />
+                          {updateFeesMutation.isPending ? 'Saving...' : 'Save'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleCancelFeesEdit}
+                          className="flex items-center gap-1"
+                        >
+                          <X className="h-3 w-3" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">Engagement Fee</h4>
+                        <p className="text-foreground">${campaign?.engagement_fee ? formatCurrency(campaign.engagement_fee) : '0'}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">Success Fee</h4>
+                        <p className="text-foreground">${campaign?.success_fee ? formatCurrency(campaign.success_fee) : '0'}</p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Notes Section */}
+              <Card className="flex-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      📝 Notes
+                      <span className="text-sm font-normal text-muted-foreground">
+                        {notes.length} notes
+                      </span>
+                    </span>
+                  </CardTitle>
+                </CardHeader>
               <CardContent className="space-y-4 overflow-y-auto max-h-[calc(100vh-16rem)]">
                 {/* Add new note */}
                 <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-dashed border-border">
@@ -704,6 +874,7 @@ const CampaignDetail = () => {
                 )}
               </CardContent>
             </Card>
+            </div>
           </ResizablePanel>
         </ResizablePanelGroup>
 

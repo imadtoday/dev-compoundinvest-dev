@@ -193,6 +193,7 @@ export type Database = {
           consent_received_at: string | null
           contact_id: string
           created_at: string
+          engagement_fee: number | null
           external_conversation_sid: string | null
           id: string
           last_question_id: number | null
@@ -203,6 +204,7 @@ export type Database = {
           scheduled_start: string | null
           skipped_questions: number[] | null
           status: string
+          success_fee: number | null
           twilio_conversation_sid: string | null
           updated_at: string
         }
@@ -215,6 +217,7 @@ export type Database = {
           consent_received_at?: string | null
           contact_id: string
           created_at?: string
+          engagement_fee?: number | null
           external_conversation_sid?: string | null
           id?: string
           last_question_id?: number | null
@@ -225,6 +228,7 @@ export type Database = {
           scheduled_start?: string | null
           skipped_questions?: number[] | null
           status?: string
+          success_fee?: number | null
           twilio_conversation_sid?: string | null
           updated_at?: string
         }
@@ -237,6 +241,7 @@ export type Database = {
           consent_received_at?: string | null
           contact_id?: string
           created_at?: string
+          engagement_fee?: number | null
           external_conversation_sid?: string | null
           id?: string
           last_question_id?: number | null
@@ -247,6 +252,7 @@ export type Database = {
           scheduled_start?: string | null
           skipped_questions?: number[] | null
           status?: string
+          success_fee?: number | null
           twilio_conversation_sid?: string | null
           updated_at?: string
         }
