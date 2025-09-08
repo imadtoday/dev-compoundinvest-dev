@@ -190,6 +190,7 @@ export type Database = {
           awaiting_other_for: number | null
           calendly_event_type: string | null
           calendly_payload_json: Json | null
+          campaign_url: string | null
           consent_received_at: string | null
           contact_id: string
           created_at: string
@@ -214,6 +215,7 @@ export type Database = {
           awaiting_other_for?: number | null
           calendly_event_type?: string | null
           calendly_payload_json?: Json | null
+          campaign_url?: string | null
           consent_received_at?: string | null
           contact_id: string
           created_at?: string
@@ -238,6 +240,7 @@ export type Database = {
           awaiting_other_for?: number | null
           calendly_event_type?: string | null
           calendly_payload_json?: Json | null
+          campaign_url?: string | null
           consent_received_at?: string | null
           contact_id?: string
           created_at?: string
@@ -296,6 +299,7 @@ export type Database = {
       contacts: {
         Row: {
           address: string | null
+          contact_url: string | null
           created_at: string
           email: string | null
           first_name: string | null
@@ -307,6 +311,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          contact_url?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -318,6 +323,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          contact_url?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -529,6 +535,7 @@ export type Database = {
         }
         Returns: {
           address: string | null
+          contact_url: string | null
           created_at: string
           email: string | null
           first_name: string | null

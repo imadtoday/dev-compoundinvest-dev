@@ -62,6 +62,16 @@ const AddContact = () => {
         .single();
 
       if (error) throw error;
+
+      // Update contact with its URL
+      const contactUrl = `${window.location.origin}/contacts/${data.id}`;
+      const { error: updateError } = await supabase
+        .from('contacts')
+        .update({ contact_url: contactUrl })
+        .eq('id', data.id);
+
+      if (updateError) throw updateError;
+
       return data;
     },
     onSuccess: (data) => {

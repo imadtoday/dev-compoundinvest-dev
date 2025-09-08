@@ -212,6 +212,17 @@ const AddCampaign = () => {
 
       if (campaignError) throw campaignError;
 
+      // Update campaign with its URL
+      const campaignUrl = `${window.location.origin}/campaigns/${campaign.id}`;
+      const { error: updateError } = await supabase
+        .from('campaigns')
+        .update({ campaign_url: campaignUrl })
+        .eq('id', campaign.id);
+
+      if (updateError) throw updateError;
+
+      if (campaignError) throw campaignError;
+
       // Then create campaign answers for any provided answers
       if (campaignData.answers && Object.keys(campaignData.answers).length > 0) {
         const answersToInsert = [];
