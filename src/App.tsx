@@ -1,11 +1,13 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -20,6 +22,38 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 import { ProfileDropdown } from "./components/ProfileDropdown";
+
+const FaviconLoader = () => {
+  const { data: settings } = useQuery({
+    queryKey: ['company-settings-favicon'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('company_settings')
+        .select('favicon_url')
+        .limit(1)
+        .single();
+      return data;
+    }
+  });
+
+  useEffect(() => {
+    if (settings?.favicon_url) {
+      const faviconLink = document.querySelector("link[rel='icon']") as HTMLLinkElement;
+      if (faviconLink) {
+        faviconLink.href = settings.favicon_url;
+      } else {
+        // Create favicon link if it doesn't exist
+        const newFaviconLink = document.createElement("link");
+        newFaviconLink.rel = "icon";
+        newFaviconLink.href = settings.favicon_url;
+        newFaviconLink.type = "image/png";
+        document.head.appendChild(newFaviconLink);
+      }
+    }
+  }, [settings?.favicon_url]);
+
+  return null;
+};
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <SidebarProvider>
@@ -41,6 +75,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <FaviconLoader />
       <Toaster />
       <Sonner />
       <BrowserRouter>
