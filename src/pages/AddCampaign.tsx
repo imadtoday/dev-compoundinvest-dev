@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Plus, Megaphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,12 +21,12 @@ const AddCampaign = () => {
     name: "",
     contact_id: "",
     status: "new",
-    scheduled_start: "",
-    scheduled_end: "",
     engagement_fee: "",
     success_fee: "",
     notes: ""
   });
+
+  const [answers, setAnswers] = useState<{ [key: string]: { value: string, letter?: string } }>({});
 
   // Fetch contacts for the dropdown
   const { data: contacts } = useQuery({
@@ -35,6 +36,27 @@ const AddCampaign = () => {
         .from('contacts')
         .select('id, first_name, last_name, email')
         .order('first_name', { ascending: true });
+      
+      return data || [];
+    }
+  });
+
+  // Fetch questions for the form
+  const { data: questions } = useQuery({
+    queryKey: ['questions-form'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('questions')
+        .select(`
+          *,
+          questionnaires!inner (
+            id,
+            name,
+            is_active
+          )
+        `)
+        .eq('questionnaires.is_active', true)
+        .order('ordinal', { ascending: true });
       
       return data || [];
     }
@@ -57,16 +79,52 @@ const AddCampaign = () => {
     }
   };
 
+  const formatQuestionText = (text: string) => {
+    if (!text) return '';
+    // Remove newlines and clean up the text
+    let cleanText = text.replace(/\\n/g, '\n');
+    
+    // Remove multiple choice options (A), B), C), etc.) and everything after them
+    const lines = cleanText.split('\n');
+    const questionLines = [];
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      // Stop at the first line that looks like a multiple choice option
+      if (/^[A-Z]\)\s/.test(trimmedLine)) {
+        break;
+      }
+      // Skip lines that contain "Reply Yes or No" instructions
+      if (trimmedLine.toLowerCase().includes('reply yes or no')) {
+        continue;
+      }
+      questionLines.push(line);
+    }
+    
+    return questionLines.join('\n').trim();
+  };
+
+  const getQuestionOptions = (question: any) => {
+    if (!question.options_json?.options) return [];
+    return question.options_json.options;
+  };
+
+  const handleAnswerChange = (questionCode: string, value: string, letter?: string) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionCode]: { value, letter }
+    }));
+  };
+
   const createCampaignMutation = useMutation({
     mutationFn: async (campaignData: any) => {
-      const { data, error } = await supabase
+      // First create the campaign
+      const { data: campaign, error: campaignError } = await supabase
         .from('campaigns')
         .insert({
           name: campaignData.name,
           contact_id: campaignData.contact_id,
           status: campaignData.status,
-          scheduled_start: campaignData.scheduled_start || null,
-          scheduled_end: campaignData.scheduled_end || null,
           engagement_fee: campaignData.engagement_fee,
           success_fee: campaignData.success_fee,
           notes: campaignData.notes || null,
@@ -79,8 +137,51 @@ const AddCampaign = () => {
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (campaignError) throw campaignError;
+
+      // Then create campaign answers for any provided answers
+      if (campaignData.answers && Object.keys(campaignData.answers).length > 0) {
+        const answersToInsert = [];
+        
+        for (const [questionCode, answerData] of Object.entries(campaignData.answers)) {
+          const question = questions?.find(q => q.code === questionCode);
+          if (question && (answerData as any).value) {
+            const answerEntry: any = {
+              campaign_id: campaign.id,
+              contact_id: campaignData.contact_id,
+              question_id: question.id,
+              questionnaire_id: question.questionnaire_id,
+              question_code: questionCode,
+              answered_at: new Date().toISOString(),
+              is_confirmed: true
+            };
+
+            if (question.type === 'choice' && (answerData as any).letter) {
+              // Format as value_json for choice questions
+              answerEntry.value_json = {
+                selected_letters: [(answerData as any).letter],
+                selected_values: [(answerData as any).value]
+              };
+              answerEntry.interpreted_value = (answerData as any).letter;
+            } else {
+              // Text answer
+              answerEntry.value_text = (answerData as any).value;
+            }
+
+            answersToInsert.push(answerEntry);
+          }
+        }
+
+        if (answersToInsert.length > 0) {
+          const { error: answersError } = await supabase
+            .from('campaign_answers')
+            .insert(answersToInsert);
+
+          if (answersError) throw answersError;
+        }
+      }
+
+      return campaign;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['campaigns-list'] });
@@ -125,6 +226,7 @@ const AddCampaign = () => {
       ...formData,
       engagement_fee: formData.engagement_fee ? parseCurrency(formData.engagement_fee) : null,
       success_fee: formData.success_fee ? parseCurrency(formData.success_fee) : null,
+      answers: answers
     });
   };
 
@@ -203,26 +305,6 @@ const AddCampaign = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="scheduled_start">Scheduled Start</Label>
-                  <Input
-                    id="scheduled_start"
-                    type="datetime-local"
-                    value={formData.scheduled_start}
-                    onChange={(e) => setFormData(prev => ({ ...prev, scheduled_start: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="scheduled_end">Scheduled End</Label>
-                  <Input
-                    id="scheduled_end"
-                    type="datetime-local"
-                    value={formData.scheduled_end}
-                    onChange={(e) => setFormData(prev => ({ ...prev, scheduled_end: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="engagement_fee">Engagement Fee</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">$</span>
@@ -261,6 +343,61 @@ const AddCampaign = () => {
                   rows={4}
                 />
               </div>
+
+              {/* Questions Section */}
+              {questions && questions.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">Questionnaire (Optional)</h3>
+                      <p className="text-sm text-muted-foreground">These questions can be filled out now or edited later</p>
+                    </div>
+                    
+                    {questions.map((question, index) => (
+                      <div key={question.id} className="space-y-3 p-4 border border-border rounded-lg">
+                        <div>
+                          <Label className="text-sm font-medium">
+                            {index + 1}. {formatQuestionText(question.text)}
+                          </Label>
+                        </div>
+                        
+                        {question.type === 'choice' ? (
+                          <div className="space-y-2">
+                            <Select 
+                              value={answers[question.code]?.letter || ""}
+                              onValueChange={(letter) => {
+                                const options = getQuestionOptions(question);
+                                const optionIndex = options.indexOf(letter);
+                                const value = optionIndex >= 0 ? `Option ${letter}` : letter;
+                                handleAnswerChange(question.code, value, letter);
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select an option..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {getQuestionOptions(question).map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}) Option {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        ) : (
+                          <Textarea
+                            value={answers[question.code]?.value || ""}
+                            onChange={(e) => handleAnswerChange(question.code, e.target.value)}
+                            placeholder="Enter your answer..."
+                            rows={3}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
 
               <div className="flex gap-4 pt-4">
                 <Button
