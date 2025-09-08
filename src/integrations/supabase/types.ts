@@ -289,6 +289,7 @@ export type Database = {
       }
       contacts: {
         Row: {
+          address: string | null
           created_at: string
           email: string | null
           first_name: string | null
@@ -299,6 +300,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -309,6 +311,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -519,6 +522,7 @@ export type Database = {
           p_source?: string
         }
         Returns: {
+          address: string | null
           created_at: string
           email: string | null
           first_name: string | null

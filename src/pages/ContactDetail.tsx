@@ -21,6 +21,7 @@ const ContactDetail = () => {
     email: "",
     phone_e164: "",
     source: "",
+    address: "",
   });
 
   const { data: contact, isLoading } = useQuery({
@@ -53,6 +54,7 @@ const ContactDetail = () => {
           email: contact.email || "",
           phone_e164: contact.phone_e164 || "",
           source: contact.source || "",
+          address: contact.address || "",
         });
       }
       
@@ -220,6 +222,17 @@ const ContactDetail = () => {
                       value={formData.source}
                       onChange={(e) => handleInputChange('source', e.target.value)}
                       placeholder="Enter contact source"
+                      className="input-premium mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="address" className="text-sm font-medium">Home Address</Label>
+                    <Input
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => handleInputChange('address', e.target.value)}
+                      placeholder="Enter home address"
                       className="input-premium mt-2"
                     />
                   </div>

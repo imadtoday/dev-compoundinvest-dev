@@ -36,7 +36,8 @@ const CampaignDetail = () => {
             first_name,
             last_name,
             email,
-            phone_e164
+            phone_e164,
+            address
           )
         `)
         .eq('id', id)
@@ -451,7 +452,7 @@ const CampaignDetail = () => {
             <CardTitle>Campaign Overview</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground">Campaign Name</h4>
                 <p className="text-foreground">{campaign.name || 'Unnamed Campaign'}</p>
@@ -468,6 +469,10 @@ const CampaignDetail = () => {
                 ) : (
                   <p className="text-muted-foreground">No contact assigned</p>
                 )}
+              </div>
+              <div>
+                <h4 className="font-medium text-sm text-muted-foreground">Home Address</h4>
+                <p className="text-foreground">{campaign.contacts?.address || 'Not provided'}</p>
               </div>
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground">Status</h4>
