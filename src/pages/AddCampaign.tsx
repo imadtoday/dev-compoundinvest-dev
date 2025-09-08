@@ -461,7 +461,10 @@ const AddCampaign = () => {
                                           htmlFor={`${question.code}-${option}`}
                                           className="text-sm font-normal cursor-pointer"
                                         >
-                                          {option}) {getOptionText(question, option)}
+                                          {['own_properties', 'finance_status'].includes(question.code) 
+                                            ? getOptionText(question, option)
+                                            : `${option}) ${getOptionText(question, option)}`
+                                          }
                                         </Label>
                                       </div>
                                     );
