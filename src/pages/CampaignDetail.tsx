@@ -25,6 +25,8 @@ const CampaignDetail = () => {
   const [editingFees, setEditingFees] = useState(false);
   const [engagementFee, setEngagementFee] = useState("");
   const [successFee, setSuccessFee] = useState("");
+  const [editingAddress, setEditingAddress] = useState(false);
+  const [addressValue, setAddressValue] = useState("");
 
   const formatCurrency = (value: number | string) => {
     if (!value) return "";
@@ -66,6 +68,7 @@ const CampaignDetail = () => {
     if (campaign) {
       setEngagementFee(campaign.engagement_fee ? formatCurrency(campaign.engagement_fee) : "");
       setSuccessFee(campaign.success_fee ? formatCurrency(campaign.success_fee) : "");
+      setAddressValue(campaign.contacts?.address || "");
     }
   }, [campaign]);
 
@@ -448,6 +451,48 @@ const CampaignDetail = () => {
     }
   };
 
+  // Address mutation
+  const updateAddressMutation = useMutation({
+    mutationFn: async (newAddress: string) => {
+      const { data, error } = await supabase
+        .from("contacts")
+        .update({ address: newAddress || null })
+        .eq("id", campaign?.contacts?.id)
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
+      setEditingAddress(false);
+      toast({
+        title: "Address Updated",
+        description: "The home address has been successfully updated.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update the address.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEditAddress = () => {
+    setEditingAddress(true);
+  };
+
+  const handleSaveAddress = () => {
+    updateAddressMutation.mutate(addressValue.trim());
+  };
+
+  const handleCancelAddressEdit = () => {
+    setEditingAddress(false);
+    setAddressValue(campaign?.contacts?.address || "");
+  };
+
   const handleCurrencyInput = (value: string, setter: (val: string) => void) => {
     // Remove any non-digit characters
     const numericValue = value.replace(/[^\d]/g, '');
@@ -562,12 +607,56 @@ const CampaignDetail = () => {
                 </Badge>
               </div>
             </div>
-            {campaign.contacts?.address && (
-              <div className="mt-4 pt-4 border-t border-border">
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">Home Address</h4>
-                <p className="text-foreground">{campaign.contacts.address}</p>
+            <div className="mt-4 pt-4 border-t border-border">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium text-sm text-muted-foreground">Home Address</h4>
+                {!editingAddress && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleEditAddress}
+                    className="flex items-center gap-1 h-6 px-2"
+                  >
+                    <Edit3 className="h-3 w-3" />
+                    Edit
+                  </Button>
+                )}
               </div>
-            )}
+              {editingAddress ? (
+                <div className="space-y-3">
+                  <Textarea
+                    value={addressValue}
+                    onChange={(e) => setAddressValue(e.target.value)}
+                    placeholder="Enter home address..."
+                    className="min-h-[80px] resize-none"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleSaveAddress}
+                      disabled={updateAddressMutation.isPending}
+                      className="flex items-center gap-1"
+                    >
+                      <Save className="h-3 w-3" />
+                      {updateAddressMutation.isPending ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelAddressEdit}
+                      className="flex items-center gap-1"
+                    >
+                      <X className="h-3 w-3" />
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-foreground whitespace-pre-wrap">
+                  {addressValue || <span className="text-muted-foreground italic">No address entered</span>}
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
