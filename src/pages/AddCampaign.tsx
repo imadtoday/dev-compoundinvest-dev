@@ -191,28 +191,7 @@ const AddCampaign = () => {
 
   const createCampaignMutation = useMutation({
     mutationFn: async (campaignData: any) => {
-      // First create the campaign
-      const { data: campaign, error: campaignError } = await supabase
-        .from('campaigns')
-        .insert({
-          name: campaignData.name,
-          contact_id: campaignData.contact_id,
-          status: campaignData.status,
-          engagement_fee: campaignData.engagement_fee,
-          success_fee: campaignData.success_fee,
-          notes: campaignData.notes || null,
-          calendly_event_type: null,
-          calendly_payload_json: {},
-          answers: {},
-          answered_questions: [],
-          skipped_questions: []
-        })
-        .select()
-        .single();
-
-      if (campaignError) throw campaignError;
-
-      // Update campaign with its URL - use configured custom domain for this project
+      // Determine base domain for this project and create the campaign with a client-generated id
       const getProjectDomain = () => {
         const hostname = window.location.hostname;
         
@@ -224,14 +203,30 @@ const AddCampaign = () => {
         // This is the dev Lovable project, so use dev custom domain
         return 'https://dev-ci.datatube.app';
       };
-      
-      const campaignUrl = `${getProjectDomain()}/campaigns/${campaign.id}`;
-      const { error: updateError } = await supabase
-        .from('campaigns')
-        .update({ campaign_url: campaignUrl })
-        .eq('id', campaign.id);
 
-      if (updateError) throw updateError;
+      const newCampaignId = crypto.randomUUID();
+      const campaignUrl = `${getProjectDomain()}/campaigns/${newCampaignId}`;
+
+      // Create the campaign with precomputed URL
+      const { data: campaign, error: campaignError } = await supabase
+        .from('campaigns')
+        .insert({
+          id: newCampaignId,
+          name: campaignData.name,
+          contact_id: campaignData.contact_id,
+          status: campaignData.status,
+          engagement_fee: campaignData.engagement_fee,
+          success_fee: campaignData.success_fee,
+          notes: campaignData.notes || null,
+          calendly_event_type: null,
+          calendly_payload_json: {},
+          answers: {},
+          answered_questions: [],
+          skipped_questions: [],
+          campaign_url: campaignUrl
+        })
+        .select()
+        .single();
 
       if (campaignError) throw campaignError;
 
