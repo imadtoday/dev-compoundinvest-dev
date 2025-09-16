@@ -212,20 +212,30 @@ const AddCampaign = () => {
 
       if (campaignError) throw campaignError;
 
-      // Update campaign with its URL - use custom domain based on environment
-      const getCustomDomain = () => {
+      // Update campaign with its URL - detect configured custom domain
+      const getProjectDomain = () => {
         const hostname = window.location.hostname;
-        // If on Lovable preview, determine environment and return appropriate custom domain
-        if (hostname.includes('lovableproject.com') || hostname.includes('lovable.app')) {
-          // For dev environment, use dev custom domain
-          return 'https://dev-ci.datatube.app';
-          // In production, this would return 'https://compoundinvest.datatube.app'
+        
+        // If already on a custom domain, use it
+        if (!hostname.includes('lovableproject.com') && !hostname.includes('lovable.app')) {
+          return window.location.origin;
         }
-        // If already on custom domain, use current origin
-        return window.location.origin;
+        
+        // If on Lovable preview, determine which custom domain is configured
+        // Check document referrer or other indicators to determine the intended domain
+        const referrer = document.referrer;
+        if (referrer.includes('dev-ci.datatube.app')) {
+          return 'https://dev-ci.datatube.app';
+        } else if (referrer.includes('compoundinvest.datatube.app')) {
+          return 'https://compoundinvest.datatube.app';
+        }
+        
+        // Default fallback - you can adjust this based on your project setup
+        // For dev repo, this would be dev domain; for prod repo, this would be prod domain
+        return 'https://dev-ci.datatube.app';
       };
       
-      const campaignUrl = `${getCustomDomain()}/campaigns/${campaign.id}`;
+      const campaignUrl = `${getProjectDomain()}/campaigns/${campaign.id}`;
       const { error: updateError } = await supabase
         .from('campaigns')
         .update({ campaign_url: campaignUrl })
