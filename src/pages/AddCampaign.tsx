@@ -212,8 +212,20 @@ const AddCampaign = () => {
 
       if (campaignError) throw campaignError;
 
-      // Update campaign with its URL
-      const campaignUrl = `https://dev-ci.datatube.app/campaigns/${campaign.id}`;
+      // Update campaign with its URL - use custom domain based on environment
+      const getCustomDomain = () => {
+        const hostname = window.location.hostname;
+        // If on Lovable preview, determine environment and return appropriate custom domain
+        if (hostname.includes('lovableproject.com') || hostname.includes('lovable.app')) {
+          // For dev environment, use dev custom domain
+          return 'https://dev-ci.datatube.app';
+          // In production, this would return 'https://compoundinvest.datatube.app'
+        }
+        // If already on custom domain, use current origin
+        return window.location.origin;
+      };
+      
+      const campaignUrl = `${getCustomDomain()}/campaigns/${campaign.id}`;
       const { error: updateError } = await supabase
         .from('campaigns')
         .update({ campaign_url: campaignUrl })
