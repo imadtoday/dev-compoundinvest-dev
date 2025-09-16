@@ -212,26 +212,16 @@ const AddCampaign = () => {
 
       if (campaignError) throw campaignError;
 
-      // Update campaign with its URL - detect configured custom domain
+      // Update campaign with its URL - use configured custom domain for this project
       const getProjectDomain = () => {
         const hostname = window.location.hostname;
         
-        // If already on a custom domain, use it
+        // If already on custom domain, use it
         if (!hostname.includes('lovableproject.com') && !hostname.includes('lovable.app')) {
           return window.location.origin;
         }
         
-        // If on Lovable preview, determine which custom domain is configured
-        // Check document referrer or other indicators to determine the intended domain
-        const referrer = document.referrer;
-        if (referrer.includes('dev-ci.datatube.app')) {
-          return 'https://dev-ci.datatube.app';
-        } else if (referrer.includes('compoundinvest.datatube.app')) {
-          return 'https://compoundinvest.datatube.app';
-        }
-        
-        // Default fallback - you can adjust this based on your project setup
-        // For dev repo, this would be dev domain; for prod repo, this would be prod domain
+        // This is the dev Lovable project, so use dev custom domain
         return 'https://dev-ci.datatube.app';
       };
       
