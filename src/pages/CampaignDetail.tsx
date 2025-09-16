@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { formatInTimeZone } from "date-fns-tz";
 import { Separator } from "@/components/ui/separator";
@@ -27,6 +28,10 @@ const CampaignDetail = () => {
   const [successFee, setSuccessFee] = useState("");
   const [editingAddress, setEditingAddress] = useState(false);
   const [addressValue, setAddressValue] = useState("");
+  
+  // Proposal creation state
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [isCreatingProposal, setIsCreatingProposal] = useState(false);
 
   const formatCurrency = (value: number | string) => {
     if (!value) return "";
@@ -493,6 +498,71 @@ const CampaignDetail = () => {
     setAddressValue(campaign?.contacts?.address || "");
   };
 
+  // Proposal creation handlers
+  const proposalTemplates = [
+    { id: 'template1', name: 'Standard Investment Proposal' },
+    { id: 'template2', name: 'Premium Investment Package' },
+    { id: 'template3', name: 'Custom Investment Strategy' }
+  ];
+
+  const handleCreateProposal = async () => {
+    if (!selectedTemplate) {
+      toast({
+        title: "Error",
+        description: "Please select a proposal template",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreatingProposal(true);
+    
+    try {
+      // TODO: Replace with your actual n8n webhook URL
+      const webhookUrl = 'https://your-n8n-instance.com/webhook/create-proposal';
+      
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          campaignId: campaign?.id,
+          contactId: campaign?.contact_id,
+          templateId: selectedTemplate,
+          campaignData: {
+            name: campaign?.name,
+            contactName: `${campaign?.contacts?.first_name} ${campaign?.contacts?.last_name}`,
+            contactEmail: campaign?.contacts?.email,
+            engagementFee: campaign?.engagement_fee,
+            successFee: campaign?.success_fee,
+            answers: answers
+          },
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Proposal creation workflow has been triggered successfully",
+        });
+        setSelectedTemplate('');
+      } else {
+        throw new Error('Failed to trigger workflow');
+      }
+    } catch (error) {
+      console.error('Error creating proposal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create proposal. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingProposal(false);
+    }
+  };
+
   const handleCurrencyInput = (value: string, setter: (val: string) => void) => {
     // Remove any non-digit characters
     const numericValue = value.replace(/[^\d]/g, '');
@@ -657,6 +727,51 @@ const CampaignDetail = () => {
                 </p>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Proposal Creation */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Create Proposal
+            </CardTitle>
+            <CardDescription>
+              Select a template and create a proposal for this campaign
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-end">
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Proposal Template
+                </label>
+                <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a proposal template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {proposalTemplates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button 
+                onClick={handleCreateProposal}
+                disabled={!selectedTemplate || isCreatingProposal}
+                className="flex items-center gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                {isCreatingProposal ? 'Creating...' : 'Create Proposal'}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              This will trigger an automated workflow to create a proposal using the selected template and campaign data.
+            </p>
           </CardContent>
         </Card>
 
