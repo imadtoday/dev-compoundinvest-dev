@@ -500,9 +500,8 @@ const CampaignDetail = () => {
 
   // Proposal creation handlers
   const proposalTemplates = [
-    { id: 'template1', name: 'Standard Investment Proposal' },
-    { id: 'template2', name: 'Premium Investment Package' },
-    { id: 'template3', name: 'Custom Investment Strategy' }
+    { id: '679719', name: 'Compound Invest Proposal (Original)' },
+    { id: '678717', name: 'CompoundInvest Proposal (Melbourne)' }
   ];
 
   const handleCreateProposal = async () => {
@@ -518,27 +517,29 @@ const CampaignDetail = () => {
     setIsCreatingProposal(true);
     
     try {
-      const webhookUrl = 'https://datatube.app.n8n.cloud/webhook-test/faf7ed5b-7569-4750-b59a-9b488b67ebcd';
+      const selectedTemplateInfo = proposalTemplates.find(t => t.id === selectedTemplate);
       
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const data = {
+        campaignId: campaign?.id,
+        contactId: campaign?.contact_id,
+        template_id: selectedTemplate,
+        template_name: selectedTemplateInfo?.name,
+        campaignData: {
+          name: campaign?.name,
+          contactName: `${campaign?.contacts?.first_name} ${campaign?.contacts?.last_name}`,
+          contactEmail: campaign?.contacts?.email,
+          engagementFee: campaign?.engagement_fee,
+          successFee: campaign?.success_fee,
+          answers: answers
         },
-        body: JSON.stringify({
-          campaignId: campaign?.id,
-          contactId: campaign?.contact_id,
-          templateId: selectedTemplate,
-          campaignData: {
-            name: campaign?.name,
-            contactName: `${campaign?.contacts?.first_name} ${campaign?.contacts?.last_name}`,
-            contactEmail: campaign?.contacts?.email,
-            engagementFee: campaign?.engagement_fee,
-            successFee: campaign?.success_fee,
-            answers: answers
-          },
-          timestamp: new Date().toISOString(),
-        }),
+        timestamp: new Date().toISOString(),
+      };
+
+      const webhookUrl = 'https://datatube.app.n8n.cloud/webhook-test/faf7ed5b-7569-4750-b59a-9b488b67ebcd';
+      const queryParams = new URLSearchParams({ data: JSON.stringify(data) });
+      
+      const response = await fetch(`${webhookUrl}?${queryParams}`, {
+        method: 'GET',
       });
 
       if (response.ok) {
