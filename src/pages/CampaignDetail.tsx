@@ -518,8 +518,7 @@ const CampaignDetail = () => {
     setIsCreatingProposal(true);
     
     try {
-      // TODO: Replace with your actual n8n webhook URL
-      const webhookUrl = 'https://your-n8n-instance.com/webhook/create-proposal';
+      const webhookUrl = 'https://datatube.app.n8n.cloud/webhook-test/faf7ed5b-7569-4750-b59a-9b488b67ebcd';
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
