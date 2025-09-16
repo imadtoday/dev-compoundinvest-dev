@@ -213,7 +213,7 @@ const AddCampaign = () => {
       if (campaignError) throw campaignError;
 
       // Update campaign with its URL
-      const campaignUrl = `${window.location.origin}/campaigns/${campaign.id}`;
+      const campaignUrl = `https://dev-ci.datatube.app/campaigns/${campaign.id}`;
       const { error: updateError } = await supabase
         .from('campaigns')
         .update({ campaign_url: campaignUrl })
