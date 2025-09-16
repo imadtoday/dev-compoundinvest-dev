@@ -204,8 +204,10 @@ const AddCampaign = () => {
         return 'https://dev-ci.datatube.app';
       };
 
+      const domain = getProjectDomain();
       const newCampaignId = crypto.randomUUID();
-      const campaignUrl = `${getProjectDomain()}/campaigns/${newCampaignId}`;
+      const campaignUrl = `${domain}/campaigns/${newCampaignId}`;
+      console.log('AddCampaign domain resolution', { hostname: window.location.hostname, origin: window.location.origin, resolvedDomain: domain, campaignUrl });
 
       // Create the campaign with precomputed URL
       const { data: campaign, error: campaignError } = await supabase
@@ -228,6 +230,7 @@ const AddCampaign = () => {
         .select()
         .single();
 
+      console.log('AddCampaign insert result', { campaignId: newCampaignId, campaignUrl, error: campaignError, data: campaign });
       if (campaignError) throw campaignError;
 
       // Then create campaign answers for any provided answers
