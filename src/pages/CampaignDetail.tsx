@@ -519,24 +519,20 @@ const CampaignDetail = () => {
     try {
       const selectedTemplateInfo = proposalTemplates.find(t => t.id === selectedTemplate);
       
-      const data = {
-        campaignId: campaign?.id,
-        contactId: campaign?.contact_id,
-        template_id: selectedTemplate,
-        template_name: selectedTemplateInfo?.name,
-        campaignData: {
-          name: campaign?.name,
-          contactName: `${campaign?.contacts?.first_name} ${campaign?.contacts?.last_name}`,
-          contactEmail: campaign?.contacts?.email,
-          engagementFee: campaign?.engagement_fee,
-          successFee: campaign?.success_fee,
-          answers: answers
-        },
-        timestamp: new Date().toISOString(),
-      };
-
       const webhookUrl = 'https://datatube.app.n8n.cloud/webhook-test/faf7ed5b-7569-4750-b59a-9b488b67ebcd';
-      const queryParams = new URLSearchParams({ data: JSON.stringify(data) });
+      const queryParams = new URLSearchParams({
+        campaignId: campaign?.id || '',
+        contactId: campaign?.contact_id || '',
+        template_id: selectedTemplate,
+        template_name: selectedTemplateInfo?.name || '',
+        name: campaign?.name || '',
+        contactName: `${campaign?.contacts?.first_name} ${campaign?.contacts?.last_name}`,
+        contactEmail: campaign?.contacts?.email || '',
+        engagementFee: campaign?.engagement_fee?.toString() || '',
+        successFee: campaign?.success_fee?.toString() || '',
+        answers: JSON.stringify(answers),
+        timestamp: new Date().toISOString(),
+      });
       
       const response = await fetch(`${webhookUrl}?${queryParams}`, {
         method: 'GET',
