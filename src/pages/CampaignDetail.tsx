@@ -839,8 +839,8 @@ const CampaignDetail = () => {
                       </Badge>
                     </div>
                     
-                    {proposal.proposal_preview_url && (
-                      <div>
+                    <div className="flex flex-wrap gap-4">
+                      {proposal.proposal_preview_url && (
                         <a 
                           href={proposal.proposal_preview_url}
                           target="_blank"
@@ -850,8 +850,20 @@ const CampaignDetail = () => {
                           <FileText className="h-4 w-4" />
                           View Proposal
                         </a>
-                      </div>
-                    )}
+                      )}
+                      
+                      {proposal.proposal_editor_url && (
+                        <a 
+                          href={proposal.proposal_editor_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-primary hover:underline text-sm"
+                        >
+                          <Edit3 className="h-4 w-4" />
+                          Edit Proposal
+                        </a>
+                      )}
+                    </div>
                     
                     {proposal.betterproposals_proposal_id && (
                       <p className="text-xs text-muted-foreground">
