@@ -565,6 +565,38 @@ const CampaignDetail = () => {
       return;
     }
 
+    // Validate required fields
+    const missingFields = [];
+    
+    // Check campaign fields - using contact address as home address
+    if (!campaign?.contacts?.address) missingFields.push("Home address");
+    if (!campaign?.engagement_fee) missingFields.push("Engagement Fee");
+    if (!campaign?.success_fee) missingFields.push("Success Fee");
+    
+    // Check contact fields
+    if (!campaign?.contacts?.first_name) missingFields.push("Contact first name");
+    if (!campaign?.contacts?.last_name) missingFields.push("Contact last name");
+    if (!campaign?.contacts?.email) missingFields.push("Contact email");
+    if (!campaign?.contacts?.phone_e164) missingFields.push("Contact phone");
+    
+    // Check specific answers (questions 1, 2, 6, and 7)
+    const requiredQuestions = [1, 2, 6, 7];
+    requiredQuestions.forEach(questionNumber => {
+      const answer = answers.find(a => a.questions?.ordinal === questionNumber);
+      if (!answer?.interpreted_value || answer.interpreted_value.trim() === '') {
+        missingFields.push(`Answer to question ${questionNumber}`);
+      }
+    });
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "Missing Required Information",
+        description: `Please make sure the following fields are filled out before attempting to create a proposal: ${missingFields.join(', ')}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsCreatingProposal(true);
     
     try {
