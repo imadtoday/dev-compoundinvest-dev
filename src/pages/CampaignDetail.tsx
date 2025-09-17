@@ -136,6 +136,28 @@ const CampaignDetail = () => {
     enabled: !!id,
   });
 
+  // Fetch existing proposals for this campaign
+  const { data: proposals = [] } = useQuery({
+    queryKey: ["campaign-proposals", id],
+    queryFn: async () => {
+      if (!id) return [];
+      
+      // Use a raw SQL query since proposals table isn't in types
+      const { data, error } = await supabase
+        .from('proposals' as any)
+        .select('*')
+        .eq('campaign_id', id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching proposals:', error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status.toLowerCase()) {
       case 'complete':
@@ -504,6 +526,26 @@ const CampaignDetail = () => {
     { id: '678717', name: 'CompoundInvest Proposal (Melbourne)' }
   ];
 
+  const getTemplateName = (templateId: string) => {
+    const template = proposalTemplates.find(t => t.id === templateId);
+    return template?.name || `Template ${templateId}`;
+  };
+
+  const getProposalStatusBadgeVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'accepted':
+        return 'default';
+      case 'sent':
+        return 'secondary';
+      case 'draft':
+        return 'outline';
+      case 'declined':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
+  };
+
   const handleCreateProposal = async () => {
     if (!selectedTemplate) {
       toast({
@@ -725,6 +767,62 @@ const CampaignDetail = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Existing Proposals */}
+        {proposals.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Existing Proposals
+              </CardTitle>
+              <CardDescription>
+                Proposals that have been created for this campaign
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {proposals.map((proposal: any) => (
+                  <div key={proposal.id} className="border border-border rounded-lg p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <h4 className="font-medium text-foreground">
+                          {getTemplateName(proposal.template_id)}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          Created: {formatSydneyTime(proposal.created_at)}
+                        </p>
+                      </div>
+                      <Badge variant={getProposalStatusBadgeVariant(proposal.proposal_status)}>
+                        {proposal.proposal_status}
+                      </Badge>
+                    </div>
+                    
+                    {proposal.proposal_preview_url && (
+                      <div>
+                        <a 
+                          href={proposal.proposal_preview_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-primary hover:underline text-sm"
+                        >
+                          <FileText className="h-4 w-4" />
+                          View Proposal
+                        </a>
+                      </div>
+                    )}
+                    
+                    {proposal.betterproposals_proposal_id && (
+                      <p className="text-xs text-muted-foreground">
+                        Proposal ID: {proposal.betterproposals_proposal_id}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Proposal Creation */}
         <Card>
