@@ -522,8 +522,17 @@ const CampaignDetail = () => {
 
   // Proposal creation handlers
   const proposalTemplates = [
-    { id: '679719', name: 'Compound Invest Proposal (Original)' },
-    { id: '678717', name: 'CompoundInvest Proposal (Melbourne)' }
+    { id: '695126', name: 'CompoundInvest Proposal (Brisbane)' },
+    { id: '695124', name: 'CompoundInvest Proposal (Central Coast + Newcastle)' },
+    { id: '695123', name: 'CompoundInvest Proposal (Central Coast)' },
+    { id: '695121', name: 'CompoundInvest Proposal (Geelong)' },
+    { id: '695120', name: 'CompoundInvest Proposal (Melbourne + Central Coast + Newcastle)' },
+    { id: '695118', name: 'CompoundInvest Proposal (Melbourne + Central Coast)' },
+    { id: '695119', name: 'CompoundInvest Proposal (Melbourne + Geelong)' },
+    { id: '695117', name: 'CompoundInvest Proposal (Melbourne + Newcastle)' },
+    { id: '678717', name: 'CompoundInvest Proposal (Melbourne)' },
+    { id: '695122', name: 'CompoundInvest Proposal (Newcastle)' },
+    { id: '695125', name: 'CompoundInvest Proposal (Sydney)' }
   ];
 
   const getTemplateName = (templateId: string) => {
