@@ -662,17 +662,21 @@ const CampaignDetail = () => {
     try {
       const webhookUrl = 'https://datatube.app.n8n.cloud/webhook-test/e85ae36f-7591-459f-a4ef-15ab01ccbadf';
       
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          campaignId: campaign?.id,
-          contactId: campaign?.contact_id,
-          timestamp: new Date().toISOString(),
-        }),
+      // Try GET method with query parameters like the proposal creation
+      const queryParams = new URLSearchParams({
+        campaignId: campaign?.id || '',
+        contactId: campaign?.contact_id || '',
+        timestamp: new Date().toISOString(),
       });
+      
+      console.log('Triggering webhook with URL:', `${webhookUrl}?${queryParams}`);
+      
+      const response = await fetch(`${webhookUrl}?${queryParams}`, {
+        method: 'GET',
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response statusText:', response.statusText);
 
       if (response.ok) {
         toast({
@@ -680,13 +684,15 @@ const CampaignDetail = () => {
           description: "Purchasing entity details request has been sent",
         });
       } else {
-        throw new Error('Failed to trigger webhook');
+        const responseText = await response.text();
+        console.log('Response body:', responseText);
+        throw new Error(`Webhook failed with status ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error triggering webhook:', error);
       toast({
         title: "Error",
-        description: "Failed to send request. Please try again.",
+        description: `Failed to send request: ${error.message}`,
         variant: "destructive",
       });
     } finally {
