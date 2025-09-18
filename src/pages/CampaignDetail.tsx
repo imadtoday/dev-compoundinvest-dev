@@ -32,6 +32,7 @@ const CampaignDetail = () => {
   // Proposal creation state
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
+  const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
 
   const formatCurrency = (value: number | string) => {
     if (!value) return "";
@@ -655,6 +656,44 @@ const CampaignDetail = () => {
     }
   };
 
+  const handleAskPurchasingEntity = async () => {
+    setIsAskingPurchasingEntity(true);
+    
+    try {
+      const webhookUrl = 'https://datatube.app.n8n.cloud/webhook-test/e85ae36f-7591-459f-a4ef-15ab01ccbadf';
+      
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          campaignId: campaign?.id,
+          contactId: campaign?.contact_id,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Purchasing entity details request has been sent",
+        });
+      } else {
+        throw new Error('Failed to trigger webhook');
+      }
+    } catch (error) {
+      console.error('Error triggering webhook:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAskingPurchasingEntity(false);
+    }
+  };
+
   const formatSydneyTime = (date: string) => {
     return formatInTimeZone(new Date(date), 'Australia/Sydney', 'MMM d, yyyy h:mm a');
   };
@@ -756,6 +795,18 @@ const CampaignDetail = () => {
                 </Badge>
               </div>
             </div>
+            
+            <div className="mt-4 pt-4 border-t border-border">
+              <Button
+                onClick={handleAskPurchasingEntity}
+                variant="outline"
+                className="mb-4"
+                disabled={isAskingPurchasingEntity}
+              >
+                {isAskingPurchasingEntity ? "Sending..." : "Ask for Purchasing Entity Details"}
+              </Button>
+            </div>
+            
             <div className="mt-4 pt-4 border-t border-border">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium text-sm text-muted-foreground">Home Address</h4>
