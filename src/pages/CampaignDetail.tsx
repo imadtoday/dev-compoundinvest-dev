@@ -662,17 +662,20 @@ const CampaignDetail = () => {
     try {
       const webhookUrl = 'https://datatube.app.n8n.cloud/webhook/handleAskPurchasingEntity';
       
-      // Try GET method with query parameters like the proposal creation
-      const queryParams = new URLSearchParams({
-        campaignId: campaign?.id || '',
-        contactId: campaign?.contact_id || '',
+      const webhookData = {
+        campaignId: campaign?.id,
+        contactId: campaign?.contact_id,
         timestamp: new Date().toISOString(),
-      });
+      };
       
-      console.log('Triggering webhook with URL:', `${webhookUrl}?${queryParams}`);
+      console.log('Triggering webhook with data:', webhookData);
       
-      const response = await fetch(`${webhookUrl}?${queryParams}`, {
-        method: 'GET',
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(webhookData),
       });
 
       console.log('Response status:', response.status);
