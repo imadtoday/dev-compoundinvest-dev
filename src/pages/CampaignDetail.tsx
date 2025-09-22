@@ -660,11 +660,19 @@ const CampaignDetail = () => {
     setIsAskingPurchasingEntity(true);
     
     try {
-      const webhookUrl = 'https://datatube.app.n8n.cloud/webhook/handleAskPurchasingEntity';
+      const webhookUrl = 'https://datatube.app.n8n.cloud/webhook-test/handleAskPurchasingEntity';
       
       const webhookData = {
         campaignId: campaign?.id,
-        contactId: campaign?.contact_id,
+        campaign_name: campaign?.name,
+        contact: {
+          id: campaign?.contacts?.id,
+          first_name: campaign?.contacts?.first_name,
+          last_name: campaign?.contacts?.last_name,
+          email: campaign?.contacts?.email,
+          phone: campaign?.contacts?.phone_e164,
+          address: campaign?.contacts?.address
+        },
         timestamp: new Date().toISOString(),
       };
       
