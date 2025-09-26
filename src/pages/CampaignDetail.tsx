@@ -660,30 +660,27 @@ const CampaignDetail = () => {
     setIsAskingPurchasingEntity(true);
     
     try {
-      const webhookUrl = 'https://datatube.app.n8n.cloud/webhook-test/handleAskPurchasingEntity';
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook-test/handleAskPurchasingEntity';
       
-      const webhookData = {
-        campaignId: campaign?.id,
-        campaign_name: campaign?.name,
-        contact: {
-          id: campaign?.contacts?.id,
-          first_name: campaign?.contacts?.first_name,
-          last_name: campaign?.contacts?.last_name,
-          email: campaign?.contacts?.email,
-          phone: campaign?.contacts?.phone_e164,
-          address: campaign?.contacts?.address
-        },
+      // Create URL with query parameters
+      const params = new URLSearchParams({
+        campaignId: campaign?.id || '',
+        campaign_name: campaign?.name || '',
+        contact_id: campaign?.contacts?.id || '',
+        contact_first_name: campaign?.contacts?.first_name || '',
+        contact_last_name: campaign?.contacts?.last_name || '',
+        contact_email: campaign?.contacts?.email || '',
+        contact_phone: campaign?.contacts?.phone_e164 || '',
+        contact_address: campaign?.contacts?.address || '',
         timestamp: new Date().toISOString(),
-      };
+      });
+
+      const webhookUrl = `${baseUrl}?${params.toString()}`;
       
-      console.log('Triggering webhook with data:', webhookData);
+      console.log('Triggering GET webhook with URL:', webhookUrl);
       
       const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(webhookData),
+        method: 'GET',
       });
 
       console.log('Response status:', response.status);
