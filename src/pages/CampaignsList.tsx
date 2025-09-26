@@ -112,7 +112,8 @@ const CampaignsList = () => {
                     <TableRow className="bg-muted/50">
                       <TableHead className="font-semibold">Campaign Name</TableHead>
                       <TableHead className="font-semibold">Contact</TableHead>
-                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="font-semibold">Workflow</TableHead>
+                      <TableHead className="font-semibold">Workflow Status</TableHead>
                       <TableHead className="font-semibold">Created</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -147,8 +148,25 @@ const CampaignsList = () => {
                           <Badge 
                             className={`font-medium px-3 py-1 transition-colors duration-200 ${getStatusBadgeStyle(campaign.status)}`}
                           >
-                            {campaign.status.replace('_', ' ').toUpperCase()}
+                            {campaign.status === 'workflow_1' ? 'Workflow 1' : 
+                             campaign.status === 'workflow_2' ? 'Workflow 2' : 
+                             campaign.status.replace('_', ' ').toUpperCase()}
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {campaign.status === 'workflow_1' && (campaign as any).workflow_1_status && (
+                            <Badge variant="secondary" className="font-medium px-3 py-1">
+                              {((campaign as any).workflow_1_status as string).replace('_', ' ').toUpperCase()}
+                            </Badge>
+                          )}
+                          {campaign.status === 'workflow_2' && (campaign as any).workflow_2_status && (
+                            <Badge variant="secondary" className="font-medium px-3 py-1">
+                              {((campaign as any).workflow_2_status as string).replace('_', ' ').toUpperCase()}
+                            </Badge>
+                          )}
+                          {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && (
+                            <span className="text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {formatInTimeZone(
@@ -159,13 +177,13 @@ const CampaignsList = () => {
                         </TableCell>
                       </TableRow>
                     ))}
-                    {filteredCampaigns?.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
-                          No campaigns found matching your criteria
-                        </TableCell>
-                      </TableRow>
-                    )}
+                     {filteredCampaigns?.length === 0 && (
+                       <TableRow>
+                         <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                           No campaigns found matching your criteria
+                         </TableCell>
+                       </TableRow>
+                     )}
                   </TableBody>
                 </Table>
               </div>
