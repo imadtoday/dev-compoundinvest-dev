@@ -803,10 +803,28 @@ const CampaignDetail = () => {
                 )}
               </div>
               <div>
-                <h4 className="font-medium text-sm text-muted-foreground">Status</h4>
+                <h4 className="font-medium text-sm text-muted-foreground">Workflow</h4>
                 <Badge variant={getStatusBadgeVariant(campaign.status)}>
-                  {campaign.status}
+                  {campaign.status === 'workflow_1' ? 'Workflow 1' : 
+                   campaign.status === 'workflow_2' ? 'Workflow 2' : 
+                   campaign.status.replace('_', ' ').toUpperCase()}
                 </Badge>
+              </div>
+              <div>
+                <h4 className="font-medium text-sm text-muted-foreground">Workflow Status</h4>
+                {campaign.status === 'workflow_1' && (campaign as any).workflow_1_status && (
+                  <Badge variant="secondary" className="font-medium px-3 py-1">
+                    {((campaign as any).workflow_1_status as string).replace('_', ' ').toUpperCase()}
+                  </Badge>
+                )}
+                {campaign.status === 'workflow_2' && (campaign as any).workflow_2_status && (
+                  <Badge variant="secondary" className="font-medium px-3 py-1">
+                    {((campaign as any).workflow_2_status as string).replace('_', ' ').toUpperCase()}
+                  </Badge>
+                )}
+                {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && (
+                  <span className="text-muted-foreground">-</span>
+                )}
               </div>
             </div>
             
