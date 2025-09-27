@@ -660,7 +660,7 @@ const CampaignDetail = () => {
     setIsAskingPurchasingEntity(true);
     
     try {
-      const baseUrl = 'https://datatube.app.n8n.cloud/webhook-test/handleAskPurchasingEntity';
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/handleAskPurchasingEntity';
       
       // Create URL with query parameters
       const params = new URLSearchParams({
