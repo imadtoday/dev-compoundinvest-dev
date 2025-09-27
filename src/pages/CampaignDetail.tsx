@@ -603,7 +603,7 @@ const CampaignDetail = () => {
     try {
       const selectedTemplateInfo = proposalTemplates.find(t => t.id === selectedTemplate);
       
-      const webhookUrl = 'https://datatube.app.n8n.cloud/webhook-test/faf7ed5b-7569-4750-b59a-9b488b67ebcd';
+      const webhookUrl = 'https://datatube.app.n8n.cloud/webhook/faf7ed5b-7569-4750-b59a-9b488b67ebcd';
       const queryParams = new URLSearchParams({
         campaignId: campaign?.id || '',
         contactId: campaign?.contact_id || '',
