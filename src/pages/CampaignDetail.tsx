@@ -103,6 +103,8 @@ const CampaignDetail = () => {
     enabled: !!id
   });
 
+  console.log('Component answers:', answers);
+
   const { data: messages } = useQuery({
     queryKey: ['campaign-messages', id],
     queryFn: async () => {
