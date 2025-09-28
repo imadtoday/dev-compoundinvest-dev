@@ -582,12 +582,15 @@ const CampaignDetail = () => {
     
     // Check specific answers (questions 1, 2, 6, and 7)
     const requiredQuestions = [1, 2, 6, 7];
+    console.log('Available answers:', answers.map(a => ({ ordinal: a.questions?.ordinal, value: a.interpreted_value })));
     requiredQuestions.forEach(questionNumber => {
       const answer = answers.find(a => a.questions?.ordinal === questionNumber);
+      console.log(`Question ${questionNumber} answer:`, answer);
       if (!answer?.interpreted_value || answer.interpreted_value.trim() === '') {
         missingFields.push(`Answer to question ${questionNumber}`);
       }
     });
+    console.log('Missing fields:', missingFields);
     
     if (missingFields.length > 0) {
       toast({
