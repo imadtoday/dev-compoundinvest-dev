@@ -633,6 +633,8 @@ const CampaignDetail = () => {
           description: "Proposal creation workflow has been triggered successfully",
         });
         setSelectedTemplate('');
+        // Invalidate and refetch proposals to show the new proposal
+        queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
       } else {
         throw new Error('Failed to trigger workflow');
       }
