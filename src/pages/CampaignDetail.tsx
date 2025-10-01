@@ -984,7 +984,7 @@ const CampaignDetail = () => {
                           className="inline-flex items-center gap-2 text-primary hover:underline text-sm"
                         >
                           <Edit3 className="h-4 w-4" />
-                          Edit Proposal
+                          Edit/Send Proposal
                         </a>
                       )}
                     </div>
