@@ -161,6 +161,35 @@ const CampaignDetail = () => {
     enabled: !!id,
   });
 
+  // Realtime updates: refresh proposals when a new one is inserted/updated for this campaign
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel(`proposals-changes-${id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'proposals',
+        filter: `campaign_id=eq.${id}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['campaign-proposals', id] });
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'proposals',
+        filter: `campaign_id=eq.${id}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['campaign-proposals', id] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, queryClient]);
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status.toLowerCase()) {
       case 'complete':
