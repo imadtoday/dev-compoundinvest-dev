@@ -33,6 +33,7 @@ const CampaignDetail = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
   const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
   const formatCurrency = (value: number | string) => {
     if (!value) return "";
@@ -947,19 +948,27 @@ const CampaignDetail = () => {
                     Proposals that have been created for this campaign
                   </CardDescription>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    try {
-                      await fetch('https://datatube.app.n8n.cloud/webhook-test/1928db19-a525-43da-8564-16f4ac4dcb7a');
-                      toast({ title: "Sync initiated", description: "Proposal platform sync has been triggered" });
-                    } catch (error) {
-                      toast({ title: "Sync failed", description: "Failed to sync with proposal platform", variant: "destructive" });
-                    }
-                  }}
-                >
-                  Proposal Platform Sync
-                </Button>
+                <div className="flex flex-col items-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        await fetch('https://datatube.app.n8n.cloud/webhook-test/1928db19-a525-43da-8564-16f4ac4dcb7a');
+                        setLastSyncTime(new Date());
+                        toast({ title: "Sync initiated", description: "Proposal platform sync has been triggered" });
+                      } catch (error) {
+                        toast({ title: "Sync failed", description: "Failed to sync with proposal platform", variant: "destructive" });
+                      }
+                    }}
+                  >
+                    Proposal Platform Sync
+                  </Button>
+                  {lastSyncTime && (
+                    <p className="text-sm text-muted-foreground">
+                      Last synced: {formatInTimeZone(lastSyncTime, 'America/New_York', 'MMM d, yyyy h:mm a')}
+                    </p>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent>
