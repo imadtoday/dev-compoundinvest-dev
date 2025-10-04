@@ -1046,6 +1046,18 @@ const CampaignDetail = () => {
                           Edit/Send Proposal
                         </a>
                       )}
+                      
+                      {proposal.proposal_status === 'sent' && proposal.proposal_url && (
+                        <a 
+                          href={proposal.proposal_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-primary hover:underline text-sm"
+                        >
+                          <FileText className="h-4 w-4" />
+                          Live Proposal
+                        </a>
+                      )}
                     </div>
                     
                     {proposal.betterproposals_proposal_id && (
