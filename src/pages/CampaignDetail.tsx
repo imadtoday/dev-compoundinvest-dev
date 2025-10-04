@@ -168,7 +168,7 @@ const CampaignDetail = () => {
       const { data, error } = await supabase
         .from('cron_sync' as any)
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching cron_sync:', error);
@@ -971,11 +971,15 @@ const CampaignDetail = () => {
                       try {
                         await fetch('https://datatube.app.n8n.cloud/webhook-test/1928db19-a525-43da-8564-16f4ac4dcb7a');
                         
-                        // Update cron_sync table (assumes row with id=1 exists)
+                        // Upsert cron_sync table row
                         const { error } = await supabase
                           .from('cron_sync' as any)
-                          .update({ updated_at: new Date().toISOString() })
-                          .eq('id', '1');
+                          .upsert({ 
+                            id: 1, 
+                            updated_at: new Date().toISOString() 
+                          }, {
+                            onConflict: 'id'
+                          });
                         
                         if (error) {
                           console.error('Error updating cron_sync:', error);
