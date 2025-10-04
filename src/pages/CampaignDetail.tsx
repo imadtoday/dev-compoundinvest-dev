@@ -937,13 +937,30 @@ const CampaignDetail = () => {
         {proposals.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Existing Proposals
-              </CardTitle>
-              <CardDescription>
-                Proposals that have been created for this campaign
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Existing Proposals
+                  </CardTitle>
+                  <CardDescription>
+                    Proposals that have been created for this campaign
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      await fetch('https://datatube.app.n8n.cloud/webhook-test/1928db19-a525-43da-8564-16f4ac4dcb7a');
+                      toast({ title: "Sync initiated", description: "Proposal platform sync has been triggered" });
+                    } catch (error) {
+                      toast({ title: "Sync failed", description: "Failed to sync with proposal platform", variant: "destructive" });
+                    }
+                  }}
+                >
+                  Proposal Platform Sync
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
