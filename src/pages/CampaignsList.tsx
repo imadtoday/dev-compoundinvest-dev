@@ -150,6 +150,7 @@ const CampaignsList = () => {
                           >
                             {campaign.status === 'workflow_1' ? 'Workflow 1' : 
                              campaign.status === 'workflow_2' ? 'Workflow 2' : 
+                             campaign.status === 'workflow_4' ? 'Workflow 4' :
                              campaign.status.replace('_', ' ').toUpperCase()}
                           </Badge>
                         </TableCell>
