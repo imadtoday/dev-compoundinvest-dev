@@ -965,7 +965,7 @@ const CampaignDetail = () => {
                   </Button>
                   {lastSyncTime && (
                     <p className="text-sm text-muted-foreground">
-                      Last synced: {formatInTimeZone(lastSyncTime, 'America/New_York', 'MMM d, yyyy h:mm a')}
+                      Last synced: {formatInTimeZone(lastSyncTime, 'Australia/Sydney', 'MMM d, yyyy h:mm a')}
                     </p>
                   )}
                 </div>
