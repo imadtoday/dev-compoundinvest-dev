@@ -33,7 +33,6 @@ const CampaignDetail = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
   const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
   const formatCurrency = (value: number | string) => {
     if (!value) return "";
@@ -160,6 +159,23 @@ const CampaignDetail = () => {
       return data || [];
     },
     enabled: !!id,
+  });
+
+  // Fetch cron_sync data
+  const { data: cronSync } = useQuery({
+    queryKey: ["cron-sync"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('cron_sync' as any)
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error fetching cron_sync:', error);
+        return null;
+      }
+      return data;
+    },
   });
 
   // Realtime updates: refresh proposals when a new one is inserted/updated for this campaign
@@ -954,7 +970,20 @@ const CampaignDetail = () => {
                     onClick={async () => {
                       try {
                         await fetch('https://datatube.app.n8n.cloud/webhook-test/1928db19-a525-43da-8564-16f4ac4dcb7a');
-                        setLastSyncTime(new Date());
+                        
+                        // Update cron_sync table (assumes row with id=1 exists)
+                        const { error } = await supabase
+                          .from('cron_sync' as any)
+                          .update({ updated_at: new Date().toISOString() })
+                          .eq('id', '1');
+                        
+                        if (error) {
+                          console.error('Error updating cron_sync:', error);
+                        }
+                        
+                        // Refresh the cron_sync query
+                        queryClient.invalidateQueries({ queryKey: ['cron-sync'] });
+                        
                         toast({ title: "Sync initiated", description: "Proposal platform sync has been triggered" });
                       } catch (error) {
                         toast({ title: "Sync failed", description: "Failed to sync with proposal platform", variant: "destructive" });
@@ -963,9 +992,9 @@ const CampaignDetail = () => {
                   >
                     Proposal Platform Sync
                   </Button>
-                  {lastSyncTime && (
+                  {cronSync && (cronSync as any).updated_at && (
                     <p className="text-sm text-muted-foreground">
-                      Last synced: {formatInTimeZone(lastSyncTime, 'Australia/Sydney', 'MMM d, yyyy h:mm a')}
+                      Last synced: {formatInTimeZone(new Date((cronSync as any).updated_at), 'Australia/Sydney', 'MMM d, yyyy h:mm a')}
                     </p>
                   )}
                 </div>
