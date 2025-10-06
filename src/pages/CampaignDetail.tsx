@@ -1,0 +1,698 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams, Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText, CheckCircle2, Circle, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { formatInTimeZone } from "date-fns-tz";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useEffect, useRef } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+
+const CampaignDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [editingAnswer, setEditingAnswer] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [editingNotes, setEditingNotes] = useState<{ [key: string]: boolean }>({});
+  const [editingNoteValues, setEditingNoteValues] = useState<{ [key: string]: string }>({});
+  const [newNoteContent, setNewNoteContent] = useState("");
+  const [editingFees, setEditingFees] = useState(false);
+  const [engagementFee, setEngagementFee] = useState("");
+  const [successFee, setSuccessFee] = useState("");
+  const [editingAddress, setEditingAddress] = useState(false);
+  const [addressValue, setAddressValue] = useState("");
+  
+  // Proposal creation state
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [isCreatingProposal, setIsCreatingProposal] = useState(false);
+  const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
+  
+  // Navigation state
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const formatCurrency = (value: number | string) => {
+    if (!value) return "";
+    const numValue = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+    return numValue.toLocaleString('en-US');
+  };
+
+  const parseCurrency = (value: string) => {
+    return parseFloat(value.replace(/,/g, '')) || 0;
+  };
+
+  const { data: campaign, isLoading } = useQuery({
+    queryKey: ['campaign-detail', id],
+    queryFn: async () => {
+      if (!id) return null;
+      
+      const { data } = await supabase
+        .from('campaigns')
+        .select(`
+          *,
+          contacts (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone_e164,
+            address
+          )
+        `)
+        .eq('id', id)
+        .single();
+      
+      return data;
+    },
+    enabled: !!id
+  });
+
+  useEffect(() => {
+    if (campaign) {
+      setEngagementFee(campaign.engagement_fee ? formatCurrency(campaign.engagement_fee) : "");
+      setSuccessFee(campaign.success_fee ? formatCurrency(campaign.success_fee) : "");
+      setAddressValue(campaign.contacts?.address || "");
+    }
+  }, [campaign]);
+
+  const { data: answers } = useQuery({
+    queryKey: ['campaign-answers', id],
+    queryFn: async () => {
+      if (!id) return [];
+      
+      const { data } = await supabase
+        .from('campaign_answers')
+        .select(`
+          *,
+          questions (
+            id,
+            text,
+            code,
+            section,
+            ordinal,
+            questionnaire_id
+          )
+        `)
+        .eq('campaign_id', id)
+        .order('answered_at', { ascending: true });
+      
+      return data || [];
+    },
+    enabled: !!id
+  });
+
+  const { data: messages } = useQuery({
+    queryKey: ['campaign-messages', id],
+    queryFn: async () => {
+      if (!id) return [];
+      
+      const { data } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('campaign_id', id)
+        .order('sent_at', { ascending: true });
+      
+      return data || [];
+    },
+    enabled: !!id
+  });
+
+  const { data: notes = [] } = useQuery({
+    queryKey: ["campaign-notes", id],
+    queryFn: async () => {
+      if (!id) return [];
+      
+      const { data, error } = await supabase
+        .from("campaign_notes")
+        .select("*")
+        .eq("campaign_id", id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: proposals = [] } = useQuery({
+    queryKey: ["campaign-proposals", id],
+    queryFn: async () => {
+      if (!id) return [];
+      
+      const { data, error } = await supabase
+        .from('proposals' as any)
+        .select('*')
+        .eq('campaign_id', id)
+        .order('created_at', { ascending: false});
+
+      if (error) {
+        console.error('Error fetching proposals:', error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
+  // Filter answers by questionnaire
+  const workflow1Answers = answers?.filter(a => a.questions?.questionnaire_id === '2bf87f22-142d-4db7-aa2c-9dc6d63da39d') || [];
+  const workflow4Answers = answers?.filter(a => a.questions?.questionnaire_id === '134a10e9-3331-4774-9972-2321bf829ec0') || [];
+
+  // Scroll to section
+  const scrollToSection = (sectionId: string) => {
+    sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Get section status
+  const getSectionStatus = (sectionId: string) => {
+    if (sectionId === 'workflow1') return workflow1Answers.length > 0 ? 'complete' : 'incomplete';
+    if (sectionId === 'workflow2') return proposals.length > 0 ? 'complete' : 'incomplete';
+    if (sectionId === 'workflow4') return workflow4Answers.length > 0 ? 'complete' : 'incomplete';
+    if (sectionId === 'notes') return notes.length > 0 ? 'complete' : 'incomplete';
+    if (sectionId === 'transcript') return messages && messages.length > 0 ? 'complete' : 'incomplete';
+    return 'complete';
+  };
+
+  const getSectionIcon = (status: string, isActive: boolean) => {
+    if (status === 'complete') return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+    if (isActive) return <AlertCircle className="h-4 w-4 text-orange-500" />;
+    return <Circle className="h-4 w-4 text-muted-foreground" />;
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'complete': return 'default';
+      case 'new': return 'secondary';
+      case 'in_progress': return 'outline';
+      default: return 'secondary';
+    }
+  };
+
+  const handleCurrencyInput = (value: string, setter: (val: string) => void) => {
+    const numericValue = value.replace(/[^\d]/g, '');
+    if (numericValue) {
+      const formatted = parseInt(numericValue).toLocaleString('en-US');
+      setter(formatted);
+    } else {
+      setter('');
+    }
+  };
+
+  const handleAskPurchasingEntity = async () => {
+    setIsAskingPurchasingEntity(true);
+    try {
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/handleAskPurchasingEntity';
+      const params = new URLSearchParams({
+        campaignId: campaign?.id || '',
+        campaign_name: campaign?.name || '',
+        contact_id: campaign?.contacts?.id || '',
+        contact_first_name: campaign?.contacts?.first_name || '',
+        contact_last_name: campaign?.contacts?.last_name || '',
+        contact_email: campaign?.contacts?.email || '',
+        contact_phone: campaign?.contacts?.phone_e164 || '',
+        contact_address: campaign?.contacts?.address || '',
+        timestamp: new Date().toISOString(),
+      });
+
+      const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
+      if (response.ok) {
+        toast({ title: "Success", description: "Purchasing entity details request has been sent" });
+      } else {
+        throw new Error(`Webhook failed with status ${response.status}`);
+      }
+    } catch (error: any) {
+      toast({ title: "Error", description: `Failed to send request: ${error.message}`, variant: "destructive" });
+    } finally {
+      setIsAskingPurchasingEntity(false);
+    }
+  };
+
+  const handleEditFees = () => setEditingFees(true);
+  const handleSaveFees = () => {
+    const engagementValue = engagementFee ? parseCurrency(engagementFee) : null;
+    const successValue = successFee ? parseCurrency(successFee) : null;
+    updateFeesMutation.mutate({ engagementFee: engagementValue, successFee: successValue });
+  };
+  const handleCancelFeesEdit = () => {
+    setEditingFees(false);
+    if (campaign) {
+      setEngagementFee(campaign.engagement_fee ? formatCurrency(campaign.engagement_fee) : "");
+      setSuccessFee(campaign.success_fee ? formatCurrency(campaign.success_fee) : "");
+    }
+  };
+
+  const handleEditAddress = () => setEditingAddress(true);
+  const handleSaveAddress = () => updateAddressMutation.mutate(addressValue.trim());
+  const handleCancelAddressEdit = () => {
+    setEditingAddress(false);
+    setAddressValue(campaign?.contacts?.address || "");
+  };
+
+  // Mutations
+  const updateFeesMutation = useMutation({
+    mutationFn: async ({ engagementFee, successFee }: { engagementFee: number | null, successFee: number | null }) => {
+      const { data, error } = await supabase
+        .from("campaigns")
+        .update({ engagement_fee: engagementFee, success_fee: successFee })
+        .eq("id", id)
+        .select();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
+      setEditingFees(false);
+      toast({ title: "Fees Updated", description: "The fees have been successfully updated." });
+    },
+  });
+
+  const updateAddressMutation = useMutation({
+    mutationFn: async (newAddress: string) => {
+      const { data, error } = await supabase
+        .from("contacts")
+        .update({ address: newAddress || null })
+        .eq("id", campaign?.contacts?.id)
+        .select();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
+      setEditingAddress(false);
+      toast({ title: "Address Updated", description: "The home address has been successfully updated." });
+    },
+  });
+
+  const createNoteMutation = useMutation({
+    mutationFn: async (content: string) => {
+      const { data, error } = await supabase
+        .from("campaign_notes")
+        .insert({ campaign_id: id, content })
+        .select();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-notes", id] });
+      setNewNoteContent("");
+      toast({ title: "Note Added" });
+    },
+  });
+
+  const formatSydneyTime = (date: string) => {
+    return formatInTimeZone(new Date(date), 'Australia/Sydney', 'MMM d, yyyy h:mm a');
+  };
+
+  const renderAnswerValue = (answer: any) => {
+    const text = typeof answer.value_text === 'string' ? answer.value_text.trim() : '';
+    if (text) return text;
+    return 'No answer provided';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto text-center py-8">
+          <p className="text-muted-foreground">Loading campaign...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!campaign) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto text-center py-8">
+          <p className="text-muted-foreground">Campaign not found.</p>
+          <Link to="/campaigns">
+            <Button variant="outline" className="mt-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Campaigns
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const navSections = [
+    { id: 'overview', label: 'Campaign Overview', status: 'complete' },
+    { id: 'workflow1', label: 'Workflow 1', status: getSectionStatus('workflow1') },
+    { id: 'workflow2', label: 'Workflow 2', status: getSectionStatus('workflow2') },
+    { id: 'workflow4', label: 'Workflow 4', status: getSectionStatus('workflow4') },
+    { id: 'notes', label: 'Notes', status: getSectionStatus('notes') },
+    { id: 'transcript', label: 'Transcript', status: getSectionStatus('transcript') },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Top Bar */}
+      <div className="border-b border-border bg-card px-6 py-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-2">
+            <Link to="/campaigns">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Campaigns
+              </Button>
+            </Link>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <AlertCircle className="h-4 w-4" />
+              <span>{answers?.length || 0} out of 22 Steps Complete</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Megaphone className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">
+              {campaign.name || 'Campaign Progress'}
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto flex gap-6 p-6">
+        {/* Left Sidebar Navigation */}
+        <div className="w-64 flex-shrink-0">
+          <Card className="sticky top-6">
+            <CardContent className="p-4">
+              <nav className="space-y-1">
+                {navSections.map((section) => {
+                  const isActive = campaign.status === section.id || (section.id === 'overview');
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => scrollToSection(section.id)}
+                      className={cn(
+                        "w-full text-left px-3 py-2.5 rounded-md transition-colors flex items-center gap-2",
+                        isActive
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "hover:bg-muted text-foreground"
+                      )}
+                    >
+                      {getSectionIcon(section.status, isActive)}
+                      <span className="flex-1 text-sm">{section.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Side - Scrollable Content */}
+        <ScrollArea className="flex-1 h-[calc(100vh-180px)]">
+          <div className="space-y-6 pr-4">
+            {/* Campaign Overview Section */}
+            <div ref={(el) => (sectionRefs.current['overview'] = el)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Campaign Overview</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Campaign Name</h4>
+                      <p className="text-foreground">{campaign.name || 'Unnamed Campaign'}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Contact</h4>
+                      {campaign.contacts ? (
+                        <Link to={`/contacts/${campaign.contacts.id}`} className="text-primary hover:underline">
+                          {campaign.contacts.first_name} {campaign.contacts.last_name}
+                        </Link>
+                      ) : (
+                        <p className="text-muted-foreground">No contact assigned</p>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Workflow</h4>
+                      <Badge variant={getStatusBadgeVariant(campaign.status)}>
+                        {campaign.status.replace('_', ' ').toUpperCase()}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Fees Section */}
+                  <div className="mt-6 pt-6 border-t border-border">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold flex items-center gap-2">💰 Fees</h3>
+                      {!editingFees && (
+                        <Button size="sm" variant="ghost" onClick={handleEditFees}>
+                          <Edit3 className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+                    {editingFees ? (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-muted-foreground">Engagement Fee ($)</label>
+                          <Input
+                            value={engagementFee}
+                            onChange={(e) => handleCurrencyInput(e.target.value, setEngagementFee)}
+                            placeholder="0"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-muted-foreground">Success Fee ($)</label>
+                          <Input
+                            value={successFee}
+                            onChange={(e) => handleCurrencyInput(e.target.value, setSuccessFee)}
+                            placeholder="0"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={handleSaveFees}>
+                            <Save className="h-3 w-3 mr-1" />
+                            Save
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={handleCancelFeesEdit}>
+                            <X className="h-3 w-3 mr-1" />
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div>
+                          <h4 className="font-medium text-sm text-muted-foreground">Engagement Fee</h4>
+                          <p className="text-lg font-semibold text-foreground">
+                            {campaign.engagement_fee ? `$${formatCurrency(campaign.engagement_fee)}` : <span className="text-muted-foreground italic">Not set</span>}
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-sm text-muted-foreground">Success Fee</h4>
+                          <p className="text-lg font-semibold text-foreground">
+                            {campaign.success_fee ? `$${formatCurrency(campaign.success_fee)}` : <span className="text-muted-foreground italic">Not set</span>}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Address */}
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm text-muted-foreground">Home Address</h4>
+                      {!editingAddress && (
+                        <Button size="sm" variant="ghost" onClick={handleEditAddress}>
+                          <Edit3 className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+                    {editingAddress ? (
+                      <div className="space-y-3">
+                        <Textarea
+                          value={addressValue}
+                          onChange={(e) => setAddressValue(e.target.value)}
+                          placeholder="Enter home address..."
+                          className="min-h-[80px]"
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={handleSaveAddress}>
+                            <Save className="h-3 w-3 mr-1" />
+                            Save
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={handleCancelAddressEdit}>
+                            <X className="h-3 w-3 mr-1" />
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-foreground whitespace-pre-wrap">
+                        {addressValue || <span className="text-muted-foreground italic">No address entered</span>}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Workflow 1 Section */}
+            <div ref={(el) => (sectionRefs.current['workflow1'] = el)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Workflow 1</CardTitle>
+                  <CardDescription>{workflow1Answers.length} questions answered</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {workflow1Answers.length > 0 ? (
+                    <div className="space-y-4">
+                      {workflow1Answers.map((answer) => (
+                        <div key={answer.id} className="border-b border-border pb-4 last:border-0">
+                          <h4 className="font-medium text-sm mb-1">{answer.questions?.text}</h4>
+                          <p className="text-foreground">{renderAnswerValue(answer)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No questions answered yet.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Workflow 2 Section */}
+            <div ref={(el) => (sectionRefs.current['workflow2'] = el)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Workflow 2 - Proposals</CardTitle>
+                  <CardDescription>{proposals.length} proposals created</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {proposals.length > 0 ? (
+                    <div className="space-y-4">
+                      {proposals.map((proposal: any) => (
+                        <div key={proposal.id} className="border border-border rounded-lg p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium">{proposal.template_id}</h4>
+                            <Badge>{proposal.proposal_status}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">Created: {formatSydneyTime(proposal.created_at)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No proposals created yet.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Workflow 4 Section */}
+            <div ref={(el) => (sectionRefs.current['workflow4'] = el)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Workflow 4</CardTitle>
+                  <CardDescription>{workflow4Answers.length} questions answered</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button
+                    onClick={handleAskPurchasingEntity}
+                    variant="outline"
+                    disabled={isAskingPurchasingEntity}
+                  >
+                    {isAskingPurchasingEntity ? "Sending..." : "Ask for Purchasing Entity Details"}
+                  </Button>
+                  
+                  {workflow4Answers.length > 0 ? (
+                    <div className="space-y-4">
+                      {workflow4Answers.map((answer) => (
+                        <div key={answer.id} className="border-b border-border pb-4 last:border-0">
+                          <h4 className="font-medium text-sm mb-1">{answer.questions?.text}</h4>
+                          <p className="text-foreground">{renderAnswerValue(answer)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No questions answered yet.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Notes Section */}
+            <div ref={(el) => (sectionRefs.current['notes'] = el)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notes</CardTitle>
+                  <CardDescription>{notes.length} notes</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <Textarea
+                        value={newNoteContent}
+                        onChange={(e) => setNewNoteContent(e.target.value)}
+                        placeholder="Add a new note..."
+                        className="min-h-[80px]"
+                      />
+                      <Button
+                        onClick={() => newNoteContent.trim() && createNoteMutation.mutate(newNoteContent)}
+                        disabled={!newNoteContent.trim() || createNoteMutation.isPending}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {notes.map((note: any) => (
+                      <div key={note.id} className="border border-border rounded-lg p-4">
+                        <p className="text-foreground whitespace-pre-wrap">{note.content}</p>
+                        <p className="text-xs text-muted-foreground mt-2">{formatSydneyTime(note.created_at)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Transcript Section */}
+            <div ref={(el) => (sectionRefs.current['transcript'] = el)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5" />
+                    Conversation Transcript
+                  </CardTitle>
+                  <CardDescription>{messages?.length || 0} messages</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {messages && messages.length > 0 ? (
+                    <div className="space-y-4">
+                      {messages.map((message: any) => (
+                        <div key={message.id} className="flex gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium text-sm">{message.sender_display || message.sender_type}</span>
+                              <span className="text-xs text-muted-foreground">{formatSydneyTime(message.sent_at)}</span>
+                            </div>
+                            <p className="text-foreground whitespace-pre-wrap">{message.body}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No messages yet.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
+  );
+};
+
+export default CampaignDetail;
