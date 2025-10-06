@@ -6,13 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText } from "lucide-react";
+import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText, ChevronDown, ChevronRight, CheckCircle2, Circle, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { formatInTimeZone } from "date-fns-tz";
 import { Separator } from "@/components/ui/separator";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { useState, useEffect } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const CampaignDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +34,10 @@ const CampaignDetail = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
   const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
+  
+  // Navigation state
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const formatCurrency = (value: number | string) => {
     if (!value) return "";
@@ -782,6 +787,50 @@ const CampaignDetail = () => {
     return ordinal <= 10 ? emojiMap[ordinal - 1] : '📝';
   };
 
+  // Toggle section collapse
+  const toggleSection = (sectionId: string) => {
+    setCollapsedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
+  };
+
+  // Scroll to section
+  const scrollToSection = (sectionId: string) => {
+    sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Filter answers by questionnaire
+  const workflow1Answers = answers?.filter(a => a.questionnaire_id === '2bf87f22-142d-4db7-aa2c-9dc6d63da39d') || [];
+  const workflow4Answers = answers?.filter(a => a.questionnaire_id === '134a10e9-3331-4774-9972-2321bf829ec0') || [];
+
+  // Get section status
+  const getSectionStatus = (sectionId: string) => {
+    if (sectionId === 'workflow1') {
+      return workflow1Answers.length > 0 ? 'complete' : 'incomplete';
+    }
+    if (sectionId === 'workflow2') {
+      return proposals.length > 0 ? 'complete' : 'incomplete';
+    }
+    if (sectionId === 'workflow4') {
+      return workflow4Answers.length > 0 ? 'complete' : 'incomplete';
+    }
+    if (sectionId === 'notes') {
+      return notes.length > 0 ? 'complete' : 'incomplete';
+    }
+    if (sectionId === 'transcript') {
+      return messages && messages.length > 0 ? 'complete' : 'incomplete';
+    }
+    return 'complete';
+  };
+
+  const getSectionIcon = (status: string, isActive: boolean) => {
+    if (status === 'complete') {
+      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+    }
+    if (isActive) {
+      return <AlertCircle className="h-4 w-4 text-orange-500" />;
+    }
+    return <Circle className="h-4 w-4 text-muted-foreground" />;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -812,23 +861,72 @@ const CampaignDetail = () => {
     );
   }
 
+  const navSections = [
+    { id: 'overview', label: 'Campaign Overview', status: 'complete' },
+    { id: 'workflow1', label: 'Workflow 1', status: getSectionStatus('workflow1') },
+    { id: 'workflow2', label: 'Workflow 2', status: getSectionStatus('workflow2') },
+    { id: 'workflow4', label: 'Workflow 4', status: getSectionStatus('workflow4') },
+    { id: 'notes', label: 'Notes', status: getSectionStatus('notes') },
+    { id: 'transcript', label: 'Transcript', status: getSectionStatus('transcript') },
+  ];
+
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="border-b border-border pb-6">
-          <div className="flex items-center gap-4 mb-4">
+    <div className="min-h-screen bg-background">
+      {/* Top Bar */}
+      <div className="border-b border-border bg-card px-6 py-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-2">
             <Link to="/campaigns">
-              <Button variant="outline" size="sm">
+              <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Campaigns
               </Button>
             </Link>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <AlertCircle className="h-4 w-4" />
+                <span>{answers?.length || 0} out of 22 Steps Complete</span>
+              </div>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-            <Megaphone className="h-8 w-8" />
-            {campaign.name || 'Unnamed Campaign'}
-          </h1>
-          <p className="text-muted-foreground">Campaign details and conversation</p>
+          <div className="flex items-center gap-3">
+            <Megaphone className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">
+              {campaign.name || 'Campaign Progress'}
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto flex gap-6 p-6">
+        {/* Left Sidebar Navigation */}
+        <div className="w-64 flex-shrink-0">
+          <Card className="sticky top-6">
+            <CardContent className="p-4">
+              <nav className="space-y-1">
+                {navSections.map((section) => {
+                  const isActive = campaign.status === section.id || (section.id === 'overview');
+                  
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => scrollToSection(section.id)}
+                      className={cn(
+                        "w-full text-left px-3 py-2.5 rounded-md transition-colors flex items-center gap-2",
+                        isActive
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "hover:bg-muted text-foreground"
+                      )}
+                    >
+                      {getSectionIcon(section.status, isActive)}
+                      <span className="flex-1 text-sm">{section.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Campaign Overview */}
