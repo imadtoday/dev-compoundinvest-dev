@@ -303,7 +303,7 @@ const CampaignDetail = () => {
   const handleSyncProposals = async () => {
     setIsSyncingProposals(true);
     try {
-      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/syncProposalsFromPlatform';
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/1928db19-a525-43da-8564-16f4ac4dcb7a';
       const params = new URLSearchParams({
         campaignId: campaign?.id || '',
         timestamp: new Date().toISOString(),
