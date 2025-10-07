@@ -35,6 +35,7 @@ const CampaignDetail = () => {
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
   const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
   const [isSyncingProposals, setIsSyncingProposals] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   
   // Navigation state
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -311,6 +312,7 @@ const CampaignDetail = () => {
 
       const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
       if (response.ok) {
+        setLastSyncTime(new Date());
         toast({ title: "Success", description: "Proposals synced from platform" });
         queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
       } else {
@@ -709,6 +711,11 @@ const CampaignDetail = () => {
                     >
                       {isSyncingProposals ? "Syncing..." : "Sync Proposals from Platform"}
                     </Button>
+                    {lastSyncTime && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Last synced: {formatSydneyTime(lastSyncTime.toISOString())}
+                      </p>
+                    )}
                   </div>
 
                   {/* Create Proposal Section */}
