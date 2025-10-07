@@ -302,6 +302,7 @@ const CampaignDetail = () => {
   };
 
   const handleSyncProposals = async () => {
+    console.log('Starting proposal sync...');
     setIsSyncingProposals(true);
     try {
       const baseUrl = 'https://datatube.app.n8n.cloud/webhook/1928db19-a525-43da-8564-16f4ac4dcb7a';
@@ -310,15 +311,23 @@ const CampaignDetail = () => {
         timestamp: new Date().toISOString(),
       });
 
+      console.log('Syncing proposals with params:', Object.fromEntries(params));
       const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
+      console.log('Sync response:', response.status, response.ok);
+      
       if (response.ok) {
-        setLastSyncTime(new Date());
+        const syncTime = new Date();
+        console.log('Setting last sync time to:', syncTime);
+        setLastSyncTime(syncTime);
         toast({ title: "Success", description: "Proposals synced from platform" });
         queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
       } else {
-        throw new Error(`Webhook failed with status ${response.status}`);
+        const errorText = await response.text();
+        console.error('Sync error:', errorText);
+        throw new Error(`Webhook failed with status ${response.status}: ${errorText}`);
       }
     } catch (error: any) {
+      console.error('Failed to sync proposals:', error);
       toast({ title: "Error", description: `Failed to sync proposals: ${error.message}`, variant: "destructive" });
     } finally {
       setIsSyncingProposals(false);
