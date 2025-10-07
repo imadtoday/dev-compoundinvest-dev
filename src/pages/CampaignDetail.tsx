@@ -310,33 +310,39 @@ const CampaignDetail = () => {
     return formatInTimeZone(new Date(date), 'Australia/Sydney', 'MMM d, yyyy h:mm a');
   };
 
-  const renderAnswerValue = (answer: any) => {
-    const text = typeof answer.value_text === 'string' ? answer.value_text.trim() : '';
-    if (!text) return 'No answer provided';
-    
-    // Split by newlines and process each line
-    const lines = text.split('\n');
-    
+  const renderFormattedText = (raw: string) => {
+    const text = typeof raw === 'string' ? raw.trim() : '';
+    if (!text) return <span className="text-muted-foreground">No content</span>;
+
+    // Normalize newlines and convert escaped \n to real line breaks
+    const normalized = text
+      .replace(/\r\n/g, '\n')
+      .replace(/\\n/g, '\n');
+
+    const lines = normalized.split('\n');
+
     return (
       <div className="space-y-2">
         {lines.map((line, lineIndex) => {
-          // Process bold text (**text**)
+          // Bold segments wrapped with ** **
           const parts = line.split(/(\*\*.*?\*\*)/g);
-          
           return (
             <div key={lineIndex}>
-              {parts.map((part, partIndex) => {
+              {parts.map((part, i) => {
                 if (part.startsWith('**') && part.endsWith('**')) {
-                  // Remove ** and render as bold
-                  return <strong key={partIndex}>{part.slice(2, -2)}</strong>;
+                  return <strong key={i}>{part.slice(2, -2)}</strong>;
                 }
-                return <span key={partIndex}>{part}</span>;
+                return <span key={i}>{part}</span>;
               })}
             </div>
           );
         })}
       </div>
     );
+  };
+
+  const renderAnswerValue = (answer: any) => {
+    return renderFormattedText(typeof answer?.value_text === 'string' ? answer.value_text : '');
   };
 
   if (isLoading) {
@@ -575,7 +581,7 @@ const CampaignDetail = () => {
                     <div className="space-y-4">
                       {workflow1Answers.map((answer) => (
                         <div key={answer.id} className="border-b border-border pb-4 last:border-0">
-                          <h4 className="font-medium text-sm mb-1">{answer.questions?.text}</h4>
+                          <div className="font-medium text-sm mb-1">{renderFormattedText(answer.questions?.text ?? '')}</div>
                           <div className="text-foreground">{renderAnswerValue(answer)}</div>
                         </div>
                       ))}
@@ -635,7 +641,7 @@ const CampaignDetail = () => {
                       {workflow4Answers.map((answer) => (
                         <div key={answer.id} className="border-b border-border pb-4 last:border-0">
                           <h4 className="font-medium text-sm mb-1">{answer.questions?.text}</h4>
-                          <p className="text-foreground">{renderAnswerValue(answer)}</p>
+                          <div className="text-foreground">{renderAnswerValue(answer)}</div>
                         </div>
                       ))}
                     </div>
