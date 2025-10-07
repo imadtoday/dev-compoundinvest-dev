@@ -312,8 +312,31 @@ const CampaignDetail = () => {
 
   const renderAnswerValue = (answer: any) => {
     const text = typeof answer.value_text === 'string' ? answer.value_text.trim() : '';
-    if (text) return text;
-    return 'No answer provided';
+    if (!text) return 'No answer provided';
+    
+    // Split by newlines and process each line
+    const lines = text.split('\\n');
+    
+    return (
+      <div className="space-y-2">
+        {lines.map((line, lineIndex) => {
+          // Process bold text (**text**)
+          const parts = line.split(/(\*\*.*?\*\*)/g);
+          
+          return (
+            <div key={lineIndex}>
+              {parts.map((part, partIndex) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                  // Remove ** and render as bold
+                  return <strong key={partIndex}>{part.slice(2, -2)}</strong>;
+                }
+                return <span key={partIndex}>{part}</span>;
+              })}
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -553,7 +576,7 @@ const CampaignDetail = () => {
                       {workflow1Answers.map((answer) => (
                         <div key={answer.id} className="border-b border-border pb-4 last:border-0">
                           <h4 className="font-medium text-sm mb-1">{answer.questions?.text}</h4>
-                          <p className="text-foreground">{renderAnswerValue(answer)}</p>
+                          <div className="text-foreground">{renderAnswerValue(answer)}</div>
                         </div>
                       ))}
                     </div>
