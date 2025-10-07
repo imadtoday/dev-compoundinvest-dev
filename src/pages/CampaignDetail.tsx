@@ -234,6 +234,40 @@ const CampaignDetail = () => {
     }
   };
 
+  const handleCreateProposal = async () => {
+    if (!selectedTemplate || !campaign) return;
+
+    setIsCreatingProposal(true);
+    try {
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/handleProposalCreation';
+      const params = new URLSearchParams({
+        campaignId: campaign.id,
+        campaign_name: campaign.name || '',
+        contact_id: campaign.contacts?.id || '',
+        contact_first_name: campaign.contacts?.first_name || '',
+        contact_last_name: campaign.contacts?.last_name || '',
+        contact_email: campaign.contacts?.email || '',
+        contact_phone: campaign.contacts?.phone_e164 || '',
+        contact_address: campaign.contacts?.address || '',
+        template_id: selectedTemplate,
+        timestamp: new Date().toISOString(),
+      });
+
+      const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
+      if (response.ok) {
+        toast({ title: "Success", description: "Proposal is being created" });
+        setSelectedTemplate('');
+        queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
+      } else {
+        throw new Error(`Webhook failed with status ${response.status}`);
+      }
+    } catch (error: any) {
+      toast({ title: "Error", description: `Failed to create proposal: ${error.message}`, variant: "destructive" });
+    } finally {
+      setIsCreatingProposal(false);
+    }
+  };
+
   const handleEditFees = () => setEditingFees(true);
   const handleSaveFees = () => {
     const engagementValue = engagementFee ? parseCurrency(engagementFee) : null;
@@ -605,7 +639,34 @@ const CampaignDetail = () => {
                   <CardTitle>Workflow 2 - Proposals</CardTitle>
                   <CardDescription>{proposals.length} proposals created</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                  {/* Create Proposal Section */}
+                  <div className="border border-border rounded-lg p-4 bg-muted/50">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Create New Proposal
+                    </h3>
+                    <div className="flex gap-2">
+                      <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select proposal template..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CI Investment Property Support">CI Investment Property Support</SelectItem>
+                          <SelectItem value="CI Refinance Support">CI Refinance Support</SelectItem>
+                          <SelectItem value="CI Owner Occupier Support">CI Owner Occupier Support</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        onClick={handleCreateProposal}
+                        disabled={!selectedTemplate || isCreatingProposal}
+                      >
+                        {isCreatingProposal ? "Creating..." : "Create Proposal"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Existing Proposals List */}
                   {proposals.length > 0 ? (
                     <div className="space-y-4">
                       {proposals.map((proposal: any) => (
@@ -615,6 +676,16 @@ const CampaignDetail = () => {
                             <Badge>{proposal.proposal_status}</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">Created: {formatSydneyTime(proposal.created_at)}</p>
+                          {proposal.proposal_url && (
+                            <a 
+                              href={proposal.proposal_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-sm text-primary hover:underline mt-2 inline-block"
+                            >
+                              View Proposal →
+                            </a>
+                          )}
                         </div>
                       ))}
                     </div>
