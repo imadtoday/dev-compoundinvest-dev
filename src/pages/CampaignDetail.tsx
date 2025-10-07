@@ -269,8 +269,8 @@ const CampaignDetail = () => {
         contact_address: campaign.contacts?.address || '',
         template_id: selectedTemplate,
         template_name: getTemplateName(selectedTemplate),
-        engagement_fee: campaign.engagement_fee?.toString() || '0',
-        success_fee: campaign.success_fee?.toString() || '0',
+        engagementFee: campaign.engagement_fee?.toString() || '0',
+        successFee: campaign.success_fee?.toString() || '0',
         timestamp: new Date().toISOString(),
       });
 
