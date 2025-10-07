@@ -820,7 +820,9 @@ const CampaignDetail = () => {
                               >
                                 <Button variant="outline" size="sm">
                                   <FileText className="h-3 w-3 mr-1" />
-                                  View Proposal
+                                  {proposal.proposal_status === 'sent' ? 'View Live Proposal' : 
+                                   proposal.proposal_status === 'accepted' ? 'View Accepted Proposal' : 
+                                   'View Proposal'}
                                 </Button>
                               </a>
                             )}
