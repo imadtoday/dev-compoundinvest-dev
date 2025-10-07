@@ -779,6 +779,7 @@ const CampaignDetail = () => {
                   {/* Existing Proposals List */}
                   {proposals.length > 0 ? (
                     <div className="space-y-4">
+                      <h3 className="font-semibold text-lg">Existing Proposals</h3>
                       {proposals.map((proposal: any) => (
                         <div key={proposal.id} className="border border-border rounded-lg p-4">
                           <div className="flex items-start justify-between mb-2">
