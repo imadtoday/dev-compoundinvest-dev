@@ -34,6 +34,7 @@ const CampaignDetail = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
   const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
+  const [isSyncingProposals, setIsSyncingProposals] = useState(false);
   
   // Navigation state
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -296,6 +297,29 @@ const CampaignDetail = () => {
       toast({ title: "Error", description: `Failed to create proposal: ${error.message}`, variant: "destructive" });
     } finally {
       setIsCreatingProposal(false);
+    }
+  };
+
+  const handleSyncProposals = async () => {
+    setIsSyncingProposals(true);
+    try {
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/syncProposalsFromPlatform';
+      const params = new URLSearchParams({
+        campaignId: campaign?.id || '',
+        timestamp: new Date().toISOString(),
+      });
+
+      const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
+      if (response.ok) {
+        toast({ title: "Success", description: "Proposals synced from platform" });
+        queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
+      } else {
+        throw new Error(`Webhook failed with status ${response.status}`);
+      }
+    } catch (error: any) {
+      toast({ title: "Error", description: `Failed to sync proposals: ${error.message}`, variant: "destructive" });
+    } finally {
+      setIsSyncingProposals(false);
     }
   };
 
@@ -671,6 +695,22 @@ const CampaignDetail = () => {
                   <CardDescription>{proposals.length} proposals created</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Sync Proposals Button */}
+                  <div className="border border-border rounded-lg p-4 bg-muted/50">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Proposal Platform Sync
+                    </h3>
+                    <Button
+                      onClick={handleSyncProposals}
+                      variant="outline"
+                      disabled={isSyncingProposals}
+                      className="w-full"
+                    >
+                      {isSyncingProposals ? "Syncing..." : "Sync Proposals from Platform"}
+                    </Button>
+                  </div>
+
                   {/* Create Proposal Section */}
                   <div className="border border-border rounded-lg p-4 bg-muted/50">
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
