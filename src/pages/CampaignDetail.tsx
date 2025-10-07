@@ -41,9 +41,17 @@ const CampaignDetail = () => {
   // Template ID to name mapping
   const getTemplateName = (templateId: string) => {
     const templateMap: Record<string, string> = {
-      '695117': 'CI Investment Property Support',
-      '695118': 'CI Refinance Support',
-      '695123': 'CI Owner Occupier Support',
+      '695126': 'CompoundInvest Proposal (Brisbane)',
+      '695124': 'CompoundInvest Proposal (Central Coast + Newcastle)',
+      '695123': 'CompoundInvest Proposal (Central Coast)',
+      '695121': 'CompoundInvest Proposal (Geelong)',
+      '695120': 'CompoundInvest Proposal (Melbourne + Central Coast + Newcastle)',
+      '695118': 'CompoundInvest Proposal (Melbourne + Central Coast)',
+      '695119': 'CompoundInvest Proposal (Melbourne + Geelong)',
+      '695117': 'CompoundInvest Proposal (Melbourne + Newcastle)',
+      '678717': 'CompoundInvest Proposal (Melbourne)',
+      '695122': 'CompoundInvest Proposal (Newcastle)',
+      '695125': 'CompoundInvest Proposal (Sydney)',
     };
     return templateMap[templateId] || templateId;
   };
@@ -662,9 +670,17 @@ const CampaignDetail = () => {
                           <SelectValue placeholder="Select proposal template..." />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="CI Investment Property Support">CI Investment Property Support</SelectItem>
-                          <SelectItem value="CI Refinance Support">CI Refinance Support</SelectItem>
-                          <SelectItem value="CI Owner Occupier Support">CI Owner Occupier Support</SelectItem>
+                          <SelectItem value="678717">CompoundInvest Proposal (Melbourne)</SelectItem>
+                          <SelectItem value="695117">CompoundInvest Proposal (Melbourne + Newcastle)</SelectItem>
+                          <SelectItem value="695118">CompoundInvest Proposal (Melbourne + Central Coast)</SelectItem>
+                          <SelectItem value="695119">CompoundInvest Proposal (Melbourne + Geelong)</SelectItem>
+                          <SelectItem value="695120">CompoundInvest Proposal (Melbourne + Central Coast + Newcastle)</SelectItem>
+                          <SelectItem value="695121">CompoundInvest Proposal (Geelong)</SelectItem>
+                          <SelectItem value="695122">CompoundInvest Proposal (Newcastle)</SelectItem>
+                          <SelectItem value="695123">CompoundInvest Proposal (Central Coast)</SelectItem>
+                          <SelectItem value="695124">CompoundInvest Proposal (Central Coast + Newcastle)</SelectItem>
+                          <SelectItem value="695125">CompoundInvest Proposal (Sydney)</SelectItem>
+                          <SelectItem value="695126">CompoundInvest Proposal (Brisbane)</SelectItem>
                         </SelectContent>
                       </Select>
                       <Button
