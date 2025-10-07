@@ -261,13 +261,16 @@ const CampaignDetail = () => {
       const params = new URLSearchParams({
         campaignId: campaign.id,
         campaign_name: campaign.name || '',
-        contact_id: campaign.contacts?.id || '',
+        contactId: campaign.contacts?.id || '',
         contact_first_name: campaign.contacts?.first_name || '',
         contact_last_name: campaign.contacts?.last_name || '',
         contact_email: campaign.contacts?.email || '',
         contact_phone: campaign.contacts?.phone_e164 || '',
         contact_address: campaign.contacts?.address || '',
         template_id: selectedTemplate,
+        template_name: getTemplateName(selectedTemplate),
+        engagement_fee: campaign.engagement_fee?.toString() || '0',
+        success_fee: campaign.success_fee?.toString() || '0',
         timestamp: new Date().toISOString(),
       });
 
