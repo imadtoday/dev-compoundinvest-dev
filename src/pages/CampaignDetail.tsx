@@ -315,7 +315,7 @@ const CampaignDetail = () => {
     if (!text) return 'No answer provided';
     
     // Split by newlines and process each line
-    const lines = text.split('\\n');
+    const lines = text.split('\n');
     
     return (
       <div className="space-y-2">
