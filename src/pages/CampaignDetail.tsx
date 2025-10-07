@@ -38,6 +38,16 @@ const CampaignDetail = () => {
   // Navigation state
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Template ID to name mapping
+  const getTemplateName = (templateId: string) => {
+    const templateMap: Record<string, string> = {
+      '695117': 'CI Investment Property Support',
+      '695118': 'CI Refinance Support',
+      '695123': 'CI Owner Occupier Support',
+    };
+    return templateMap[templateId] || templateId;
+  };
+
   const formatCurrency = (value: number | string) => {
     if (!value) return "";
     const numValue = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
@@ -672,20 +682,36 @@ const CampaignDetail = () => {
                       {proposals.map((proposal: any) => (
                         <div key={proposal.id} className="border border-border rounded-lg p-4">
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-medium">{proposal.template_id}</h4>
+                            <h4 className="font-medium">{getTemplateName(proposal.template_id)}</h4>
                             <Badge>{proposal.proposal_status}</Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">Created: {formatSydneyTime(proposal.created_at)}</p>
-                          {proposal.proposal_url && (
-                            <a 
-                              href={proposal.proposal_url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-sm text-primary hover:underline mt-2 inline-block"
-                            >
-                              View Proposal →
-                            </a>
-                          )}
+                          <p className="text-sm text-muted-foreground mb-3">Created: {formatSydneyTime(proposal.created_at)}</p>
+                          <div className="flex gap-2">
+                            {proposal.proposal_editor_url && (
+                              <a 
+                                href={proposal.proposal_editor_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                              >
+                                <Button variant="outline" size="sm">
+                                  <Edit3 className="h-3 w-3 mr-1" />
+                                  Edit Proposal
+                                </Button>
+                              </a>
+                            )}
+                            {proposal.proposal_url && (
+                              <a 
+                                href={proposal.proposal_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                              >
+                                <Button variant="outline" size="sm">
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  View Proposal
+                                </Button>
+                              </a>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
