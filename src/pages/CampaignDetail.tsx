@@ -35,7 +35,6 @@ const CampaignDetail = () => {
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
   const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
   const [isSyncingProposals, setIsSyncingProposals] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   
   // Navigation state
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -181,6 +180,24 @@ const CampaignDetail = () => {
     enabled: !!id,
   });
 
+  const { data: cronSync } = useQuery({
+    queryKey: ["cron-sync"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('cron_sync' as any)
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching cron sync:', error);
+        return null;
+      }
+      return data ? (data as any as { id: number; created_at: string; updated_at: string }) : null;
+    },
+  });
+
   // Filter answers by questionnaire
   const workflow1Answers = answers?.filter(a => a.questions?.questionnaire_id === '2bf87f22-142d-4db7-aa2c-9dc6d63da39d') || [];
   const workflow4Answers = answers?.filter(a => a.questions?.questionnaire_id === '134a10e9-3331-4774-9972-2321bf829ec0') || [];
@@ -316,11 +333,9 @@ const CampaignDetail = () => {
       console.log('Sync response:', response.status, response.ok);
       
       if (response.ok) {
-        const syncTime = new Date();
-        console.log('Setting last sync time to:', syncTime);
-        setLastSyncTime(syncTime);
         toast({ title: "Success", description: "Proposals synced from platform" });
         queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
+        queryClient.invalidateQueries({ queryKey: ["cron-sync"] });
       } else {
         const errorText = await response.text();
         console.error('Sync error:', errorText);
@@ -720,9 +735,9 @@ const CampaignDetail = () => {
                     >
                       {isSyncingProposals ? "Syncing..." : "Sync Proposals from Platform"}
                     </Button>
-                    {lastSyncTime && (
+                    {cronSync?.updated_at && (
                       <p className="text-xs text-muted-foreground mt-2">
-                        Last synced: {formatSydneyTime(lastSyncTime.toISOString())}
+                        Last synced: {formatSydneyTime(cronSync.updated_at)}
                       </p>
                     )}
                   </div>
