@@ -711,7 +711,7 @@ const CampaignDetail = () => {
                               >
                                 <Button variant="outline" size="sm">
                                   <Edit3 className="h-3 w-3 mr-1" />
-                                  Edit Proposal
+                                  Edit/Send Proposal
                                 </Button>
                               </a>
                             )}
