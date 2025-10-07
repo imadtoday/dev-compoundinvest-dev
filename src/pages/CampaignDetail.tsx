@@ -324,13 +324,18 @@ const CampaignDetail = () => {
     return (
       <div className="space-y-2">
         {lines.map((line, lineIndex) => {
-          // Bold segments wrapped with ** **
-          const parts = line.split(/(\*\*.*?\*\*)/g);
+          // Bold segments wrapped with ** ** or * *
+          const parts = line.split(/(\*\*.*?\*\*|\*.*?\*)/g);
           return (
             <div key={lineIndex}>
               {parts.map((part, i) => {
+                // Handle **text** (double asterisks)
                 if (part.startsWith('**') && part.endsWith('**')) {
                   return <strong key={i}>{part.slice(2, -2)}</strong>;
+                }
+                // Handle *text* (single asterisks)
+                if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+                  return <strong key={i}>{part.slice(1, -1)}</strong>;
                 }
                 return <span key={i}>{part}</span>;
               })}
