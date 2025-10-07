@@ -788,6 +788,18 @@ const CampaignDetail = () => {
                           </div>
                           <p className="text-sm text-muted-foreground mb-3">Created: {formatSydneyTime(proposal.created_at)}</p>
                           <div className="flex gap-2">
+                            {proposal.proposal_preview_url && (
+                              <a 
+                                href={proposal.proposal_preview_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                              >
+                                <Button variant="outline" size="sm">
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  Proposal Preview
+                                </Button>
+                              </a>
+                            )}
                             {proposal.proposal_editor_url && (
                               <a 
                                 href={proposal.proposal_editor_url} 
