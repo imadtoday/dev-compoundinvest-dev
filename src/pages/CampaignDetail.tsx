@@ -271,15 +271,25 @@ const CampaignDetail = () => {
         timestamp: new Date().toISOString(),
       });
 
+      console.log('Creating proposal with params:', Object.fromEntries(params));
       const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
+      console.log('Proposal creation response:', response.status, response.ok);
+      
       if (response.ok) {
         toast({ title: "Success", description: "Proposal is being created" });
         setSelectedTemplate('');
-        queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
+        
+        // Wait a bit for the webhook to complete before refetching
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
+        }, 2000);
       } else {
-        throw new Error(`Webhook failed with status ${response.status}`);
+        const errorText = await response.text();
+        console.error('Webhook error:', errorText);
+        throw new Error(`Webhook failed with status ${response.status}: ${errorText}`);
       }
     } catch (error: any) {
+      console.error('Failed to create proposal:', error);
       toast({ title: "Error", description: `Failed to create proposal: ${error.message}`, variant: "destructive" });
     } finally {
       setIsCreatingProposal(false);
