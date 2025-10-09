@@ -207,11 +207,26 @@ const CampaignDetail = () => {
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Get section status
+  // Get section status - for workflows, use the workflow_x_status field
   const getSectionStatus = (sectionId: string) => {
-    if (sectionId === 'workflow1') return workflow1Answers.length > 0 ? 'complete' : 'incomplete';
-    if (sectionId === 'workflow2') return proposals.length > 0 ? 'complete' : 'incomplete';
-    if (sectionId === 'workflow4') return workflow4Answers.length > 0 ? 'complete' : 'incomplete';
+    if (sectionId === 'workflow1') {
+      const status = (campaign as any)?.workflow_1_status;
+      if (status === 'complete') return 'complete';
+      if (status) return 'in_progress';
+      return 'incomplete';
+    }
+    if (sectionId === 'workflow2') {
+      const status = (campaign as any)?.workflow_2_status;
+      if (status === 'complete') return 'complete';
+      if (status) return 'in_progress';
+      return 'incomplete';
+    }
+    if (sectionId === 'workflow4') {
+      const status = (campaign as any)?.workflow_4_status;
+      if (status === 'complete') return 'complete';
+      if (status) return 'in_progress';
+      return 'incomplete';
+    }
     if (sectionId === 'notes') return notes.length > 0 ? 'complete' : 'incomplete';
     if (sectionId === 'transcript') return messages && messages.length > 0 ? 'complete' : 'incomplete';
     return 'complete';
@@ -219,7 +234,7 @@ const CampaignDetail = () => {
 
   const getSectionIcon = (status: string, isActive: boolean) => {
     if (status === 'complete') return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-    if (isActive) return <AlertCircle className="h-4 w-4 text-orange-500" />;
+    if (status === 'in_progress') return <CheckCircle2 className="h-4 w-4 text-orange-500" />;
     return <Circle className="h-4 w-4 text-muted-foreground" />;
   };
 
