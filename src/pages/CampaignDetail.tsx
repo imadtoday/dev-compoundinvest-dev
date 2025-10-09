@@ -514,7 +514,16 @@ const CampaignDetail = () => {
             </Link>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <AlertCircle className="h-4 w-4" />
-              <span>{answers?.length || 0} out of 22 Steps Complete</span>
+              <span>
+                {(() => {
+                  const completedWorkflows = [
+                    (campaign as any)?.workflow_1_status === 'complete',
+                    (campaign as any)?.workflow_2_status === 'complete',
+                    (campaign as any)?.workflow_4_status === 'complete'
+                  ].filter(Boolean).length;
+                  return `${completedWorkflows} out of 3 Workflows Complete`;
+                })()}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-3">
