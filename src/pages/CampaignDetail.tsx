@@ -782,12 +782,12 @@ const CampaignDetail = () => {
                       <h3 className="font-semibold text-lg">Existing Proposals</h3>
                       {proposals.map((proposal: any) => (
                         <div key={proposal.id} className="border border-border rounded-lg p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-medium">{getTemplateName(proposal.template_id)}</h4>
-                            <Badge>{proposal.proposal_status}</Badge>
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <h4 className="font-medium flex-1">{getTemplateName(proposal.template_id)}</h4>
+                            <Badge className="shrink-0">{proposal.proposal_status}</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mb-3">Created: {formatSydneyTime(proposal.created_at)}</p>
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap gap-2">
                             {proposal.proposal_preview_url && (
                               <a 
                                 href={proposal.proposal_preview_url} 
