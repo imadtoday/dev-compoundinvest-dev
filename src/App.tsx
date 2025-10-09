@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,18 +59,16 @@ const FaviconLoader = () => {
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
   <SidebarProvider>
-    <div className="min-h-screen flex w-full">
-      <AppSidebar />
-      <div className="flex-1 flex flex-col">
-        <header className="h-12 flex items-center justify-between border-b border-border bg-background px-4">
-          <SidebarTrigger />
-          <ProfileDropdown />
-        </header>
-        <main className="flex-1 p-6">
-          {children}
-        </main>
-      </div>
-    </div>
+    <AppSidebar />
+    <SidebarInset>
+      <header className="h-12 flex items-center justify-between border-b border-border bg-background px-4">
+        <SidebarTrigger />
+        <ProfileDropdown />
+      </header>
+      <main className="p-6">
+        {children}
+      </main>
+    </SidebarInset>
   </SidebarProvider>
 );
 
