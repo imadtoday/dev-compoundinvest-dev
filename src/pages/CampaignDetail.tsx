@@ -704,7 +704,7 @@ const CampaignDetail = () => {
                         </div>
                       </div>
                     ) : (
-                      <p className="text-foreground whitespace-pre-wrap">
+                      <p className="text-foreground whitespace-pre-wrap break-words">
                         {addressValue || <span className="text-muted-foreground italic">No address entered</span>}
                       </p>
                     )}
@@ -726,7 +726,7 @@ const CampaignDetail = () => {
                       {workflow1Answers.map((answer) => (
                         <div key={answer.id} className="border-b border-border pb-4 last:border-0">
                           <div className="font-medium text-sm mb-1">{renderFormattedText(answer.questions?.text ?? '')}</div>
-                          <div className="text-foreground">{renderAnswerValue(answer)}</div>
+                          <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
                         </div>
                       ))}
                     </div>
@@ -882,7 +882,7 @@ const CampaignDetail = () => {
                       {workflow4Answers.map((answer) => (
                         <div key={answer.id} className="border-b border-border pb-4 last:border-0">
                           <h4 className="font-medium text-sm mb-1">{answer.questions?.text}</h4>
-                          <div className="text-foreground">{renderAnswerValue(answer)}</div>
+                          <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
                         </div>
                       ))}
                     </div>
@@ -918,7 +918,7 @@ const CampaignDetail = () => {
                     </div>
                     {notes.map((note: any) => (
                       <div key={note.id} className="border border-border rounded-lg p-4">
-                        <p className="text-foreground whitespace-pre-wrap">{note.content}</p>
+                        <p className="text-foreground whitespace-pre-wrap break-words">{note.content}</p>
                         <p className="text-xs text-muted-foreground mt-2">{formatSydneyTime(note.created_at)}</p>
                       </div>
                     ))}
@@ -947,7 +947,7 @@ const CampaignDetail = () => {
                               <span className="font-medium text-sm">{message.sender_display || message.sender_type}</span>
                               <span className="text-xs text-muted-foreground">{formatSydneyTime(message.sent_at)}</span>
                             </div>
-                            <p className="text-foreground whitespace-pre-wrap">{message.body}</p>
+                            <p className="text-foreground whitespace-pre-wrap break-words">{message.body}</p>
                           </div>
                         </div>
                       ))}
