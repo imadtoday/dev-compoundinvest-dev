@@ -557,7 +557,7 @@ const CampaignDetail = () => {
         </div>
 
         {/* Right Side - Scrollable Content */}
-        <ScrollArea className="flex-1 h-[calc(100vh-180px)]">
+        <ScrollArea className="flex-1 min-w-0 h-[calc(100vh-180px)]">
           <div className="space-y-6 pr-6 md:pr-8">
             {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
