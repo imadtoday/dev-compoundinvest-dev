@@ -516,7 +516,7 @@ const CampaignDetail = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Top Bar */}
       <div className="border-b border-border bg-card px-6 py-4">
         <div className="max-w-7xl mx-auto">
@@ -551,7 +551,7 @@ const CampaignDetail = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto flex gap-6 p-6">
+      <div className="max-w-7xl w-full mx-auto flex gap-6 p-6">
         {/* Left Sidebar Navigation */}
         <div className="w-64 flex-shrink-0">
           <Card className="sticky top-6">
@@ -582,7 +582,7 @@ const CampaignDetail = () => {
 
         {/* Right Side - Scrollable Content */}
         <ScrollArea className="flex-1 min-w-0 h-[calc(100vh-180px)]">
-          <div className="space-y-6 pr-6 md:pr-8">
+          <div className="space-y-6 pr-6 md:pr-8 break-words">
             {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
               <Card>
