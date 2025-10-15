@@ -395,6 +395,8 @@ const CampaignDetail = () => {
       
       if (response.ok) {
         toast({ title: "Success", description: "Proposals synced from platform" });
+        // Wait a moment for the database to update before refreshing
+        await new Promise(resolve => setTimeout(resolve, 500));
         queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
         queryClient.invalidateQueries({ queryKey: ["cron-sync"] });
       } else {
