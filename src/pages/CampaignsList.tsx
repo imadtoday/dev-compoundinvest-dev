@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { Megaphone, Search, Plus } from "lucide-react";
 import { useState } from "react";
@@ -12,6 +13,7 @@ import { formatInTimeZone } from "date-fns-tz";
 
 const CampaignsList = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [workflowFilter, setWorkflowFilter] = useState<string>("all");
 
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ['campaigns-list'],
@@ -38,7 +40,10 @@ const CampaignsList = () => {
       (campaign.contacts?.first_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (campaign.contacts?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    return matchesSearch;
+    const matchesWorkflow = workflowFilter === "all" || 
+      campaign.status === workflowFilter;
+    
+    return matchesSearch && matchesWorkflow;
   });
 
   const getStatusBadgeStyle = (status: string) => {
@@ -70,7 +75,7 @@ const CampaignsList = () => {
           </div>
         </div>
 
-        {/* Search and Add Button */}
+        {/* Search, Filter, and Add Button */}
         <div className="flex gap-4 flex-col sm:flex-row animate-slide-up">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
@@ -81,6 +86,17 @@ const CampaignsList = () => {
               className="input-premium pl-12 h-12 text-base"
             />
           </div>
+          <Select value={workflowFilter} onValueChange={setWorkflowFilter}>
+            <SelectTrigger className="w-full sm:w-[200px] h-12 bg-background">
+              <SelectValue placeholder="Filter by workflow" />
+            </SelectTrigger>
+            <SelectContent className="bg-background z-50">
+              <SelectItem value="all">All Workflows</SelectItem>
+              <SelectItem value="workflow_1">Workflow 1</SelectItem>
+              <SelectItem value="workflow_2">Workflow 2</SelectItem>
+              <SelectItem value="workflow_4">Workflow 4</SelectItem>
+            </SelectContent>
+          </Select>
           <Link to="/campaigns/add">
             <Button className="h-12 px-6 flex items-center gap-2">
               <Plus className="h-5 w-5" />
