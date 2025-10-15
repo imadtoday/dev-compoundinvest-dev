@@ -449,6 +449,20 @@ const CampaignDetail = () => {
     },
   });
 
+  const updateWorkflow1StatusMutation = useMutation({
+    mutationFn: async (newStatus: string) => {
+      const { error } = await supabase
+        .from("campaigns")
+        .update({ workflow_1_status: newStatus })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
+      toast({ title: "Status Updated", description: "Workflow 1 status has been updated." });
+    },
+  });
+
   const updateAddressMutation = useMutation({
     mutationFn: async (newAddress: string) => {
       const { data, error } = await supabase
@@ -781,8 +795,25 @@ const CampaignDetail = () => {
             <div ref={(el) => (sectionRefs.current['workflow1'] = el)}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Workflow 1</CardTitle>
-                  <CardDescription>{workflow1Answers.length} questions answered</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Workflow 1</CardTitle>
+                      <CardDescription>{workflow1Answers.length} questions answered</CardDescription>
+                    </div>
+                    <Select 
+                      value={(campaign as any)?.workflow_1_status || 'consent_pending'}
+                      onValueChange={(value) => updateWorkflow1StatusMutation.mutate(value)}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="consent_pending">Consent pending</SelectItem>
+                        <SelectItem value="intake_in_progress">Intake in progress</SelectItem>
+                        <SelectItem value="complete">Complete</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {workflow1Answers.length > 0 ? (
