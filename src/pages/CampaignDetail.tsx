@@ -453,7 +453,7 @@ const CampaignDetail = () => {
     mutationFn: async (newStatus: string) => {
       const { error } = await supabase
         .from("campaigns")
-        .update({ workflow_1_status: newStatus })
+        .update({ workflow_1_status: newStatus } as any)
         .eq("id", id);
       if (error) throw error;
     },
