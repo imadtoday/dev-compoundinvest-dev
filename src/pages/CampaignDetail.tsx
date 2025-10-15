@@ -220,7 +220,7 @@ const CampaignDetail = () => {
     }
     if (sectionId === 'workflow2') {
       const status = (campaign as any)?.workflow_2_status;
-      if (status === 'complete') return 'complete';
+      if (status === 'accepted') return 'complete';
       if (status) return 'in_progress';
       return 'incomplete';
     }
