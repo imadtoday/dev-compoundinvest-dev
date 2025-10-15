@@ -289,6 +289,42 @@ const CampaignDetail = () => {
   const handleCreateProposal = async () => {
     if (!selectedTemplate || !campaign) return;
 
+    // Validation
+    const missingFields: string[] = [];
+    
+    // Check contact details
+    if (!campaign.contacts?.first_name) missingFields.push("Contact first name");
+    if (!campaign.contacts?.last_name) missingFields.push("Contact last name");
+    if (!campaign.contacts?.email) missingFields.push("Contact email");
+    if (!campaign.contacts?.phone_e164) missingFields.push("Contact phone");
+    
+    // Check address
+    if (!campaign.contacts?.address) missingFields.push("Home address");
+    
+    // Check fees
+    if (!campaign.engagement_fee) missingFields.push("Engagement Fee");
+    if (!campaign.success_fee) missingFields.push("Success Fee");
+    
+    // Check workflow 1 answers for questions 1, 2, 6, and 7
+    const requiredQuestionCodes = ['Q1', 'Q2', 'Q6', 'Q7'];
+    const workflow1AnswersList = answers?.filter(a => a.questions?.questionnaire_id === '2bf87f22-142d-4db7-aa2c-9dc6d63da39d') || [];
+    
+    requiredQuestionCodes.forEach(code => {
+      const answer = workflow1AnswersList.find(a => a.questions?.code === code);
+      if (!answer || !answer.value_text) {
+        missingFields.push(`Answer to question ${code.replace('Q', '')}`);
+      }
+    });
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: "Missing Required Fields",
+        description: `Please make sure the following fields are filled out before attempting to create a proposal: ${missingFields.join(', ')}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsCreatingProposal(true);
     try {
       const baseUrl = 'https://datatube.app.n8n.cloud/webhook/faf7ed5b-7569-4750-b59a-9b488b67ebcd';
