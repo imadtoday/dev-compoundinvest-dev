@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText, CheckCircle2, Circle, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
+import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect, useRef } from "react";
@@ -691,6 +692,14 @@ const CampaignDetail = () => {
                         {campaign.status.replace('_', ' ').toUpperCase()}
                       </Badge>
                     </div>
+                    {campaign.scheduled_start && (
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">Scheduled Consultation Call</h4>
+                        <p className="text-foreground">
+                          {format(toZonedTime(new Date(campaign.scheduled_start), 'Australia/Sydney'), 'PPP p')}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Fees Section */}
