@@ -289,6 +289,16 @@ const CampaignDetail = () => {
   const handleCreateProposal = async () => {
     if (!selectedTemplate || !campaign) return;
 
+    // Check if workflow 1 is complete
+    if ((campaign as any).workflow_1_status !== 'complete') {
+      toast({
+        title: "Workflow 1 Incomplete",
+        description: "Please complete Workflow 1 before creating a proposal.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Validation
     const missingFields: string[] = [];
     
