@@ -420,6 +420,24 @@ const CampaignDetail = () => {
     },
   });
 
+  const updateAnswerMutation = useMutation({
+    mutationFn: async ({ answerId, newValue }: { answerId: string, newValue: string }) => {
+      const { data, error } = await supabase
+        .from("campaign_answers")
+        .update({ value_text: newValue })
+        .eq("id", answerId)
+        .select();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-answers", id] });
+      setEditingAnswer(null);
+      setEditValue("");
+      toast({ title: "Answer Updated", description: "The answer has been successfully updated." });
+    },
+  });
+
   const createNoteMutation = useMutation({
     mutationFn: async (content: string) => {
       const { data, error } = await supabase
@@ -725,8 +743,53 @@ const CampaignDetail = () => {
                     <div className="space-y-4">
                       {workflow1Answers.map((answer) => (
                         <div key={answer.id} className="border-b border-border pb-4 last:border-0">
-                          <div className="font-medium text-sm mb-1">{renderFormattedText(answer.questions?.text ?? '')}</div>
-                          <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="font-medium text-sm flex-1">{renderFormattedText(answer.questions?.text ?? '')}</div>
+                            {editingAnswer !== answer.id && (
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => {
+                                  setEditingAnswer(answer.id);
+                                  setEditValue(answer.value_text || "");
+                                }}
+                              >
+                                <Edit3 className="h-3 w-3 mr-1" />
+                                Edit
+                              </Button>
+                            )}
+                          </div>
+                          {editingAnswer === answer.id ? (
+                            <div className="space-y-2">
+                              <Textarea
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                className="min-h-[80px]"
+                              />
+                              <div className="flex gap-2">
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => updateAnswerMutation.mutate({ answerId: answer.id, newValue: editValue })}
+                                >
+                                  <Save className="h-3 w-3 mr-1" />
+                                  Save
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingAnswer(null);
+                                    setEditValue("");
+                                  }}
+                                >
+                                  <X className="h-3 w-3 mr-1" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
+                          )}
                         </div>
                       ))}
                     </div>
