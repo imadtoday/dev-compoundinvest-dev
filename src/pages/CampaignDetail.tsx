@@ -636,7 +636,25 @@ const CampaignDetail = () => {
   };
 
   const renderAnswerValue = (answer: any) => {
-    // Check multiple fields for answer content
+    // Try to get the human-readable answer from value_json first
+    if (answer?.value_json) {
+      try {
+        const parsed = typeof answer.value_json === 'string' 
+          ? JSON.parse(answer.value_json) 
+          : answer.value_json;
+        
+        if (parsed?.selected_values && Array.isArray(parsed.selected_values) && parsed.selected_values.length > 0) {
+          const values = parsed.selected_values.filter((v: string) => v && v.trim());
+          if (values.length > 0) {
+            return renderFormattedText(values.join(', '));
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing value_json:', e);
+      }
+    }
+    
+    // Fall back to other fields
     const value = answer?.value_text || answer?.interpreted_value || answer?.raw_text || '';
     return renderFormattedText(typeof value === 'string' ? value : '');
   };
