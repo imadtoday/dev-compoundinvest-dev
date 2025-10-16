@@ -822,6 +822,14 @@ const CampaignDetail = () => {
                         </p>
                       </div>
                     )}
+                    {(campaign as any).first_followup && (
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground">Followup Sent</h4>
+                        <p className="text-foreground">
+                          {format(toZonedTime(new Date((campaign as any).first_followup), 'Australia/Sydney'), 'PPP p')}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Fees Section */}
