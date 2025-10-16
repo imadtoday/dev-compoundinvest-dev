@@ -984,7 +984,7 @@ const CampaignDetail = () => {
                                     <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
                                       {questionNumber}
                                     </div>
-                                    <div className="font-medium text-base flex-1">{questionText}</div>
+                                    <div className="font-medium text-base flex-1">{renderFormattedText(questionText)}</div>
                                   </div>
                                   {!isEditing && (
                                     <Button 
