@@ -1072,7 +1072,7 @@ const CampaignDetail = () => {
             <div ref={(el) => (sectionRefs.current['workflow4'] = el)}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Workflow 4</CardTitle>
+                  <CardTitle>Workflow 4 - Purchasing Entity Details</CardTitle>
                   <CardDescription>{workflow4Answers.length} questions answered</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
