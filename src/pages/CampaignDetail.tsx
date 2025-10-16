@@ -635,6 +635,30 @@ const CampaignDetail = () => {
     );
   };
 
+  const hasAnswerContent = (answer: any) => {
+    if (!answer) return false;
+    
+    // Check value_json
+    if (answer?.value_json) {
+      try {
+        const parsed = typeof answer.value_json === 'string' 
+          ? JSON.parse(answer.value_json) 
+          : answer.value_json;
+        
+        if (parsed?.selected_values && Array.isArray(parsed.selected_values) && parsed.selected_values.length > 0) {
+          const values = parsed.selected_values.filter((v: string) => v && v.trim());
+          if (values.length > 0) return true;
+        }
+      } catch (e) {
+        // Continue to check other fields
+      }
+    }
+    
+    // Check other fields
+    const value = answer?.value_text || answer?.interpreted_value || answer?.raw_text || '';
+    return typeof value === 'string' && value.trim().length > 0;
+  };
+
   const renderAnswerValue = (answer: any) => {
     // Try to get the human-readable answer from value_json first
     if (answer?.value_json) {
@@ -996,7 +1020,7 @@ const CampaignDetail = () => {
                                   </Button>
                                 </div>
                               </div>
-                            ) : answer ? (
+                            ) : answer && hasAnswerContent(answer) ? (
                               <div className="mt-2">
                                 <div className="text-sm text-muted-foreground mb-1">Answer:</div>
                                 <div className="text-foreground break-words font-medium">{renderAnswerValue(answer)}</div>
