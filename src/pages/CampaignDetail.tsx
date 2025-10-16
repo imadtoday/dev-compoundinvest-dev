@@ -1001,7 +1001,7 @@ const CampaignDetail = () => {
                                 <div className="text-sm text-muted-foreground mb-1">Answer:</div>
                                 <div className="text-foreground break-words font-medium">{renderAnswerValue(answer)}</div>
                                 <div className="text-xs text-muted-foreground mt-2">
-                                  Answered: {formatSydneyTime(answer.created_at)}
+                                  {formatSydneyTime(answer.created_at)}
                                 </div>
                               </div>
                             ) : (
