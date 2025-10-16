@@ -201,6 +201,24 @@ const CampaignDetail = () => {
     },
   });
 
+  // Fetch all Workflow 1 questions
+  const { data: workflow1Questions = [] } = useQuery({
+    queryKey: ["workflow1-questions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('questionnaire_id', '2bf87f22-142d-4db7-aa2c-9dc6d63da39d')
+        .order('ordinal', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching workflow 1 questions:', error);
+        return [];
+      }
+      return data || [];
+    },
+  });
+
   // Filter answers by questionnaire
   const workflow1Answers = answers?.filter(a => a.questions?.questionnaire_id === '2bf87f22-142d-4db7-aa2c-9dc6d63da39d') || [];
   const workflow4Answers = answers?.filter(a => a.questions?.questionnaire_id === '134a10e9-3331-4774-9972-2321bf829ec0') || [];
@@ -857,13 +875,14 @@ const CampaignDetail = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {workflow1Answers.length > 0 ? (
-                    <div className="space-y-4">
-                      {workflow1Answers.map((answer) => (
-                        <div key={answer.id} className="border-b border-border pb-4 last:border-0">
+                  <div className="space-y-4">
+                    {workflow1Questions.map((question) => {
+                      const answer = workflow1Answers.find(a => a.question_id === question.id);
+                      return (
+                        <div key={question.id} className="border-b border-border pb-4 last:border-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
-                            <div className="font-medium text-sm flex-1">{renderFormattedText(answer.questions?.text ?? '')}</div>
-                            {editingAnswer !== answer.id && (
+                            <div className="font-medium text-sm flex-1">{renderFormattedText(question.text)}</div>
+                            {answer && editingAnswer !== answer.id && (
                               <Button 
                                 size="sm" 
                                 variant="ghost"
@@ -877,43 +896,45 @@ const CampaignDetail = () => {
                               </Button>
                             )}
                           </div>
-                          {editingAnswer === answer.id ? (
-                            <div className="space-y-2">
-                              <Textarea
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                className="min-h-[80px]"
-                              />
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => updateAnswerMutation.mutate({ answerId: answer.id, newValue: editValue })}
-                                >
-                                  <Save className="h-3 w-3 mr-1" />
-                                  Save
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="outline"
-                                  onClick={() => {
-                                    setEditingAnswer(null);
-                                    setEditValue("");
-                                  }}
-                                >
-                                  <X className="h-3 w-3 mr-1" />
-                                  Cancel
-                                </Button>
+                          {answer ? (
+                            editingAnswer === answer.id ? (
+                              <div className="space-y-2">
+                                <Textarea
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  className="min-h-[80px]"
+                                />
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => updateAnswerMutation.mutate({ answerId: answer.id, newValue: editValue })}
+                                  >
+                                    <Save className="h-3 w-3 mr-1" />
+                                    Save
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => {
+                                      setEditingAnswer(null);
+                                      setEditValue("");
+                                    }}
+                                  >
+                                    <X className="h-3 w-3 mr-1" />
+                                    Cancel
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
+                            ) : (
+                              <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
+                            )
                           ) : (
-                            <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
+                            <div className="text-muted-foreground italic">Not Answered</div>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No questions answered yet.</p>
-                  )}
+                      );
+                    })}
+                  </div>
                 </CardContent>
               </Card>
             </div>
