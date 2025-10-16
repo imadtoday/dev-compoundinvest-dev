@@ -636,7 +636,9 @@ const CampaignDetail = () => {
   };
 
   const renderAnswerValue = (answer: any) => {
-    return renderFormattedText(typeof answer?.value_text === 'string' ? answer.value_text : '');
+    // Check multiple fields for answer content
+    const value = answer?.value_text || answer?.interpreted_value || answer?.raw_text || '';
+    return renderFormattedText(typeof value === 'string' ? value : '');
   };
 
   if (isLoading) {
