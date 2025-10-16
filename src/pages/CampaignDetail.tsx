@@ -937,8 +937,11 @@ const CampaignDetail = () => {
                         
                         return (
                           <div key={question.id} className="border-b border-border pb-4 last:border-0">
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <div className="font-medium text-sm flex-1">{renderFormattedText(question.text)}</div>
+                            <div className="flex items-start justify-between gap-2 mb-3">
+                              <div className="flex-1">
+                                <div className="text-sm text-muted-foreground mb-2">Question:</div>
+                                <div className="font-medium">{renderFormattedText(question.text)}</div>
+                              </div>
                               {!isEditing && (
                                 <Button 
                                   size="sm" 
@@ -994,9 +997,18 @@ const CampaignDetail = () => {
                                 </div>
                               </div>
                             ) : answer ? (
-                              <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
+                              <div className="mt-2">
+                                <div className="text-sm text-muted-foreground mb-1">Answer:</div>
+                                <div className="text-foreground break-words font-medium">{renderAnswerValue(answer)}</div>
+                                <div className="text-xs text-muted-foreground mt-2">
+                                  Answered: {formatSydneyTime(answer.created_at)}
+                                </div>
+                              </div>
                             ) : (
-                              <div className="text-muted-foreground italic">Not Answered</div>
+                              <div className="mt-2">
+                                <div className="text-sm text-muted-foreground mb-1">Answer:</div>
+                                <div className="text-muted-foreground italic">Not Answered</div>
+                              </div>
                             )}
                           </div>
                         );
