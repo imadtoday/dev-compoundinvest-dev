@@ -967,15 +967,14 @@ const CampaignDetail = () => {
                             const isEditing = editingQuestionId === question.id || editingAnswer === answer?.id;
                             const questionNumber = question.ordinal;
                             
-                            // Extract just the question text without the full formatting
-                            const questionText = question.text
-                              .replace(/🎯 \d+\. Property Portfolio Goals\n\n/g, '')
-                              .replace(/🏘️ \*\d+\. [^*]+\*\n\n/g, '')
-                              .replace(/📈 \*\d+\. [^*]+\*\n\n/g, '')
-                              .replace(/\d+️⃣ /g, '')
-                              .replace(/🧭 /g, '')
-                              .split('\n\n')[0]
-                              .split('\n')[0];
+                            // Extract just the question text, removing section headers, numbers, and options
+                            let questionText = question.text;
+                            // Remove section headers like "🎯 1. Property Portfolio Goals"
+                            questionText = questionText.replace(/^[🎯📈🏘️]\s*\d+\.\s*[^\n]+\n+/gm, '');
+                            // Remove question numbers and emojis like "1️⃣ 🧭"
+                            questionText = questionText.replace(/^\d+️⃣\s*[🧭📝🏘️💰🌏]?\s*/gm, '');
+                            // Get just the first line (the actual question)
+                            questionText = questionText.split('\n')[0].trim();
                             
                             return (
                               <div key={question.id} className="border-l-4 border-border pl-4 space-y-2">
@@ -984,7 +983,7 @@ const CampaignDetail = () => {
                                     <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
                                       {questionNumber}
                                     </div>
-                                    <div className="font-medium text-base flex-1">{renderFormattedText(questionText)}</div>
+                                    <div className="font-medium text-base flex-1">{questionText}</div>
                                   </div>
                                   {!isEditing && (
                                     <Button 
