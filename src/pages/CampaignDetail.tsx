@@ -876,64 +876,69 @@ const CampaignDetail = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {workflow1Questions.map((question) => {
-                      const answer = workflow1Answers.find(a => a.question_id === question.id);
-                      return (
-                        <div key={question.id} className="border-b border-border pb-4 last:border-0">
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div className="font-medium text-sm flex-1">{renderFormattedText(question.text)}</div>
-                            {answer && editingAnswer !== answer.id && (
-                              <Button 
-                                size="sm" 
-                                variant="ghost"
-                                onClick={() => {
-                                  setEditingAnswer(answer.id);
-                                  setEditValue(answer.value_text || "");
-                                }}
-                              >
-                                <Edit3 className="h-3 w-3 mr-1" />
-                                Edit
-                              </Button>
+                    {workflow1Questions
+                      .filter(question => 
+                        question.text !== "Thanks! Could you please describe your other current focus in a few words?" &&
+                        question.text !== "Thanks! Which other cities or areas did you have in mind?"
+                      )
+                      .map((question) => {
+                        const answer = workflow1Answers.find(a => a.question_id === question.id);
+                        return (
+                          <div key={question.id} className="border-b border-border pb-4 last:border-0">
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="font-medium text-sm flex-1">{renderFormattedText(question.text)}</div>
+                              {answer && editingAnswer !== answer.id && (
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setEditingAnswer(answer.id);
+                                    setEditValue(answer.value_text || "");
+                                  }}
+                                >
+                                  <Edit3 className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                              )}
+                            </div>
+                            {answer ? (
+                              editingAnswer === answer.id ? (
+                                <div className="space-y-2">
+                                  <Textarea
+                                    value={editValue}
+                                    onChange={(e) => setEditValue(e.target.value)}
+                                    className="min-h-[80px]"
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => updateAnswerMutation.mutate({ answerId: answer.id, newValue: editValue })}
+                                    >
+                                      <Save className="h-3 w-3 mr-1" />
+                                      Save
+                                    </Button>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={() => {
+                                        setEditingAnswer(null);
+                                        setEditValue("");
+                                      }}
+                                    >
+                                      <X className="h-3 w-3 mr-1" />
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
+                              )
+                            ) : (
+                              <div className="text-muted-foreground italic">Not Answered</div>
                             )}
                           </div>
-                          {answer ? (
-                            editingAnswer === answer.id ? (
-                              <div className="space-y-2">
-                                <Textarea
-                                  value={editValue}
-                                  onChange={(e) => setEditValue(e.target.value)}
-                                  className="min-h-[80px]"
-                                />
-                                <div className="flex gap-2">
-                                  <Button 
-                                    size="sm" 
-                                    onClick={() => updateAnswerMutation.mutate({ answerId: answer.id, newValue: editValue })}
-                                  >
-                                    <Save className="h-3 w-3 mr-1" />
-                                    Save
-                                  </Button>
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => {
-                                      setEditingAnswer(null);
-                                      setEditValue("");
-                                    }}
-                                  >
-                                    <X className="h-3 w-3 mr-1" />
-                                    Cancel
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
-                            )
-                          ) : (
-                            <div className="text-muted-foreground italic">Not Answered</div>
-                          )}
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                 </CardContent>
               </Card>
