@@ -925,140 +925,82 @@ const CampaignDetail = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    {(() => {
-                      const filteredQuestions = workflow1Questions.filter(question => 
+                  <div className="space-y-4">
+                    {workflow1Questions
+                      .filter(question => 
                         question.text !== "Thanks! Could you please describe your other current focus in a few words?" &&
                         question.text !== "Thanks! Which other cities or areas did you have in mind?"
-                      );
-                      
-                      // Group questions by section
-                      const sections: Record<string, any[]> = {};
-                      filteredQuestions.forEach(question => {
-                        const section = question.section || 'Other';
-                        if (!sections[section]) {
-                          sections[section] = [];
-                        }
-                        sections[section].push(question);
-                      });
-                      
-                      const sectionEmojis: Record<string, string> = {
-                        'Goals': '🎯',
-                        'Current Portfolio': '🏘️',
-                        'Campaign Info': '📈',
-                        'Preferences': '🏘️'
-                      };
-                      
-                      const sectionTitles: Record<string, string> = {
-                        'Goals': '1. Property Portfolio Goals',
-                        'Current Portfolio': '2. Current Property Portfolio',
-                        'Campaign Info': '3. Campaign Information',
-                        'Preferences': '4. Property Preferences'
-                      };
-                      
-                      return Object.entries(sections).map(([sectionName, questions]) => (
-                        <div key={sectionName} className="space-y-4">
-                          <h3 className="text-lg font-semibold flex items-center gap-2">
-                            <span>{sectionEmojis[sectionName] || '📋'}</span>
-                            {sectionTitles[sectionName] || sectionName}
-                          </h3>
-                          {questions.map((question, idx) => {
-                            const answer = workflow1Answers.find(a => a.question_id === question.id);
-                            const isEditing = editingQuestionId === question.id || editingAnswer === answer?.id;
-                            const questionNumber = question.ordinal;
-                            
-                            // Extract just the question text, removing section headers, numbers, and options
-                            let questionText = question.text;
-                            // Remove section headers like "🎯 1. Property Portfolio Goals"
-                            questionText = questionText.replace(/^[🎯📈🏘️]\s*\d+\.\s*[^\n]+\n+/gm, '');
-                            // Remove question numbers and emojis like "1️⃣ 🧭"
-                            questionText = questionText.replace(/^\d+️⃣\s*[🧭📝🏘️💰🌏]?\s*/gm, '');
-                            // Get just the first line (the actual question)
-                            questionText = questionText.split('\n')[0].trim();
-                            
-                            return (
-                              <div key={question.id} className="border-l-4 border-border pl-4 space-y-2">
-                                <div className="flex items-start gap-3">
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
-                                      {questionNumber}
-                                    </div>
-                                    <div className="font-medium text-base flex-1">{questionText}</div>
-                                  </div>
-                                  {!isEditing && (
-                                    <Button 
-                                      size="sm" 
-                                      variant="ghost"
-                                      onClick={() => {
-                                        setEditingQuestionId(question.id);
-                                        if (answer) {
-                                          setEditingAnswer(answer.id);
-                                          setEditValue(answer.value_text || answer.interpreted_value || answer.raw_text || "");
-                                        } else {
-                                          setEditValue("");
-                                        }
-                                      }}
-                                      className="flex-shrink-0"
-                                    >
-                                      <Edit3 className="h-3 w-3 mr-1" />
-                                      Edit
-                                    </Button>
-                                  )}
+                      )
+                      .map((question) => {
+                        const answer = workflow1Answers.find(a => a.question_id === question.id);
+                        const isEditing = editingQuestionId === question.id || editingAnswer === answer?.id;
+                        
+                        return (
+                          <div key={question.id} className="border-b border-border pb-4 last:border-0">
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="font-medium text-sm flex-1">{renderFormattedText(question.text)}</div>
+                              {!isEditing && (
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setEditingQuestionId(question.id);
+                                    if (answer) {
+                                      setEditingAnswer(answer.id);
+                                      setEditValue(answer.value_text || "");
+                                    } else {
+                                      setEditValue("");
+                                    }
+                                  }}
+                                >
+                                  <Edit3 className="h-3 w-3 mr-1" />
+                                  Edit
+                                </Button>
+                              )}
+                            </div>
+                            {isEditing ? (
+                              <div className="space-y-2">
+                                <Textarea
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  className="min-h-[80px]"
+                                />
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => {
+                                      if (answer) {
+                                        updateAnswerMutation.mutate({ answerId: answer.id, newValue: editValue });
+                                      } else {
+                                        createAnswerMutation.mutate({ questionId: question.id, value: editValue });
+                                      }
+                                    }}
+                                  >
+                                    <Save className="h-3 w-3 mr-1" />
+                                    Save
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => {
+                                      setEditingAnswer(null);
+                                      setEditingQuestionId(null);
+                                      setEditValue("");
+                                    }}
+                                  >
+                                    <X className="h-3 w-3 mr-1" />
+                                    Cancel
+                                  </Button>
                                 </div>
-                                
-                                {isEditing ? (
-                                  <div className="space-y-2 ml-10">
-                                    <Textarea
-                                      value={editValue}
-                                      onChange={(e) => setEditValue(e.target.value)}
-                                      className="min-h-[80px]"
-                                    />
-                                    <div className="flex gap-2">
-                                      <Button 
-                                        size="sm" 
-                                        onClick={() => {
-                                          if (answer) {
-                                            updateAnswerMutation.mutate({ answerId: answer.id, newValue: editValue });
-                                          } else {
-                                            createAnswerMutation.mutate({ questionId: question.id, value: editValue });
-                                          }
-                                        }}
-                                      >
-                                        <Save className="h-3 w-3 mr-1" />
-                                        Save
-                                      </Button>
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline"
-                                        onClick={() => {
-                                          setEditingAnswer(null);
-                                          setEditingQuestionId(null);
-                                          setEditValue("");
-                                        }}
-                                      >
-                                        <X className="h-3 w-3 mr-1" />
-                                        Cancel
-                                      </Button>
-                                    </div>
-                                  </div>
-                                ) : answer ? (
-                                  <div className="ml-10 space-y-1">
-                                    <div className="text-lg font-semibold text-foreground">
-                                      {renderAnswerValue(answer)}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                      Answered: {formatSydneyTime(answer.answered_at)}
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="ml-10 text-muted-foreground italic">Not Answered</div>
-                                )}
                               </div>
-                            );
-                          })}
-                        </div>
-                      ));
-                    })()}
+                            ) : answer ? (
+                              <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
+                            ) : (
+                              <div className="text-muted-foreground italic">Not Answered</div>
+                            )}
+                          </div>
+                        );
+                      })}
                   </div>
                 </CardContent>
               </Card>
