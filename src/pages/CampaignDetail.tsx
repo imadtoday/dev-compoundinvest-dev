@@ -1050,7 +1050,7 @@ const CampaignDetail = () => {
                   {(campaign as any)?.workflow_2_status !== 'accepted' && (
                     <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-4">
                       <p className="text-sm text-yellow-700 dark:text-yellow-400">
-                        Workflow 2 must be accepted before asking for purchasing entity details.
+                        Workflow 2 must be completed before asking for purchasing entity details.
                       </p>
                     </div>
                   )}
