@@ -856,7 +856,7 @@ const CampaignDetail = () => {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Workflow 1</CardTitle>
+                      <CardTitle>Workflow 1 - Intake Questions</CardTitle>
                       <CardDescription>{workflow1Answers.length} questions answered</CardDescription>
                     </div>
                     <Select 
