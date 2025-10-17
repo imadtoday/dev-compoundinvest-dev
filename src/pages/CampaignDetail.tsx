@@ -387,11 +387,31 @@ const CampaignDetail = () => {
       if (response.ok) {
         toast({ title: "Success", description: "Proposal is being created" });
         setSelectedTemplate('');
-        
-        // Wait a bit for the webhook to complete before refetching
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
-          queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
+
+        // Start polling for the new proposal to appear (handles webhook delay)
+        const initialCount = proposals?.length || 0;
+        const startTime = Date.now();
+        const pollInterval = setInterval(async () => {
+          // Invalidate to trigger a refetch
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] }),
+            queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] })
+          ]);
+
+          const latest = (queryClient.getQueryData(["campaign-proposals", id]) as any[]) || [];
+          const hasNew = latest.length > initialCount || latest.some(p => {
+            try { return new Date(p.created_at).getTime() >= startTime; } catch { return false; }
+          });
+
+          if (hasNew) {
+            clearInterval(pollInterval);
+            toast({ title: "Proposal created", description: "Your new proposal is now visible." });
+          }
+
+          // Stop polling after 30s to avoid infinite loops
+          if (Date.now() - startTime > 30000) {
+            clearInterval(pollInterval);
+          }
         }, 2000);
       } else {
         const errorText = await response.text();
