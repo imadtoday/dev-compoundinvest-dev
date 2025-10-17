@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText, CheckCircle2, Circle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText, CheckCircle2, Circle, AlertCircle, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import { format } from "date-fns";
@@ -1264,6 +1264,11 @@ const CampaignDetail = () => {
                         <div key={message.id}>
                           <div className="rounded-lg border bg-card p-4">
                             <div className="flex items-center gap-2 mb-2">
+                              {message.sender_type === 'ai_sms' ? (
+                                <Mail className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                              )}
                               <span className="font-semibold text-sm">{message.sender_display || message.sender_type}</span>
                               <span className="text-xs text-muted-foreground">{formatSydneyTime(message.sent_at)}</span>
                             </div>
