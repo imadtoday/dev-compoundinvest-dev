@@ -391,6 +391,7 @@ const CampaignDetail = () => {
         // Wait a bit for the webhook to complete before refetching
         setTimeout(() => {
           queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
+          queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
         }, 2000);
       } else {
         const errorText = await response.text();
