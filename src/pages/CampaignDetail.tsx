@@ -254,38 +254,46 @@ const CampaignDetail = () => {
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Scroll spy using IntersectionObserver - detect which section is in view
+  // Scroll spy - detect which section is in view
   useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: '-100px 0px -70% 0px', // Top offset for header, bottom offset to trigger earlier
-      threshold: 0
-    };
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 200; // Offset from top of viewport
 
-    const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const sectionId = entry.target.getAttribute('data-section-id');
-          if (sectionId) {
-            setActiveSection(sectionId);
-          }
+      // Get all sections with their positions
+      const sectionPositions = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript']
+        .map(id => ({
+          id,
+          element: sectionRefs.current[id],
+          top: sectionRefs.current[id]?.offsetTop || 0,
+          bottom: (sectionRefs.current[id]?.offsetTop || 0) + (sectionRefs.current[id]?.offsetHeight || 0)
+        }))
+        .filter(section => section.element);
+
+      // Find the section that the scroll position is currently in
+      let currentSection = 'overview'; // Default to overview
+      
+      for (const section of sectionPositions) {
+        // Check if scroll position is within this section's boundaries
+        if (scrollPosition >= section.top && scrollPosition < section.bottom) {
+          currentSection = section.id;
+          break;
         }
-      });
-    };
-
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-    // Observe all section refs
-    Object.entries(sectionRefs.current).forEach(([id, element]) => {
-      if (element) {
-        element.setAttribute('data-section-id', id);
-        observer.observe(element);
+        // If we've scrolled past this section but not reached the next one, use this section
+        if (scrollPosition >= section.top) {
+          currentSection = section.id;
+        }
       }
-    });
 
-    return () => {
-      observer.disconnect();
+      setActiveSection(currentSection);
     };
+
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll);
+    
+    // Call immediately to set initial state
+    setTimeout(handleScroll, 100); // Small delay to ensure elements are rendered
+
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [campaign]); // Re-run when campaign data loads
 
   // Get section status - for workflows, use the workflow_x_status field
