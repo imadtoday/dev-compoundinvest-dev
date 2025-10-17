@@ -385,15 +385,15 @@ const AddCampaign = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="status">Workflow 1 Status</Label>
                   <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="new">New</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="complete">Complete</SelectItem>
+                      <SelectItem value="CONSENT_PENDING">Consent pending</SelectItem>
+                      <SelectItem value="INTAKE_IN_PROGRESS">Intake in progress</SelectItem>
+                      <SelectItem value="COMPLETE">Complete</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
