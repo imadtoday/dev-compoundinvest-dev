@@ -1259,16 +1259,17 @@ const CampaignDetail = () => {
                 </CardHeader>
                 <CardContent>
                   {messages && messages.length > 0 ? (
-                    <div className="space-y-4">
-                      {messages.map((message: any) => (
-                        <div key={message.id} className="flex gap-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm">{message.sender_display || message.sender_type}</span>
+                    <div className="space-y-3">
+                      {messages.map((message: any, index: number) => (
+                        <div key={message.id}>
+                          <div className="rounded-lg border bg-card p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="font-semibold text-sm">{message.sender_display || message.sender_type}</span>
                               <span className="text-xs text-muted-foreground">{formatSydneyTime(message.sent_at)}</span>
                             </div>
-                            <p className="text-foreground whitespace-pre-wrap break-words">{message.body}</p>
+                            <p className="text-foreground whitespace-pre-wrap break-words leading-relaxed">{message.body}</p>
                           </div>
+                          {index < messages.length - 1 && <Separator className="mt-3" />}
                         </div>
                       ))}
                     </div>
