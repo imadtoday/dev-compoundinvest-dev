@@ -44,6 +44,9 @@ const CampaignDetail = () => {
   // Navigation state
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [activeSection, setActiveSection] = useState('overview');
+  // Scroll container refs
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
 
   // Template ID to name mapping
   const getTemplateName = (templateId: string) => {
@@ -258,7 +261,7 @@ const CampaignDetail = () => {
   useEffect(() => {
     const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript'];
 
-    const rootEl = document.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+    const rootEl = viewportRef.current;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -327,12 +330,15 @@ const CampaignDetail = () => {
 
     // Initial sync
     setTimeout(() => {
+      const targetY = rootEl ? 40 : 120;
+      const baseTop = rootEl ? rootEl.getBoundingClientRect().top : 0;
       const distances = sectionIds
         .map((id) => {
           const el = sectionRefs.current[id];
           if (!el) return { id, dist: Number.POSITIVE_INFINITY };
           const rect = el.getBoundingClientRect();
-          return { id, dist: Math.abs(rect.top - 120) };
+          const topRelative = rect.top - baseTop;
+          return { id, dist: Math.abs(topRelative - targetY) };
         })
         .sort((a, b) => a.dist - b.dist);
       if (distances.length) {
@@ -947,7 +953,7 @@ const CampaignDetail = () => {
         </div>
 
           {/* Right Side - Scrollable Content */}
-          <ScrollArea className="flex-1 min-w-0 h-[calc(100vh-180px)]">
+          <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="flex-1 min-w-0 h-[calc(100vh-180px)]">
             <div className="space-y-6 pr-6 md:pr-8 break-words">
             {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
