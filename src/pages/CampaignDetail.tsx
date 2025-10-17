@@ -1266,9 +1266,9 @@ const CampaignDetail = () => {
                           <div className="rounded-lg border bg-card p-4">
                             <div className="flex items-center gap-2 mb-2">
                               {message.sender_type === 'ai_sms' ? (
-                                <Mail className="h-4 w-4 text-muted-foreground" />
+                                <Mail className="h-7 w-7 text-muted-foreground" />
                               ) : (
-                                <img src={whatsappIcon} alt="WhatsApp" className="h-4 w-4" />
+                                <img src={whatsappIcon} alt="WhatsApp" className="h-7 w-7" />
                               )}
                               <span className="font-semibold text-sm">{message.sender_display || message.sender_type}</span>
                               <span className="text-xs text-muted-foreground">{formatSydneyTime(message.sent_at)}</span>
