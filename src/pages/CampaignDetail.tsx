@@ -254,47 +254,62 @@ const CampaignDetail = () => {
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Scroll spy - detect which section is in view
+  // Scroll spy - detect which section is in view using a top-offset target line
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200; // Offset from top of viewport
+    const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript'];
 
-      // Get all sections with their positions
-      const sectionPositions = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript']
-        .map(id => ({
-          id,
-          element: sectionRefs.current[id],
-          top: sectionRefs.current[id]?.offsetTop || 0,
-          bottom: (sectionRefs.current[id]?.offsetTop || 0) + (sectionRefs.current[id]?.offsetHeight || 0)
-        }))
-        .filter(section => section.element);
+    const calcActive = () => {
+      // Use a target line slightly below the top to account for sticky header
+      const target = window.scrollY + 120;
 
-      // Find the section that the scroll position is currently in
-      let currentSection = 'overview'; // Default to overview
-      
-      for (const section of sectionPositions) {
-        // Check if scroll position is within this section's boundaries
-        if (scrollPosition >= section.top && scrollPosition < section.bottom) {
-          currentSection = section.id;
-          break;
-        }
-        // If we've scrolled past this section but not reached the next one, use this section
-        if (scrollPosition >= section.top) {
-          currentSection = section.id;
-        }
+      // Build positions
+      const sections = sectionIds
+        .map((id) => {
+          const el = sectionRefs.current[id];
+          if (!el) return null;
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          const bottom = top + height;
+          return { id, top, bottom, height };
+        })
+        .filter((s): s is { id: string; top: number; bottom: number; height: number } => Boolean(s));
+
+      if (!sections.length) return;
+
+      // 1) Prefer the section whose [top, bottom) contains the target line
+      const inView = sections.find((s) => target >= s.top && target < s.bottom);
+      if (inView) {
+        setActiveSection(inView.id);
+        return;
       }
 
-      setActiveSection(currentSection);
+      // 2) Otherwise, pick the last section whose top is above the target
+      const past = sections.filter((s) => s.top <= target);
+      if (past.length) {
+        setActiveSection(past[past.length - 1].id);
+        return;
+      }
+
+      // 3) Fallback to the first section
+      setActiveSection(sections[0].id);
     };
 
-    // Add scroll listener
-    window.addEventListener('scroll', handleScroll);
-    
-    // Call immediately to set initial state
-    setTimeout(handleScroll, 100); // Small delay to ensure elements are rendered
+    const onScroll = () => {
+      // Use rAF to avoid excessive updates during fast scroll
+      requestAnimationFrame(calcActive);
+    };
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [campaign]); // Re-run when campaign data loads
+    window.addEventListener('scroll', onScroll);
+    window.addEventListener('resize', onScroll);
+
+    // Initial calculation
+    setTimeout(calcActive, 0);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
 
   // Get section status - for workflows, use the workflow_x_status field
   const getSectionStatus = (sectionId: string) => {
