@@ -1007,7 +1007,25 @@ const CampaignDetail = () => {
                                     setEditingQuestionId(question.id);
                                     if (answer) {
                                       setEditingAnswer(answer.id);
-                                      setEditValue(answer.value_text || "");
+                                      // Get value from value_text, value_json, or interpreted_value
+                                      let currentValue = "";
+                                      if (answer.value_text) {
+                                        currentValue = answer.value_text;
+                                      } else if (answer.value_json) {
+                                        try {
+                                          const parsed = typeof answer.value_json === 'string' 
+                                            ? JSON.parse(answer.value_json) 
+                                            : answer.value_json;
+                                          if (parsed?.selected_values && Array.isArray(parsed.selected_values)) {
+                                            currentValue = parsed.selected_values.filter((v: string) => v && v.trim()).join(', ');
+                                          }
+                                        } catch (e) {
+                                          console.error('Error parsing value_json for edit:', e);
+                                        }
+                                      } else if (answer.interpreted_value) {
+                                        currentValue = answer.interpreted_value;
+                                      }
+                                      setEditValue(currentValue);
                                     } else {
                                       setEditValue("");
                                     }
