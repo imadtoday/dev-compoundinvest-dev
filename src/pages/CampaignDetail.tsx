@@ -40,6 +40,7 @@ const CampaignDetail = () => {
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
   const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
   const [isSyncingProposals, setIsSyncingProposals] = useState(false);
+  const [watchProposals, setWatchProposals] = useState(false);
   
   // Navigation state
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -210,6 +211,8 @@ const CampaignDetail = () => {
       return data || [];
     },
     enabled: !!id,
+    refetchInterval: watchProposals ? 2000 : false,
+    refetchOnWindowFocus: true,
   });
 
   const { data: cronSync } = useQuery({
@@ -229,6 +232,26 @@ const CampaignDetail = () => {
       return data ? (data as any as { id: number; created_at: string; updated_at: string }) : null;
     },
   });
+
+  // Realtime updates for proposals status changes
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`proposals:${id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'proposals',
+        filter: `campaign_id=eq.${id}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, queryClient]);
 
   // Fetch all Workflow 1 questions
   const { data: workflow1Questions = [] } = useQuery({
@@ -544,6 +567,7 @@ const CampaignDetail = () => {
   const handleSyncProposals = async () => {
     console.log('Starting proposal sync...');
     setIsSyncingProposals(true);
+    setWatchProposals(true);
     try {
       const baseUrl = 'https://datatube.app.n8n.cloud/webhook/1928db19-a525-43da-8564-16f4ac4dcb7a';
       const params = new URLSearchParams({
@@ -574,6 +598,8 @@ const CampaignDetail = () => {
       toast({ title: "Error", description: `Failed to sync proposals: ${error.message}`, variant: "destructive" });
     } finally {
       setIsSyncingProposals(false);
+      // Keep polling proposals briefly to catch delayed platform updates
+      setTimeout(() => setWatchProposals(false), 30000);
     }
   };
 
