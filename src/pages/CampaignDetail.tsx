@@ -1519,8 +1519,8 @@ const CampaignDetail = () => {
                 </AlertDialog>
               </div>
             </div>
-          </ScrollArea>
-        </div>
+          </div>
+        </ScrollArea>
       </div>
     </div>
   );
