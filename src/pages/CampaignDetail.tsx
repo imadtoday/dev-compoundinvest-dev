@@ -883,7 +883,7 @@ const CampaignDetail = () => {
                     <div>
                       <h4 className="font-medium text-sm text-muted-foreground">Workflow</h4>
                       <Badge variant={getStatusBadgeVariant(campaign.status)}>
-                        {campaign.status.replace('_', ' ').toUpperCase()}
+                        {formatWorkflowStatus(campaign.status)}
                       </Badge>
                     </div>
                     <div>
