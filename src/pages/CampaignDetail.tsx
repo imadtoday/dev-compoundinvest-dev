@@ -556,14 +556,14 @@ const CampaignDetail = () => {
       console.log('Sync response:', response.status, response.ok);
       
       if (response.ok) {
-        toast({ title: "Success", description: "Proposals synced from platform" });
         // Wait a moment for the database to update before refreshing
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
         // Refetch both queries to update the UI
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] }),
           queryClient.refetchQueries({ queryKey: ["cron-sync"] })
         ]);
+        toast({ title: "Success", description: "Proposals synced from platform" });
       } else {
         const errorText = await response.text();
         console.error('Sync error:', errorText);
