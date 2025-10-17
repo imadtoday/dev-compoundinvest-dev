@@ -697,7 +697,27 @@ const CampaignDetail = () => {
           : answer.value_json;
         
         if (parsed?.selected_values && Array.isArray(parsed.selected_values) && parsed.selected_values.length > 0) {
-          const values = parsed.selected_values.filter((v: string) => v && v.trim());
+          let values = parsed.selected_values.filter((v: string) => v && v.trim());
+          
+          // Check if "Other" is selected and look up the corresponding _other field
+          if (values.some(v => v.toLowerCase().includes('other'))) {
+            const questionCode = answer.question_code;
+            const otherFieldCode = `${questionCode}_other`;
+            
+            // Find the answer for the _other field
+            const otherAnswer = answers?.find((a: any) => a.question_code === otherFieldCode);
+            
+            if (otherAnswer) {
+              const otherValue = otherAnswer.value_text || otherAnswer.interpreted_value || otherAnswer.raw_text;
+              if (otherValue) {
+                // Replace "Other" with "Other: <value>"
+                values = values.map(v => 
+                  v.toLowerCase().includes('other') ? `Other: ${otherValue}` : v
+                );
+              }
+            }
+          }
+          
           if (values.length > 0) {
             return renderFormattedText(values.join(', '));
           }
