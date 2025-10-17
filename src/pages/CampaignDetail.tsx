@@ -258,6 +258,8 @@ const CampaignDetail = () => {
   useEffect(() => {
     const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript'];
 
+    const rootEl = document.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+
     const observer = new IntersectionObserver(
       (entries) => {
         console.log('IntersectionObserver triggered:', entries.map(e => ({ 
@@ -286,13 +288,15 @@ const CampaignDetail = () => {
         }
 
         // Fallback: choose the section whose top is closest to a target line below the header
-        const targetY = 120; // px from top of viewport
+        const targetY = rootEl ? 40 : 120; // px from top of viewport
+        const baseTop = rootEl ? rootEl.getBoundingClientRect().top : 0;
         const distances = sectionIds
           .map((id) => {
             const el = sectionRefs.current[id];
             if (!el) return { id, dist: Number.POSITIVE_INFINITY };
             const rect = el.getBoundingClientRect();
-            return { id, dist: Math.abs(rect.top - targetY) };
+            const topRelative = rect.top - baseTop;
+            return { id, dist: Math.abs(topRelative - targetY) };
           })
           .sort((a, b) => a.dist - b.dist);
 
@@ -302,9 +306,9 @@ const CampaignDetail = () => {
         }
       },
       {
-        root: null,
+        root: rootEl ?? null,
         // Offset top for sticky header and bias to highlight section earlier
-        rootMargin: '-120px 0px -50% 0px',
+        rootMargin: rootEl ? '-40px 0px -50% 0px' : '-120px 0px -50% 0px',
         threshold: [0, 0.1, 0.25, 0.4, 0.5, 0.75, 1],
       }
     );
@@ -942,9 +946,9 @@ const CampaignDetail = () => {
           </Card>
         </div>
 
-        {/* Right Side - Scrollable Content */}
-        <ScrollArea className="flex-1 min-w-0 h-[calc(100vh-180px)]">
-          <div className="space-y-6 pr-6 md:pr-8 break-words">
+          {/* Right Side - Scrollable Content */}
+          <ScrollArea className="flex-1 min-w-0 h-[calc(100vh-180px)]">
+            <div className="space-y-6 pr-6 md:pr-8 break-words">
             {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
               <Card>
@@ -1515,8 +1519,8 @@ const CampaignDetail = () => {
                 </AlertDialog>
               </div>
             </div>
-          </div>
-        </ScrollArea>
+          </ScrollArea>
+        </div>
       </div>
     </div>
   );
