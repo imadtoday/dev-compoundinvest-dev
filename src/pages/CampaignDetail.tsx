@@ -339,13 +339,16 @@ const CampaignDetail = () => {
     if (!campaign.success_fee) missingFields.push("Success Fee");
     
     // Check workflow 1 answers for questions 1, 2, 6, and 7
-    const requiredQuestionCodes = ['Q1', 'Q2', 'Q6', 'Q7'];
+    const requiredQuestionCodes = ['current_focus', 'timeframe', 'budget_range', 'cities'];
     const workflow1AnswersList = answers?.filter(a => a.questions?.questionnaire_id === '2bf87f22-142d-4db7-aa2c-9dc6d63da39d') || [];
     
     requiredQuestionCodes.forEach(code => {
       const answer = workflow1AnswersList.find(a => a.questions?.code === code);
-      if (!answer || !answer.value_text) {
-        missingFields.push(`Answer to question ${code.replace('Q', '')}`);
+      // Check for value in value_text, value_json, or interpreted_value
+      const hasValue = answer && (answer.value_text || answer.value_json || answer.interpreted_value);
+      if (!hasValue) {
+        const questionNumber = code === 'current_focus' ? '1' : code === 'timeframe' ? '2' : code === 'budget_range' ? '6' : '7';
+        missingFields.push(`Answer to question ${questionNumber}`);
       }
     });
     
