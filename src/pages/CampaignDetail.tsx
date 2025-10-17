@@ -254,61 +254,74 @@ const CampaignDetail = () => {
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Scroll spy - detect which section is in view using a top-offset target line
+  // Scroll spy - robust using IntersectionObserver with ratio + nearest fallback
   useEffect(() => {
     const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript'];
 
-    const calcActive = () => {
-      // Use a target line slightly below the top to account for sticky header
-      const target = window.scrollY + 120;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Pick the entry with the highest intersection ratio among those intersecting
+        let bestId: string | null = null;
+        let bestRatio = 0;
 
-      // Build positions
-      const sections = sectionIds
+        entries.forEach((entry) => {
+          const id = (entry.target as HTMLElement).dataset.sectionId;
+          if (!id) return;
+          if (entry.isIntersecting && entry.intersectionRatio >= bestRatio) {
+            bestRatio = entry.intersectionRatio;
+            bestId = id;
+          }
+        });
+
+        if (bestId) {
+          setActiveSection(bestId);
+          return;
+        }
+
+        // Fallback: choose the section whose top is closest to a target line below the header
+        const targetY = 120; // px from top of viewport
+        const distances = sectionIds
+          .map((id) => {
+            const el = sectionRefs.current[id];
+            if (!el) return { id, dist: Number.POSITIVE_INFINITY };
+            const rect = el.getBoundingClientRect();
+            return { id, dist: Math.abs(rect.top - targetY) };
+          })
+          .sort((a, b) => a.dist - b.dist);
+
+        if (distances.length) setActiveSection(distances[0].id);
+      },
+      {
+        root: null,
+        // Offset top for sticky header and bias to highlight section earlier
+        rootMargin: '-120px 0px -50% 0px',
+        threshold: [0, 0.1, 0.25, 0.4, 0.5, 0.75, 1],
+      }
+    );
+
+    // Observe each section
+    sectionIds.forEach((id) => {
+      const el = sectionRefs.current[id];
+      if (el) {
+        el.setAttribute('data-section-id', id);
+        observer.observe(el);
+      }
+    });
+
+    // Initial sync
+    setTimeout(() => {
+      const distances = sectionIds
         .map((id) => {
           const el = sectionRefs.current[id];
-          if (!el) return null;
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          const bottom = top + height;
-          return { id, top, bottom, height };
+          if (!el) return { id, dist: Number.POSITIVE_INFINITY };
+          const rect = el.getBoundingClientRect();
+          return { id, dist: Math.abs(rect.top - 120) };
         })
-        .filter((s): s is { id: string; top: number; bottom: number; height: number } => Boolean(s));
+        .sort((a, b) => a.dist - b.dist);
+      if (distances.length) setActiveSection(distances[0].id);
+    }, 0);
 
-      if (!sections.length) return;
-
-      // 1) Prefer the section whose [top, bottom) contains the target line
-      const inView = sections.find((s) => target >= s.top && target < s.bottom);
-      if (inView) {
-        setActiveSection(inView.id);
-        return;
-      }
-
-      // 2) Otherwise, pick the last section whose top is above the target
-      const past = sections.filter((s) => s.top <= target);
-      if (past.length) {
-        setActiveSection(past[past.length - 1].id);
-        return;
-      }
-
-      // 3) Fallback to the first section
-      setActiveSection(sections[0].id);
-    };
-
-    const onScroll = () => {
-      // Use rAF to avoid excessive updates during fast scroll
-      requestAnimationFrame(calcActive);
-    };
-
-    window.addEventListener('scroll', onScroll);
-    window.addEventListener('resize', onScroll);
-
-    // Initial calculation
-    setTimeout(calcActive, 0);
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
+    return () => observer.disconnect();
   }, []);
 
   // Get section status - for workflows, use the workflow_x_status field
