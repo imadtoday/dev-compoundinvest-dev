@@ -1327,7 +1327,17 @@ const CampaignDetail = () => {
                         <div key={proposal.id} className="border border-border rounded-lg p-4">
                           <div className="flex items-start justify-between gap-4 mb-2">
                             <h4 className="font-medium flex-1">{getTemplateName(proposal.template_id)}</h4>
-                            <Badge className="shrink-0">{proposal.proposal_status}</Badge>
+                            <Badge 
+                              className="shrink-0"
+                              variant={
+                                proposal.proposal_status === 'accepted' ? 'success' :
+                                proposal.proposal_status === 'draft' ? 'warning' :
+                                proposal.proposal_status === 'sent' ? 'info' :
+                                'default'
+                              }
+                            >
+                              {proposal.proposal_status.charAt(0).toUpperCase() + proposal.proposal_status.slice(1)}
+                            </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mb-3">Created: {formatSydneyTime(proposal.created_at)}</p>
                           <div className="flex flex-wrap gap-2">
