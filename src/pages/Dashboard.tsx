@@ -74,7 +74,7 @@ const Dashboard = () => {
 
         {/* Stats Cards with premium styling */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          <div className="premium-card animate-slide-up">
+          <Link to="/contacts" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Contacts</CardTitle>
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -85,9 +85,9 @@ const Dashboard = () => {
               <div className="text-3xl font-bold text-gradient-primary">{stats?.totalContacts || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">Active contacts</p>
             </CardContent>
-          </div>
+          </Link>
           
-          <div className="premium-card animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <Link to="/campaigns" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer" style={{ animationDelay: '0.1s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Campaigns</CardTitle>
               <div className="p-2 bg-accent/10 rounded-lg">
@@ -98,9 +98,9 @@ const Dashboard = () => {
               <div className="text-3xl font-bold text-gradient-gold">{stats?.totalCampaigns || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">All campaigns</p>
             </CardContent>
-          </div>
+          </Link>
           
-          <div className="premium-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <Link to="/campaigns?workflow=workflow_1" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer" style={{ animationDelay: '0.2s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Workflow 1</CardTitle>
               <div className="p-2 bg-blue-500/10 rounded-lg">
@@ -111,9 +111,9 @@ const Dashboard = () => {
               <div className="text-3xl font-bold text-blue-600">{stats?.workflow1Count || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">In workflow 1</p>
             </CardContent>
-          </div>
+          </Link>
 
-          <div className="premium-card animate-slide-up" style={{ animationDelay: '0.3s' }}>
+          <Link to="/campaigns?workflow=workflow_2" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer" style={{ animationDelay: '0.3s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Workflow 2</CardTitle>
               <div className="p-2 bg-purple-500/10 rounded-lg">
@@ -124,9 +124,9 @@ const Dashboard = () => {
               <div className="text-3xl font-bold text-purple-600">{stats?.workflow2Count || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">In workflow 2</p>
             </CardContent>
-          </div>
+          </Link>
 
-          <div className="premium-card animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <Link to="/campaigns?workflow=workflow_4" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer" style={{ animationDelay: '0.4s' }}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Workflow 4</CardTitle>
               <div className="p-2 bg-green-500/10 rounded-lg">
@@ -137,7 +137,7 @@ const Dashboard = () => {
               <div className="text-3xl font-bold text-green-600">{stats?.workflow4Count || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">In workflow 4</p>
             </CardContent>
-          </div>
+          </Link>
         </div>
 
         {/* Latest Contacts with premium styling */}

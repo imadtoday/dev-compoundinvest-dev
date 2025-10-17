@@ -6,14 +6,23 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Megaphone, Search, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatInTimeZone } from "date-fns-tz";
 
 const CampaignsList = () => {
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [workflowFilter, setWorkflowFilter] = useState<string>("all");
+
+  // Set workflow filter from URL params on mount
+  useEffect(() => {
+    const workflowParam = searchParams.get("workflow");
+    if (workflowParam) {
+      setWorkflowFilter(workflowParam);
+    }
+  }, [searchParams]);
 
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ['campaigns-list'],
