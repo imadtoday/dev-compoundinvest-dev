@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText, CheckCircle2, Circle, AlertCircle, Mail } from "lucide-react";
+import whatsappIcon from "@/assets/whatsapp-icon.png";
 import { Input } from "@/components/ui/input";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import { format } from "date-fns";
@@ -1267,7 +1268,7 @@ const CampaignDetail = () => {
                               {message.sender_type === 'ai_sms' ? (
                                 <Mail className="h-4 w-4 text-muted-foreground" />
                               ) : (
-                                <MessageCircle className="h-4 w-4 text-muted-foreground" />
+                                <img src={whatsappIcon} alt="WhatsApp" className="h-4 w-4" />
                               )}
                               <span className="font-semibold text-sm">{message.sender_display || message.sender_type}</span>
                               <span className="text-xs text-muted-foreground">{formatSydneyTime(message.sent_at)}</span>
