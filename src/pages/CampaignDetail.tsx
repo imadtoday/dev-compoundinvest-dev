@@ -43,6 +43,7 @@ const CampaignDetail = () => {
   
   // Navigation state
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [activeSection, setActiveSection] = useState('overview');
 
   // Template ID to name mapping
   const getTemplateName = (templateId: string) => {
@@ -252,6 +253,32 @@ const CampaignDetail = () => {
   const scrollToSection = (sectionId: string) => {
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  // Scroll spy - detect which section is in view
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 100; // offset for header
+
+      // Check each section to see which one is currently in view
+      const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript'];
+      
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const section = sectionRefs.current[sectionIds[i]];
+        if (section) {
+          const sectionTop = section.offsetTop;
+          if (scrollPosition >= sectionTop - 50) {
+            setActiveSection(sectionIds[i]);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Call once on mount
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Get section status - for workflows, use the workflow_x_status field
   const getSectionStatus = (sectionId: string) => {
@@ -833,7 +860,7 @@ const CampaignDetail = () => {
             <CardContent className="p-4">
               <nav className="space-y-1">
                 {navSections.map((section) => {
-                  const isActive = campaign.status === section.id || (section.id === 'overview');
+                  const isActive = activeSection === section.id;
                   return (
                     <button
                       key={section.id}
