@@ -561,7 +561,11 @@ const CampaignDetail = () => {
     mutationFn: async ({ answerId, newValue }: { answerId: string, newValue: string }) => {
       const { data, error } = await supabase
         .from("campaign_answers")
-        .update({ value_text: newValue })
+        .update({ 
+          value_text: newValue,
+          value_json: null,  // Clear value_json when manually editing
+          interpreted_value: null  // Clear interpreted_value when manually editing
+        })
         .eq("id", answerId)
         .select();
       if (error) throw error;
