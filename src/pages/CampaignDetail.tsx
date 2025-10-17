@@ -260,6 +260,12 @@ const CampaignDetail = () => {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        console.log('IntersectionObserver triggered:', entries.map(e => ({ 
+          id: (e.target as HTMLElement).dataset.sectionId, 
+          isIntersecting: e.isIntersecting,
+          ratio: e.intersectionRatio 
+        })));
+
         // Pick the entry with the highest intersection ratio among those intersecting
         let bestId: string | null = null;
         let bestRatio = 0;
@@ -274,6 +280,7 @@ const CampaignDetail = () => {
         });
 
         if (bestId) {
+          console.log('Setting active section to:', bestId);
           setActiveSection(bestId);
           return;
         }
@@ -289,7 +296,10 @@ const CampaignDetail = () => {
           })
           .sort((a, b) => a.dist - b.dist);
 
-        if (distances.length) setActiveSection(distances[0].id);
+        if (distances.length) {
+          console.log('Fallback - setting active section to:', distances[0].id);
+          setActiveSection(distances[0].id);
+        }
       },
       {
         root: null,
@@ -305,6 +315,9 @@ const CampaignDetail = () => {
       if (el) {
         el.setAttribute('data-section-id', id);
         observer.observe(el);
+        console.log('Observing section:', id);
+      } else {
+        console.warn('Section ref not found:', id);
       }
     });
 
@@ -318,8 +331,11 @@ const CampaignDetail = () => {
           return { id, dist: Math.abs(rect.top - 120) };
         })
         .sort((a, b) => a.dist - b.dist);
-      if (distances.length) setActiveSection(distances[0].id);
-    }, 0);
+      if (distances.length) {
+        console.log('Initial active section:', distances[0].id);
+        setActiveSection(distances[0].id);
+      }
+    }, 100);
 
     return () => observer.disconnect();
   }, []);
