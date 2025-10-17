@@ -926,7 +926,7 @@ const CampaignDetail = () => {
                 {(() => {
                   const completedWorkflows = [
                     (campaign as any)?.workflow_1_status === 'complete',
-                    (campaign as any)?.workflow_2_status === 'complete',
+                    (campaign as any)?.workflow_2_status === 'accepted',
                     (campaign as any)?.workflow_4_status === 'complete'
                   ].filter(Boolean).length;
                   return `${completedWorkflows} out of 3 Workflows Complete`;
