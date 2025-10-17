@@ -55,6 +55,17 @@ const CampaignsList = () => {
     return matchesSearch && matchesWorkflow;
   });
 
+  const formatWorkflowStatus = (status: string) => {
+    return status
+      .split('_')
+      .map((word, index) => 
+        index === 0 
+          ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          : word.toLowerCase()
+      )
+      .join(' ');
+  };
+
   const getStatusBadgeStyle = (status: string) => {
     switch (status.toLowerCase()) {
       case 'complete':
@@ -182,12 +193,12 @@ const CampaignsList = () => {
                         <TableCell>
                           {campaign.status === 'workflow_1' && (campaign as any).workflow_1_status && (
                             <Badge variant="secondary" className="font-medium px-3 py-1">
-                              {((campaign as any).workflow_1_status as string).replace('_', ' ').toUpperCase()}
+                              {formatWorkflowStatus((campaign as any).workflow_1_status as string)}
                             </Badge>
                           )}
                           {campaign.status === 'workflow_2' && (campaign as any).workflow_2_status && (
                             <Badge variant="secondary" className="font-medium px-3 py-1">
-                              {((campaign as any).workflow_2_status as string).replace('_', ' ').toUpperCase()}
+                              {formatWorkflowStatus((campaign as any).workflow_2_status as string)}
                             </Badge>
                           )}
                           {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && (

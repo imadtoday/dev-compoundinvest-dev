@@ -62,6 +62,17 @@ const CampaignDetail = () => {
     return templateMap[templateId] || templateId;
   };
 
+  const formatWorkflowStatus = (status: string) => {
+    return status
+      .split('_')
+      .map((word, index) => 
+        index === 0 
+          ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          : word.toLowerCase()
+      )
+      .join(' ');
+  };
+
   const formatCurrency = (value: number | string) => {
     if (!value) return "";
     const numValue = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
@@ -867,17 +878,17 @@ const CampaignDetail = () => {
                       <h4 className="font-medium text-sm text-muted-foreground">Workflow Status</h4>
                       {campaign.status === 'workflow_1' && (campaign as any).workflow_1_status && (
                         <Badge variant="secondary" className="font-medium px-3 py-1">
-                          {((campaign as any).workflow_1_status as string).replace('_', ' ').toUpperCase()}
+                          {formatWorkflowStatus((campaign as any).workflow_1_status as string)}
                         </Badge>
                       )}
                       {campaign.status === 'workflow_2' && (campaign as any).workflow_2_status && (
                         <Badge variant="secondary" className="font-medium px-3 py-1">
-                          {((campaign as any).workflow_2_status as string).replace('_', ' ').toUpperCase()}
+                          {formatWorkflowStatus((campaign as any).workflow_2_status as string)}
                         </Badge>
                       )}
                       {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
                         <Badge variant="secondary" className="font-medium px-3 py-1">
-                          {((campaign as any).workflow_4_status as string).replace('_', ' ').toUpperCase()}
+                          {formatWorkflowStatus((campaign as any).workflow_4_status as string)}
                         </Badge>
                       )}
                       {(!['workflow_1', 'workflow_2', 'workflow_4'].includes(campaign.status) || 
