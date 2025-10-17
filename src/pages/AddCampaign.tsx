@@ -21,7 +21,7 @@ const AddCampaign = () => {
   const [formData, setFormData] = useState({
     name: "",
     contact_id: "",
-    status: "new",
+    workflow_1_status: "CONSENT_PENDING",
     engagement_fee: "",
     success_fee: "",
     notes: ""
@@ -216,7 +216,8 @@ const AddCampaign = () => {
           id: newCampaignId,
           name: campaignData.name,
           contact_id: campaignData.contact_id,
-          status: campaignData.status,
+          status: 'workflow_1',
+          workflow_1_status: campaignData.workflow_1_status,
           engagement_fee: campaignData.engagement_fee,
           success_fee: campaignData.success_fee,
           notes: campaignData.notes || null,
@@ -385,8 +386,8 @@ const AddCampaign = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="status">Workflow 1 Status</Label>
-                  <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
+                  <Label htmlFor="workflow_1_status">Workflow 1 Status</Label>
+                  <Select value={formData.workflow_1_status} onValueChange={(value) => setFormData(prev => ({ ...prev, workflow_1_status: value }))}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
