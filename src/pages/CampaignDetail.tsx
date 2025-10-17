@@ -254,31 +254,39 @@ const CampaignDetail = () => {
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Scroll spy - detect which section is in view
+  // Scroll spy using IntersectionObserver - detect which section is in view
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 100; // offset for header
-
-      // Check each section to see which one is currently in view
-      const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript'];
-      
-      for (let i = sectionIds.length - 1; i >= 0; i--) {
-        const section = sectionRefs.current[sectionIds[i]];
-        if (section) {
-          const sectionTop = section.offsetTop;
-          if (scrollPosition >= sectionTop - 50) {
-            setActiveSection(sectionIds[i]);
-            break;
-          }
-        }
-      }
+    const observerOptions = {
+      root: null,
+      rootMargin: '-100px 0px -70% 0px', // Top offset for header, bottom offset to trigger earlier
+      threshold: 0
     };
 
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Call once on mount
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.getAttribute('data-section-id');
+          if (sectionId) {
+            setActiveSection(sectionId);
+          }
+        }
+      });
+    };
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observe all section refs
+    Object.entries(sectionRefs.current).forEach(([id, element]) => {
+      if (element) {
+        element.setAttribute('data-section-id', id);
+        observer.observe(element);
+      }
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [campaign]); // Re-run when campaign data loads
 
   // Get section status - for workflows, use the workflow_x_status field
   const getSectionStatus = (sectionId: string) => {
