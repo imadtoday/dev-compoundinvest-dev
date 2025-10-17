@@ -261,38 +261,69 @@ const CampaignDetail = () => {
   useEffect(() => {
     const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript'];
 
-    const rootEl = viewportRef.current;
+    let observer: IntersectionObserver | null = null;
+    let rafId = 0;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        console.log('IntersectionObserver triggered:', entries.map(e => ({ 
-          id: (e.target as HTMLElement).dataset.sectionId, 
-          isIntersecting: e.isIntersecting,
-          ratio: e.intersectionRatio 
-        })));
+    const setup = () => {
+      const rootEl = (viewportRef.current ?? (document.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null));
+      if (!rootEl) {
+        rafId = requestAnimationFrame(setup);
+        return;
+      }
 
-        // Pick the entry with the highest intersection ratio among those intersecting
-        let bestId: string | null = null;
-        let bestRatio = 0;
+      observer = new IntersectionObserver(
+        (entries) => {
+          let bestId: string | null = null;
+          let bestRatio = 0;
 
-        entries.forEach((entry) => {
-          const id = (entry.target as HTMLElement).dataset.sectionId;
-          if (!id) return;
-          if (entry.isIntersecting && entry.intersectionRatio >= bestRatio) {
-            bestRatio = entry.intersectionRatio;
-            bestId = id;
+          entries.forEach((entry) => {
+            const id = (entry.target as HTMLElement).dataset.sectionId;
+            if (!id) return;
+            if (entry.isIntersecting && entry.intersectionRatio >= bestRatio) {
+              bestRatio = entry.intersectionRatio;
+              bestId = id;
+            }
+          });
+
+          if (bestId) {
+            setActiveSection(bestId);
+            return;
           }
-        });
 
-        if (bestId) {
-          console.log('Setting active section to:', bestId);
-          setActiveSection(bestId);
-          return;
+          const targetY = 40; // px from top of scroll ROOT
+          const baseTop = rootEl.getBoundingClientRect().top;
+          const distances = sectionIds
+            .map((id) => {
+              const el = sectionRefs.current[id];
+              if (!el) return { id, dist: Number.POSITIVE_INFINITY };
+              const rect = el.getBoundingClientRect();
+              const topRelative = rect.top - baseTop;
+              return { id, dist: Math.abs(topRelative - targetY) };
+            })
+            .sort((a, b) => a.dist - b.dist);
+
+          if (distances.length) setActiveSection(distances[0].id);
+        },
+        {
+          root: rootEl,
+          rootMargin: '-40px 0px -50% 0px',
+          threshold: [0, 0.1, 0.25, 0.4, 0.5, 0.75, 1],
         }
+      );
 
-        // Fallback: choose the section whose top is closest to a target line below the header
-        const targetY = rootEl ? 40 : 120; // px from top of viewport
-        const baseTop = rootEl ? rootEl.getBoundingClientRect().top : 0;
+      // Observe each section
+      sectionIds.forEach((id) => {
+        const el = sectionRefs.current[id];
+        if (el) {
+          el.setAttribute('data-section-id', id);
+          observer!.observe(el);
+        }
+      });
+
+      // Initial sync aligned to scroll root
+      setTimeout(() => {
+        const targetY = 40;
+        const baseTop = rootEl.getBoundingClientRect().top;
         const distances = sectionIds
           .map((id) => {
             const el = sectionRefs.current[id];
@@ -302,52 +333,16 @@ const CampaignDetail = () => {
             return { id, dist: Math.abs(topRelative - targetY) };
           })
           .sort((a, b) => a.dist - b.dist);
+        if (distances.length) setActiveSection(distances[0].id);
+      }, 100);
+    };
 
-        if (distances.length) {
-          console.log('Fallback - setting active section to:', distances[0].id);
-          setActiveSection(distances[0].id);
-        }
-      },
-      {
-        root: rootEl ?? null,
-        // Offset top for sticky header and bias to highlight section earlier
-        rootMargin: rootEl ? '-40px 0px -50% 0px' : '-120px 0px -50% 0px',
-        threshold: [0, 0.1, 0.25, 0.4, 0.5, 0.75, 1],
-      }
-    );
+    setup();
 
-    // Observe each section
-    sectionIds.forEach((id) => {
-      const el = sectionRefs.current[id];
-      if (el) {
-        el.setAttribute('data-section-id', id);
-        observer.observe(el);
-        console.log('Observing section:', id);
-      } else {
-        console.warn('Section ref not found:', id);
-      }
-    });
-
-    // Initial sync
-    setTimeout(() => {
-      const targetY = rootEl ? 40 : 120;
-      const baseTop = rootEl ? rootEl.getBoundingClientRect().top : 0;
-      const distances = sectionIds
-        .map((id) => {
-          const el = sectionRefs.current[id];
-          if (!el) return { id, dist: Number.POSITIVE_INFINITY };
-          const rect = el.getBoundingClientRect();
-          const topRelative = rect.top - baseTop;
-          return { id, dist: Math.abs(topRelative - targetY) };
-        })
-        .sort((a, b) => a.dist - b.dist);
-      if (distances.length) {
-        console.log('Initial active section:', distances[0].id);
-        setActiveSection(distances[0].id);
-      }
-    }, 100);
-
-    return () => observer.disconnect();
+    return () => {
+      if (observer) observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Get section status - for workflows, use the workflow_x_status field
