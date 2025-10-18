@@ -10,13 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Plus, Megaphone } from "lucide-react";
+import { ArrowLeft, Plus, Megaphone, Check, ChevronsUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const AddCampaign = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [openContactCombobox, setOpenContactCombobox] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -371,18 +375,56 @@ const AddCampaign = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="contact">Contact *</Label>
-                  <Select value={formData.contact_id} onValueChange={(value) => setFormData(prev => ({ ...prev, contact_id: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a contact" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {contacts?.map((contact) => (
-                        <SelectItem key={contact.id} value={contact.id}>
-                          {contact.first_name} {contact.last_name} ({contact.email})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={openContactCombobox} onOpenChange={setOpenContactCombobox}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openContactCombobox}
+                        className="w-full justify-between"
+                      >
+                        {formData.contact_id
+                          ? (() => {
+                              const selectedContact = contacts?.find(
+                                (contact) => contact.id === formData.contact_id
+                              );
+                              return selectedContact
+                                ? `${selectedContact.first_name} ${selectedContact.last_name} (${selectedContact.email})`
+                                : "Select a contact";
+                            })()
+                          : "Select a contact"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0 bg-background z-50" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search contacts..." className="h-9" />
+                        <CommandList>
+                          <CommandEmpty>No contact found.</CommandEmpty>
+                          <CommandGroup>
+                            {contacts?.map((contact) => (
+                              <CommandItem
+                                key={contact.id}
+                                value={`${contact.first_name} ${contact.last_name} ${contact.email}`}
+                                onSelect={() => {
+                                  setFormData(prev => ({ ...prev, contact_id: contact.id }));
+                                  setOpenContactCombobox(false);
+                                }}
+                              >
+                                {contact.first_name} {contact.last_name} ({contact.email})
+                                <Check
+                                  className={cn(
+                                    "ml-auto h-4 w-4",
+                                    formData.contact_id === contact.id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <div className="space-y-2">
