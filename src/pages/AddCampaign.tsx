@@ -56,7 +56,7 @@ const AddCampaign = () => {
             is_active
           )
         `)
-        .eq('questionnaires.is_active', true)
+        .eq('questionnaire_id', '2bf87f22-142d-4db7-aa2c-9dc6d63da39d')
         .order('ordinal', { ascending: true });
       
       return data || [];
