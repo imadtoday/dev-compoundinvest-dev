@@ -213,7 +213,12 @@ const CampaignsList = () => {
                               {formatWorkflowStatus((campaign as any).workflow_2_status as string)}
                             </Badge>
                           )}
-                          {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && (
+                          {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
+                            <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_4_status as string)}`}>
+                              {formatWorkflowStatus((campaign as any).workflow_4_status as string)}
+                            </Badge>
+                          )}
+                          {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && campaign.status !== 'workflow_4' && (
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
