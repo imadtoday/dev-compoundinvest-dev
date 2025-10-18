@@ -1443,7 +1443,7 @@ const CampaignDetail = () => {
                     <div className="space-y-4">
                       {workflow4Answers.map((answer) => (
                         <div key={answer.id} className="border-b border-border pb-4 last:border-0">
-                          <h4 className="font-medium text-sm mb-1">{answer.questions?.text}</h4>
+                          <div className="font-medium text-sm mb-1">{renderFormattedText(answer.questions?.text || '')}</div>
                           <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
                         </div>
                       ))}
