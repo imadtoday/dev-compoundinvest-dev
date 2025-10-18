@@ -70,7 +70,7 @@ const CampaignsList = () => {
     const lowerStatus = status.toLowerCase();
     if (lowerStatus === 'complete' || lowerStatus === 'accepted') {
       return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
-    } else if (lowerStatus === 'intake_in_progress' || lowerStatus === 'sent') {
+    } else if (lowerStatus === 'intake_in_progress' || lowerStatus === 'sent' || lowerStatus === 'in_progress') {
       return 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200';
     } else if (lowerStatus === 'consent_pending') {
       return 'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200';
