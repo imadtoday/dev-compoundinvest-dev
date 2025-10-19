@@ -974,8 +974,8 @@ const CampaignDetail = () => {
         </div>
 
           {/* Right Side - Scrollable Content */}
-          <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="flex-1 h-[calc(100vh-180px)]">
-            <div className="space-y-6 pr-4 break-words max-w-full">
+          <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="flex-1 min-w-0 h-[calc(100vh-180px)]">
+            <div className="space-y-6 pr-4 md:pr-6 lg:pr-8 break-words max-w-full overflow-x-hidden">
             {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
               <Card>
@@ -1366,7 +1366,7 @@ const CampaignDetail = () => {
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mb-3">Created: {formatSydneyTime(proposal.created_at)}</p>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-2 w-full">
                             {proposal.proposal_preview_url && (
                               <a 
                                 href={proposal.proposal_preview_url} 
