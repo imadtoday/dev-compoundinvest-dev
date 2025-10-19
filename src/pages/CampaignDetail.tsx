@@ -975,7 +975,7 @@ const CampaignDetail = () => {
 
           {/* Right Side - Scrollable Content */}
           <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="flex-1 min-w-0 h-[calc(100vh-180px)]">
-            <div className="space-y-6 pr-4 md:pr-6 lg:pr-8 break-words max-w-full overflow-x-hidden">
+            <div className="space-y-6 pr-4 md:pr-6 lg:pr-8 break-words max-w-full min-w-0 overflow-x-hidden">
             {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
               <Card>
@@ -1317,9 +1317,9 @@ const CampaignDetail = () => {
                       <FileText className="h-4 w-4" />
                       Create New Proposal
                     </h3>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap items-center gap-2 min-w-0">
                       <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                        <SelectTrigger className="flex-1">
+                        <SelectTrigger className="flex-1 basis-0 min-w-0">
                           <SelectValue placeholder="Select proposal template..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -1339,6 +1339,7 @@ const CampaignDetail = () => {
                       <Button
                         onClick={handleCreateProposal}
                         disabled={!selectedTemplate || isCreatingProposal}
+                        className="shrink-0"
                       >
                         {isCreatingProposal ? "Creating..." : "Create Proposal"}
                       </Button>
