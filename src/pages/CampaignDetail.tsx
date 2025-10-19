@@ -1350,9 +1350,9 @@ const CampaignDetail = () => {
                     <div className="space-y-4">
                       <h3 className="font-semibold text-lg">Existing Proposals</h3>
                       {proposals.map((proposal: any) => (
-                        <div key={proposal.id} className="border border-border rounded-lg p-4">
+                        <div key={proposal.id} className="border border-border rounded-lg p-4 max-w-full overflow-hidden">
                           <div className="flex items-start justify-between gap-4 mb-2">
-                            <h4 className="font-medium flex-1">{getTemplateName(proposal.template_id)}</h4>
+                            <h4 className="font-medium flex-1 break-words">{getTemplateName(proposal.template_id)}</h4>
                             <Badge 
                               className="shrink-0"
                               variant={
