@@ -1461,36 +1461,29 @@ const CampaignDetail = () => {
                     {isAskingPurchasingEntity ? "Sending..." : "Ask for Purchasing Entity Details"}
                   </Button>
                   
-                  {workflow4Questions.length > 0 ? (
+                  {workflow4Answers.length > 0 ? (
                     <div className="space-y-4">
-                      {workflow4Questions.map((question) => {
-                        const answer = workflow4Answers.find(a => a.question_id === question.id);
-                        
-                        return (
-                          <div key={question.id} className="border-b border-border pb-4 last:border-0">
-                            <div className="text-sm text-muted-foreground mb-2">Question:</div>
-                            <div className="font-medium mb-3">{renderFormattedText(question.text)}</div>
-                            {answer && hasAnswerContent(answer) ? (
-                              <div className="mt-2">
-                                <div className="text-sm text-muted-foreground mb-1">Answer:</div>
-                                <div className="text-foreground break-words font-medium">{renderAnswerValue(answer)}</div>
-                                <div className="text-xs text-muted-foreground mt-2">
-                                  {formatSydneyTime(answer.created_at)}
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="mt-2">
-                                <div className="text-sm text-muted-foreground mb-1">Answer:</div>
-                                <div className="text-muted-foreground italic">Not Answered</div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                      {workflow4Answers.map((answer) => (
+                        <div key={answer.id} className="border-b border-border pb-4 last:border-0">
+                          <div className="text-sm text-muted-foreground mb-2">Question:</div>
+                          <div className="font-medium mb-3">{renderFormattedText(answer.questions?.text || '')}</div>
+                          <div className="text-sm text-muted-foreground mb-2">Answer:</div>
+                          <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
+                        </div>
+                      ))}
                     </div>
-                  ) : (
-                    <p className="text-muted-foreground">No questions configured.</p>
-                  )}
+                  ) : workflow4Questions.length > 0 ? (
+                    <div className="space-y-4">
+                      <div className="border-b border-border pb-4">
+                        <div className="text-sm text-muted-foreground mb-2">Question:</div>
+                        <div className="font-medium mb-3">{renderFormattedText(workflow4Questions[0].text)}</div>
+                        <div className="mt-2">
+                          <div className="text-sm text-muted-foreground mb-1">Answer:</div>
+                          <div className="text-muted-foreground italic">Not Answered</div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                 </CardContent>
               </Card>
             </div>
