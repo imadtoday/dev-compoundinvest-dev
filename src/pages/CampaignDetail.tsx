@@ -271,6 +271,24 @@ const CampaignDetail = () => {
     },
   });
 
+  // Fetch all Workflow 4 questions
+  const { data: workflow4Questions = [] } = useQuery({
+    queryKey: ["workflow4-questions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('questionnaire_id', '134a10e9-3331-4774-9972-2321bf829ec0')
+        .order('ordinal', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching workflow 4 questions:', error);
+        return [];
+      }
+      return data || [];
+    },
+  });
+
   // Filter answers by questionnaire
   const workflow1Answers = answers?.filter(a => a.questions?.questionnaire_id === '2bf87f22-142d-4db7-aa2c-9dc6d63da39d') || [];
   const workflow4Answers = answers?.filter(a => a.questions?.questionnaire_id === '134a10e9-3331-4774-9972-2321bf829ec0') || [];
@@ -1443,19 +1461,35 @@ const CampaignDetail = () => {
                     {isAskingPurchasingEntity ? "Sending..." : "Ask for Purchasing Entity Details"}
                   </Button>
                   
-                  {workflow4Answers.length > 0 ? (
+                  {workflow4Questions.length > 0 ? (
                     <div className="space-y-4">
-                      {workflow4Answers.map((answer) => (
-                        <div key={answer.id} className="border-b border-border pb-4 last:border-0">
-                          <div className="text-sm text-muted-foreground mb-2">Question:</div>
-                          <div className="font-medium mb-3">{renderFormattedText(answer.questions?.text || '')}</div>
-                          <div className="text-sm text-muted-foreground mb-2">Answer:</div>
-                          <div className="text-foreground break-words">{renderAnswerValue(answer)}</div>
-                        </div>
-                      ))}
+                      {workflow4Questions.map((question) => {
+                        const answer = workflow4Answers.find(a => a.question_id === question.id);
+                        
+                        return (
+                          <div key={question.id} className="border-b border-border pb-4 last:border-0">
+                            <div className="text-sm text-muted-foreground mb-2">Question:</div>
+                            <div className="font-medium mb-3">{renderFormattedText(question.text)}</div>
+                            {answer && hasAnswerContent(answer) ? (
+                              <div className="mt-2">
+                                <div className="text-sm text-muted-foreground mb-1">Answer:</div>
+                                <div className="text-foreground break-words font-medium">{renderAnswerValue(answer)}</div>
+                                <div className="text-xs text-muted-foreground mt-2">
+                                  {formatSydneyTime(answer.created_at)}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="mt-2">
+                                <div className="text-sm text-muted-foreground mb-1">Answer:</div>
+                                <div className="text-muted-foreground italic">Not Answered</div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground">No questions answered yet.</p>
+                    <p className="text-muted-foreground">No questions configured.</p>
                   )}
                 </CardContent>
               </Card>
