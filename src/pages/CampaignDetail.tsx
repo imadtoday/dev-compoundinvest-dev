@@ -437,6 +437,9 @@ const CampaignDetail = () => {
       const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
       if (response.ok) {
         toast({ title: "Success", description: "Purchasing entity details request has been sent" });
+        // Refresh the campaign data and answers
+        queryClient.invalidateQueries({ queryKey: ["campaign", id] });
+        queryClient.invalidateQueries({ queryKey: ["campaign-answers", id] });
       } else {
         throw new Error(`Webhook failed with status ${response.status}`);
       }
