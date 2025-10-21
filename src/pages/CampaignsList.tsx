@@ -35,11 +35,20 @@ const CampaignsList = () => {
             id,
             first_name,
             last_name
+          ),
+          messages (
+            sent_at
           )
         `)
         .order('created_at', { ascending: false });
       
-      return data || [];
+      // Calculate last activity for each campaign
+      return data?.map(campaign => ({
+        ...campaign,
+        lastActivity: campaign.messages?.length > 0 
+          ? new Date(Math.max(...campaign.messages.map((m: any) => new Date(m.sent_at).getTime())))
+          : null
+      })) || [];
     }
   });
 
@@ -162,6 +171,7 @@ const CampaignsList = () => {
                       <TableHead className="font-semibold">Contact</TableHead>
                       <TableHead className="font-semibold">Workflow</TableHead>
                       <TableHead className="font-semibold">Workflow Status</TableHead>
+                      <TableHead className="font-semibold">Last Activity</TableHead>
                       <TableHead className="font-semibold">Created</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -223,6 +233,17 @@ const CampaignsList = () => {
                           )}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
+                          {(campaign as any).lastActivity ? (
+                            formatInTimeZone(
+                              (campaign as any).lastActivity,
+                              'Australia/Sydney',
+                              'dd/MM/yyyy HH:mm'
+                            )
+                          ) : (
+                            <span className="text-muted-foreground/60">No messages</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
                           {formatInTimeZone(
                             new Date(campaign.created_at),
                             'Australia/Sydney',
@@ -233,7 +254,7 @@ const CampaignsList = () => {
                     ))}
                      {filteredCampaigns?.length === 0 && (
                        <TableRow>
-                         <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                         <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                            No campaigns found matching your criteria
                          </TableCell>
                        </TableRow>
