@@ -1541,18 +1541,28 @@ const CampaignDetail = () => {
                               <div className="mt-2">
                                 <div className="text-sm text-muted-foreground mb-1">Answer:</div>
                                 <div className="text-foreground break-words font-medium">
-                                  {answer.question_code === 'upload_pre_approval' && answer.value_json && typeof answer.value_json === 'object' && (answer.value_json as any).filename ? (
-                                    <a 
-                                      href={(answer.value_json as any).file_url} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="text-primary hover:underline flex items-center gap-1"
-                                    >
-                                      {(answer.value_json as any).filename}
-                                    </a>
-                                  ) : (
-                                    renderAnswerValue(answer)
-                                  )}
+                                  {answer.question_code === 'upload_pre_approval' ? (() => {
+                                    let vj: any = answer.value_json;
+                                    try { if (typeof vj === 'string') vj = JSON.parse(vj); } catch {}
+                                    const filename = vj?.filename ?? vj?.file?.filename ?? vj?.file?.name ?? vj?.files?.[0]?.filename ?? vj?.files?.[0]?.name;
+                                    const fileUrl = vj?.file_url ?? vj?.file?.file_url ?? vj?.file?.url ?? vj?.files?.[0]?.file_url ?? vj?.files?.[0]?.url;
+                                    if (filename && fileUrl) {
+                                      return (
+                                        <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                                          {filename}
+                                        </a>
+                                      );
+                                    }
+                                    if (fileUrl) {
+                                      const fallbackName = fileUrl.split('/').pop() || 'View file';
+                                      return (
+                                        <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                                          {fallbackName}
+                                        </a>
+                                      );
+                                    }
+                                    return renderAnswerValue(answer);
+                                  })() : renderAnswerValue(answer)}
                                 </div>
                                 <div className="text-xs text-muted-foreground mt-2">
                                   {formatSydneyTime(answer.created_at)}
