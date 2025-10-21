@@ -1540,7 +1540,20 @@ const CampaignDetail = () => {
                             ) : (
                               <div className="mt-2">
                                 <div className="text-sm text-muted-foreground mb-1">Answer:</div>
-                                <div className="text-foreground break-words font-medium">{renderAnswerValue(answer)}</div>
+                                <div className="text-foreground break-words font-medium">
+                                  {answer.question_code === 'upload_pre_approval' && answer.value_json && typeof answer.value_json === 'object' && (answer.value_json as any).filename ? (
+                                    <a 
+                                      href={(answer.value_json as any).file_url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-primary hover:underline flex items-center gap-1"
+                                    >
+                                      {(answer.value_json as any).filename}
+                                    </a>
+                                  ) : (
+                                    renderAnswerValue(answer)
+                                  )}
+                                </div>
                                 <div className="text-xs text-muted-foreground mt-2">
                                   {formatSydneyTime(answer.created_at)}
                                 </div>
