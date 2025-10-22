@@ -1453,13 +1453,46 @@ const CampaignDetail = () => {
                       </p>
                     </div>
                   )}
-                  <Button
-                    onClick={handleAskPurchasingEntity}
-                    variant="outline"
-                    disabled={isAskingPurchasingEntity || (campaign as any)?.workflow_2_status !== 'accepted'}
-                  >
-                    {isAskingPurchasingEntity ? "Sending..." : "Ask for Purchasing Entity Details"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleAskPurchasingEntity}
+                      variant="outline"
+                      disabled={isAskingPurchasingEntity || (campaign as any)?.workflow_2_status !== 'accepted'}
+                    >
+                      {isAskingPurchasingEntity ? "Sending..." : "Ask for Purchasing Entity Details"}
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        if (!confirm('Are you sure you want to delete all Workflow 4 answers? This cannot be undone.')) return;
+                        
+                        try {
+                          const { error } = await supabase
+                            .from('campaign_answers')
+                            .delete()
+                            .eq('campaign_id', id)
+                            .in('question_id', workflow4Answers.map(a => a.question_id));
+                          
+                          if (error) throw error;
+                          
+                          toast({
+                            title: "Success",
+                            description: "Workflow 4 answers deleted successfully",
+                          });
+                          
+                          queryClient.invalidateQueries({ queryKey: ['campaign-answers', id] });
+                        } catch (error: any) {
+                          toast({
+                            title: "Error",
+                            description: error.message,
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      variant="destructive"
+                    >
+                      Temporary Reset
+                    </Button>
+                  </div>
                   
                   {workflow4Answers.length > 0 ? (
                     <div className="space-y-4">
