@@ -1476,7 +1476,10 @@ const CampaignDetail = () => {
 
                           const { error: updateError } = await supabase
                             .from('campaigns')
-                            .update({ workflow_4_status: null } as any)
+                            .update({ 
+                              workflow_4_status: null,
+                              status: 'workflow_2'
+                            } as any)
                             .eq('id', id);
                           
                           if (updateError) throw updateError;
