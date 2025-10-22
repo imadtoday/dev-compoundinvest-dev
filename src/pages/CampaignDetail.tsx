@@ -1466,20 +1466,28 @@ const CampaignDetail = () => {
                         if (!confirm('Are you sure you want to delete all Workflow 4 answers? This cannot be undone.')) return;
                         
                         try {
-                          const { error } = await supabase
+                          const { error: deleteError } = await supabase
                             .from('campaign_answers')
                             .delete()
                             .eq('campaign_id', id)
                             .in('question_id', workflow4Answers.map(a => a.question_id));
                           
-                          if (error) throw error;
+                          if (deleteError) throw deleteError;
+
+                          const { error: updateError } = await supabase
+                            .from('campaigns')
+                            .update({ workflow_4_status: null } as any)
+                            .eq('id', id);
+                          
+                          if (updateError) throw updateError;
                           
                           toast({
                             title: "Success",
-                            description: "Workflow 4 answers deleted successfully",
+                            description: "Workflow 4 reset successfully",
                           });
                           
                           queryClient.invalidateQueries({ queryKey: ['campaign-answers', id] });
+                          queryClient.invalidateQueries({ queryKey: ['campaign-detail', id] });
                         } catch (error: any) {
                           toast({
                             title: "Error",
