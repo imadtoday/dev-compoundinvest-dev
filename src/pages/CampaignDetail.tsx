@@ -1127,6 +1127,25 @@ const CampaignDetail = () => {
                         </div>
                       </div>
                     )}
+                    
+                    {/* Invoice Settings Section */}
+                    <div className="mt-6 pt-6 border-t border-border">
+                      <h4 className="text-md font-semibold mb-4">Invoice Settings</h4>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Engagement Fee Bracket</label>
+                        <Select defaultValue="">
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select bracket" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0-0.5m">Engagement Fee Bracket up to $0.5M ($2,000)</SelectItem>
+                            <SelectItem value="0.5m-1m">Engagement Fee Bracket $0.5M to $1M ($2,500)</SelectItem>
+                            <SelectItem value="1m-2m">Engagement Fee Bracket $1M to $2M ($3,000)</SelectItem>
+                            <SelectItem value="over-2m">Engagement Fee Bracket over $2M ($3,500)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Address */}
