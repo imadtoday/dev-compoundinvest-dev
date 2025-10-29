@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText, CheckCircle2, Circle, AlertCircle, Mail } from "lucide-react";
+import { ArrowLeft, Megaphone, MessageCircle, Edit3, Save, X, Plus, Trash2, FileText, CheckCircle2, Circle, AlertCircle, Mail, Settings } from "lucide-react";
 import whatsappIcon from "@/assets/whatsapp-icon.png";
 import { Input } from "@/components/ui/input";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
@@ -1130,7 +1130,10 @@ const CampaignDetail = () => {
                     
                     {/* Invoice Settings Section */}
                     <div className="mt-6 pt-6 border-t border-border">
-                      <h4 className="text-md font-semibold mb-4">Invoice Settings</h4>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <Settings className="h-5 w-5" />
+                        Invoice Settings
+                      </h3>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Engagement Fee Bracket</label>
                         <Select defaultValue="">
