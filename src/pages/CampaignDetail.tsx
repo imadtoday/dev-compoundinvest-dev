@@ -34,6 +34,10 @@ const CampaignDetail = () => {
   const [successFee, setSuccessFee] = useState("");
   const [editingAddress, setEditingAddress] = useState(false);
   const [addressValue, setAddressValue] = useState("");
+  const [editingInvoiceSettings, setEditingInvoiceSettings] = useState(false);
+  const [engagementFeeBracket, setEngagementFeeBracket] = useState("");
+  const [discountType, setDiscountType] = useState("");
+  const [discountAmount, setDiscountAmount] = useState("");
   
   // Proposal creation state
   const [selectedTemplate, setSelectedTemplate] = useState('');
@@ -647,6 +651,23 @@ const CampaignDetail = () => {
     setAddressValue(campaign?.contacts?.address || "");
   };
 
+  const handleEditInvoiceSettings = () => setEditingInvoiceSettings(true);
+  const handleSaveInvoiceSettings = () => {
+    const discountValue = discountAmount ? parseCurrency(discountAmount) : null;
+    updateInvoiceSettingsMutation.mutate({ 
+      engagementFeeBracket, 
+      discountType, 
+      discountAmount: discountValue 
+    });
+  };
+  const handleCancelInvoiceSettingsEdit = () => {
+    setEditingInvoiceSettings(false);
+    // TODO: Reset to campaign values when database columns are added
+    setEngagementFeeBracket("");
+    setDiscountType("");
+    setDiscountAmount("");
+  };
+
   // Mutations
   const deleteCampaignMutation = useMutation({
     mutationFn: async () => {
@@ -718,6 +739,33 @@ const CampaignDetail = () => {
       queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
       setEditingAddress(false);
       toast({ title: "Address Updated", description: "The home address has been successfully updated." });
+    },
+  });
+
+  const updateInvoiceSettingsMutation = useMutation({
+    mutationFn: async ({ engagementFeeBracket, discountType, discountAmount }: { 
+      engagementFeeBracket: string, 
+      discountType: string, 
+      discountAmount: number | null 
+    }) => {
+      // TODO: Update this mutation once database columns are provided
+      const { data, error } = await supabase
+        .from("campaigns")
+        .update({ 
+          // Add actual column names here when provided
+          // engagement_fee_bracket: engagementFeeBracket,
+          // discount_type: discountType,
+          // discount_amount: discountAmount
+        })
+        .eq("id", id)
+        .select();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
+      setEditingInvoiceSettings(false);
+      toast({ title: "Invoice Settings Updated", description: "The invoice settings have been successfully updated." });
     },
   });
 
@@ -1130,56 +1178,114 @@ const CampaignDetail = () => {
                     
                     {/* Invoice Settings Section */}
                     <div className="mt-6 pt-6 border-t border-border">
-                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Settings className="h-5 w-5" />
-                        Invoice Settings
-                      </h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-sm font-medium text-muted-foreground">Engagement Fee Bracket</label>
-                          <Select defaultValue="">
-                            <SelectTrigger className="mt-1">
-                              <SelectValue placeholder="Select bracket" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="0-0.5m">Engagement Fee Bracket up to $0.5M ($2,000)</SelectItem>
-                              <SelectItem value="0.5m-1m">Engagement Fee Bracket $0.5M to $1M ($2,500)</SelectItem>
-                              <SelectItem value="1m-2m">Engagement Fee Bracket $1M to $2M ($3,000)</SelectItem>
-                              <SelectItem value="over-2m">Engagement Fee Bracket over $2M ($3,500)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-3">Engagement Fee Discount</h4>
-                          <div className="space-y-3">
-                            <div>
-                              <label className="text-sm font-medium text-muted-foreground">Discount Type</label>
-                              <Select defaultValue="">
-                                <SelectTrigger className="mt-1">
-                                  <SelectValue placeholder="Select discount type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="recurring">Recurring Customer Discount</SelectItem>
-                                  <SelectItem value="referral">Referral Discount</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div>
-                              <label className="text-sm font-medium text-muted-foreground">Discount Amount ($)</label>
-                              <div className="relative mt-1">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                          <Settings className="h-5 w-5" />
+                          Invoice Settings
+                        </h3>
+                        {!editingInvoiceSettings && (
+                          <Button size="sm" variant="ghost" onClick={handleEditInvoiceSettings}>
+                            <Edit3 className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                        )}
+                      </div>
+                      {editingInvoiceSettings ? (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-sm font-medium text-muted-foreground">Engagement Fee Bracket</label>
+                            <Select value={engagementFeeBracket} onValueChange={setEngagementFeeBracket}>
+                              <SelectTrigger className="mt-1">
+                                <SelectValue placeholder="Select bracket" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0-0.5m">Engagement Fee Bracket up to $0.5M ($2,000)</SelectItem>
+                                <SelectItem value="0.5m-1m">Engagement Fee Bracket $0.5M to $1M ($2,500)</SelectItem>
+                                <SelectItem value="1m-2m">Engagement Fee Bracket $1M to $2M ($3,000)</SelectItem>
+                                <SelectItem value="over-2m">Engagement Fee Bracket over $2M ($3,500)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-sm font-medium text-muted-foreground mb-3">Engagement Fee Discount</h4>
+                            <div className="space-y-3">
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">Discount Type</label>
+                                <Select value={discountType} onValueChange={setDiscountType}>
+                                  <SelectTrigger className="mt-1">
+                                    <SelectValue placeholder="Select discount type" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="recurring">Recurring Customer Discount</SelectItem>
+                                    <SelectItem value="referral">Referral Discount</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">Discount Amount ($)</label>
                                 <Input
-                                  type="text"
+                                  value={discountAmount}
+                                  onChange={(e) => handleCurrencyInput(e.target.value, setDiscountAmount)}
                                   placeholder="0"
-                                  className="pl-7"
+                                  className="mt-1"
                                 />
                               </div>
                             </div>
                           </div>
+                          
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={handleSaveInvoiceSettings}>
+                              <Save className="h-3 w-3 mr-1" />
+                              Save
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={handleCancelInvoiceSettingsEdit}>
+                              <X className="h-3 w-3 mr-1" />
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-medium text-sm text-muted-foreground">Engagement Fee Bracket</h4>
+                            <p className="text-foreground mt-1">
+                              {engagementFeeBracket ? (
+                                (() => {
+                                  const brackets: Record<string, string> = {
+                                    "0-0.5m": "Engagement Fee Bracket up to $0.5M ($2,000)",
+                                    "0.5m-1m": "Engagement Fee Bracket $0.5M to $1M ($2,500)",
+                                    "1m-2m": "Engagement Fee Bracket $1M to $2M ($3,000)",
+                                    "over-2m": "Engagement Fee Bracket over $2M ($3,500)"
+                                  };
+                                  return brackets[engagementFeeBracket] || engagementFeeBracket;
+                                })()
+                              ) : (
+                                <span className="text-muted-foreground italic">Not set</span>
+                              )}
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium text-sm text-muted-foreground">Discount Type</h4>
+                            <p className="text-foreground mt-1">
+                              {discountType ? (
+                                discountType === "recurring" ? "Recurring Customer Discount" : "Referral Discount"
+                              ) : (
+                                <span className="text-muted-foreground italic">Not set</span>
+                              )}
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <h4 className="font-medium text-sm text-muted-foreground">Discount Amount</h4>
+                            <p className="text-lg font-semibold text-foreground">
+                              {discountAmount ? `$${formatCurrency(discountAmount)}` : <span className="text-muted-foreground italic">Not set</span>}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
