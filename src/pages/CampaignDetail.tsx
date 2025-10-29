@@ -748,14 +748,12 @@ const CampaignDetail = () => {
       discountType: string, 
       discountAmount: number | null 
     }) => {
-      // TODO: Update this mutation once database columns are provided
       const { data, error } = await supabase
         .from("campaigns")
         .update({ 
-          // Add actual column names here when provided
-          // engagement_fee_bracket: engagementFeeBracket,
-          // discount_type: discountType,
-          // discount_amount: discountAmount
+          engagement_fee_bracket: engagementFeeBracket,
+          discount_type: discountType,
+          discount_amount: discountAmount
         })
         .eq("id", id)
         .select();
