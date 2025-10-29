@@ -662,10 +662,9 @@ const CampaignDetail = () => {
   };
   const handleCancelInvoiceSettingsEdit = () => {
     setEditingInvoiceSettings(false);
-    // TODO: Reset to campaign values when database columns are added
-    setEngagementFeeBracket("");
-    setDiscountType("");
-    setDiscountAmount("");
+    setEngagementFeeBracket((campaign as any)?.engagement_fee_bracket || "");
+    setDiscountType((campaign as any)?.discount_type || "");
+    setDiscountAmount((campaign as any)?.discount_amount ? formatCurrency((campaign as any).discount_amount) : "");
   };
 
   // Mutations
