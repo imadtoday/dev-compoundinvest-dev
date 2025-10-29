@@ -307,7 +307,7 @@ const CampaignDetail = () => {
 
   // Scroll spy - robust using IntersectionObserver with ratio + nearest fallback
   useEffect(() => {
-    const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow4', 'notes', 'transcript'];
+    const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow3', 'workflow4', 'notes', 'transcript'];
 
     let observer: IntersectionObserver | null = null;
     let rafId = 0;
