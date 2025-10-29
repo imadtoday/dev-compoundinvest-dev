@@ -406,6 +406,12 @@ const CampaignDetail = () => {
       if (status) return 'in_progress';
       return 'incomplete';
     }
+    if (sectionId === 'workflow3') {
+      const status = (campaign as any)?.workflow_3_status;
+      if (status === 'paid') return 'complete';
+      if (status === 'pending') return 'in_progress';
+      return 'incomplete';
+    }
     if (sectionId === 'workflow4') {
       const status = (campaign as any)?.workflow_4_status;
       if (status === 'complete') return 'complete';
@@ -996,9 +1002,10 @@ const CampaignDetail = () => {
                   const completedWorkflows = [
                     (campaign as any)?.workflow_1_status === 'complete',
                     (campaign as any)?.workflow_2_status === 'accepted',
+                    (campaign as any)?.workflow_3_status === 'paid',
                     (campaign as any)?.workflow_4_status === 'complete'
                   ].filter(Boolean).length;
-                  return `${completedWorkflows} out of 3 Workflows Complete`;
+                  return `${completedWorkflows} out of 4 Workflows Complete`;
                 })()}
               </span>
             </div>
