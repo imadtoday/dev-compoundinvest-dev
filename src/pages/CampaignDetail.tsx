@@ -44,6 +44,7 @@ const CampaignDetail = () => {
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
   const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
   const [isSyncingProposals, setIsSyncingProposals] = useState(false);
+  const [isSyncingInvoices, setIsSyncingInvoices] = useState(false);
   const [watchProposals, setWatchProposals] = useState(false);
   
   // Navigation state
@@ -665,6 +666,31 @@ const CampaignDetail = () => {
       discountType, 
       discountAmount: discountValue 
     });
+  };
+
+  const handleSyncInvoices = async () => {
+    console.log('Starting invoice sync...');
+    setIsSyncingInvoices(true);
+    try {
+      // Webhook URL will be provided later
+      const baseUrl = 'WEBHOOK_URL_TO_BE_PROVIDED';
+      const params = new URLSearchParams({
+        campaignId: campaign?.id || '',
+        timestamp: new Date().toISOString(),
+      });
+
+      console.log('Syncing invoices with params:', Object.fromEntries(params));
+      // const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
+      
+      // Temporary placeholder - will be implemented when webhook URL is provided
+      toast({ title: "Info", description: "Invoice sync will be available once webhook URL is configured" });
+      
+    } catch (error: any) {
+      console.error('Failed to sync invoices:', error);
+      toast({ title: "Error", description: `Failed to sync invoices: ${error.message}`, variant: "destructive" });
+    } finally {
+      setIsSyncingInvoices(false);
+    }
   };
   const handleCancelInvoiceSettingsEdit = () => {
     setEditingInvoiceSettings(false);
@@ -1618,7 +1644,26 @@ const CampaignDetail = () => {
                   <CardDescription>Invoice management and tracking</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-muted-foreground">Invoice functionality will be added here.</p>
+                  {/* Sync Invoices Button */}
+                  <div className="border border-border rounded-lg p-4 bg-muted/50">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Invoice Platform Sync
+                    </h3>
+                    <Button
+                      onClick={handleSyncInvoices}
+                      variant="outline"
+                      disabled={isSyncingInvoices}
+                      className="w-full"
+                    >
+                      {isSyncingInvoices ? "Syncing..." : "Sync Invoices from Platform"}
+                    </Button>
+                    {cronSync?.updated_at && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Last synced: {formatSydneyTime(cronSync.updated_at)}
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
