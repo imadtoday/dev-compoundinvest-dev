@@ -971,6 +971,7 @@ const CampaignDetail = () => {
     { id: 'overview', label: 'Campaign Overview', status: 'complete' },
     { id: 'workflow1', label: 'Workflow 1', status: getSectionStatus('workflow1') },
     { id: 'workflow2', label: 'Workflow 2', status: getSectionStatus('workflow2') },
+    { id: 'workflow3', label: 'Workflow 3', status: getSectionStatus('workflow3') },
     { id: 'workflow4', label: 'Workflow 4', status: getSectionStatus('workflow4') },
     { id: 'notes', label: 'Notes', status: getSectionStatus('notes') },
     { id: 'transcript', label: 'Transcript', status: getSectionStatus('transcript') },
@@ -1598,6 +1599,19 @@ const CampaignDetail = () => {
                   ) : (
                     <p className="text-muted-foreground">No proposals created yet.</p>
                   )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Workflow 3 Section */}
+            <div ref={(el) => (sectionRefs.current['workflow3'] = el)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Workflow 3 - Invoices</CardTitle>
+                  <CardDescription>Invoice management and tracking</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">Invoice functionality will be added here.</p>
                 </CardContent>
               </Card>
             </div>
