@@ -754,7 +754,7 @@ const CampaignDetail = () => {
           engagement_fee_bracket: engagementFeeBracket,
           discount_type: discountType,
           discount_amount: discountAmount
-        })
+        } as any)
         .eq("id", id)
         .select();
       if (error) throw error;
