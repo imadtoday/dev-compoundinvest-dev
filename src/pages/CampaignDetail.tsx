@@ -260,6 +260,15 @@ const CampaignDetail = () => {
     };
   }, [id, queryClient]);
 
+  // Initialize invoice settings from campaign data
+  useEffect(() => {
+    if (campaign) {
+      setEngagementFeeBracket((campaign as any).engagement_fee_bracket || "");
+      setDiscountType((campaign as any).discount_type || "");
+      setDiscountAmount((campaign as any).discount_amount?.toString() || "");
+    }
+  }, [campaign]);
+
   // Fetch all Workflow 1 questions
   const { data: workflow1Questions = [] } = useQuery({
     queryKey: ["workflow1-questions"],
