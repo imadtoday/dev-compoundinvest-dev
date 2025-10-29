@@ -1134,19 +1134,51 @@ const CampaignDetail = () => {
                         <Settings className="h-5 w-5" />
                         Invoice Settings
                       </h3>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Engagement Fee Bracket</label>
-                        <Select defaultValue="">
-                          <SelectTrigger className="mt-1">
-                            <SelectValue placeholder="Select bracket" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0-0.5m">Engagement Fee Bracket up to $0.5M ($2,000)</SelectItem>
-                            <SelectItem value="0.5m-1m">Engagement Fee Bracket $0.5M to $1M ($2,500)</SelectItem>
-                            <SelectItem value="1m-2m">Engagement Fee Bracket $1M to $2M ($3,000)</SelectItem>
-                            <SelectItem value="over-2m">Engagement Fee Bracket over $2M ($3,500)</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-muted-foreground">Engagement Fee Bracket</label>
+                          <Select defaultValue="">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select bracket" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0-0.5m">Engagement Fee Bracket up to $0.5M ($2,000)</SelectItem>
+                              <SelectItem value="0.5m-1m">Engagement Fee Bracket $0.5M to $1M ($2,500)</SelectItem>
+                              <SelectItem value="1m-2m">Engagement Fee Bracket $1M to $2M ($3,000)</SelectItem>
+                              <SelectItem value="over-2m">Engagement Fee Bracket over $2M ($3,500)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-3">Engagement Fee Discount</h4>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Discount Type</label>
+                              <Select defaultValue="">
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue placeholder="Select discount type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="recurring">Recurring Customer Discount</SelectItem>
+                                  <SelectItem value="referral">Referral Discount</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Discount Amount ($)</label>
+                              <div className="relative mt-1">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                                <Input
+                                  type="text"
+                                  placeholder="0"
+                                  className="pl-7"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
