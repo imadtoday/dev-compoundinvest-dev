@@ -1115,175 +1115,180 @@ const CampaignDetail = () => {
                     )}
                   </div>
 
-                  {/* Fees Section */}
+                  {/* Fees and Invoice Settings Side by Side */}
                   <div className="mt-6 pt-6 border-t border-border">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold flex items-center gap-2">💰 Fees</h3>
-                      {!editingFees && (
-                        <Button size="sm" variant="ghost" onClick={handleEditFees}>
-                          <Edit3 className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                      )}
-                    </div>
-                    {editingFees ? (
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-sm font-medium text-muted-foreground">Engagement Fee ($)</label>
-                          <Input
-                            value={engagementFee}
-                            onChange={(e) => handleCurrencyInput(e.target.value, setEngagementFee)}
-                            placeholder="0"
-                            className="mt-1"
-                          />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Fees Section */}
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold flex items-center gap-2">💰 Fees</h3>
+                          {!editingFees && (
+                            <Button size="sm" variant="ghost" onClick={handleEditFees}>
+                              <Edit3 className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
+                          )}
                         </div>
-                        <div>
-                          <label className="text-sm font-medium text-muted-foreground">Success Fee ($)</label>
-                          <Input
-                            value={successFee}
-                            onChange={(e) => handleCurrencyInput(e.target.value, setSuccessFee)}
-                            placeholder="0"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" onClick={handleSaveFees}>
-                            <Save className="h-3 w-3 mr-1" />
-                            Save
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={handleCancelFeesEdit}>
-                            <X className="h-3 w-3 mr-1" />
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <div>
-                          <h4 className="font-medium text-sm text-muted-foreground">Engagement Fee</h4>
-                          <p className="text-lg font-semibold text-foreground">
-                            {campaign.engagement_fee ? `$${formatCurrency(campaign.engagement_fee)}` : <span className="text-muted-foreground italic">Not set</span>}
-                          </p>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-sm text-muted-foreground">Success Fee</h4>
-                          <p className="text-lg font-semibold text-foreground">
-                            {campaign.success_fee ? `$${formatCurrency(campaign.success_fee)}` : <span className="text-muted-foreground italic">Not set</span>}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Invoice Settings Section */}
-                    <div className="mt-6 pt-6 border-t border-border">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold flex items-center gap-2">
-                          <Settings className="h-5 w-5" />
-                          Invoice Settings
-                        </h3>
-                        {!editingInvoiceSettings && (
-                          <Button size="sm" variant="ghost" onClick={handleEditInvoiceSettings}>
-                            <Edit3 className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
-                        )}
-                      </div>
-                      {editingInvoiceSettings ? (
-                        <div className="space-y-4">
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Engagement Fee Bracket</label>
-                            <Select value={engagementFeeBracket} onValueChange={setEngagementFeeBracket}>
-                              <SelectTrigger className="mt-1">
-                                <SelectValue placeholder="Select bracket" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="0-0.5m">Engagement Fee Bracket up to $0.5M ($2,000)</SelectItem>
-                                <SelectItem value="0.5m-1m">Engagement Fee Bracket $0.5M to $1M ($2,500)</SelectItem>
-                                <SelectItem value="1m-2m">Engagement Fee Bracket $1M to $2M ($3,000)</SelectItem>
-                                <SelectItem value="over-2m">Engagement Fee Bracket over $2M ($3,500)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div>
-                            <h4 className="text-sm font-medium text-muted-foreground mb-3">Engagement Fee Discount</h4>
-                            <div className="space-y-3">
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Discount Type</label>
-                                <Select value={discountType} onValueChange={setDiscountType}>
-                                  <SelectTrigger className="mt-1">
-                                    <SelectValue placeholder="Select discount type" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="recurring">Recurring Customer Discount</SelectItem>
-                                    <SelectItem value="referral">Referral Discount</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Discount Amount ($)</label>
-                                <Input
-                                  value={discountAmount}
-                                  onChange={(e) => handleCurrencyInput(e.target.value, setDiscountAmount)}
-                                  placeholder="0"
-                                  className="mt-1"
-                                />
-                              </div>
+                        {editingFees ? (
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Engagement Fee ($)</label>
+                              <Input
+                                value={engagementFee}
+                                onChange={(e) => handleCurrencyInput(e.target.value, setEngagementFee)}
+                                placeholder="0"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Success Fee ($)</label>
+                              <Input
+                                value={successFee}
+                                onChange={(e) => handleCurrencyInput(e.target.value, setSuccessFee)}
+                                placeholder="0"
+                                className="mt-1"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={handleSaveFees}>
+                                <Save className="h-3 w-3 mr-1" />
+                                Save
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={handleCancelFeesEdit}>
+                                <X className="h-3 w-3 mr-1" />
+                                Cancel
+                              </Button>
                             </div>
                           </div>
-                          
-                          <div className="flex gap-2">
-                            <Button size="sm" onClick={handleSaveInvoiceSettings}>
-                              <Save className="h-3 w-3 mr-1" />
-                              Save
+                        ) : (
+                          <div className="space-y-3">
+                            <div>
+                              <h4 className="font-medium text-sm text-muted-foreground">Engagement Fee</h4>
+                              <p className="text-lg font-semibold text-foreground">
+                                {campaign.engagement_fee ? `$${formatCurrency(campaign.engagement_fee)}` : <span className="text-muted-foreground italic">Not set</span>}
+                              </p>
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-sm text-muted-foreground">Success Fee</h4>
+                              <p className="text-lg font-semibold text-foreground">
+                                {campaign.success_fee ? `$${formatCurrency(campaign.success_fee)}` : <span className="text-muted-foreground italic">Not set</span>}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Invoice Settings Section */}
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold flex items-center gap-2">
+                            <Settings className="h-5 w-5" />
+                            Invoice Settings
+                          </h3>
+                          {!editingInvoiceSettings && (
+                            <Button size="sm" variant="ghost" onClick={handleEditInvoiceSettings}>
+                              <Edit3 className="h-3 w-3 mr-1" />
+                              Edit
                             </Button>
-                            <Button size="sm" variant="outline" onClick={handleCancelInvoiceSettingsEdit}>
-                              <X className="h-3 w-3 mr-1" />
-                              Cancel
-                            </Button>
-                          </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-medium text-sm text-muted-foreground">Engagement Fee Bracket</h4>
-                            <p className="text-foreground mt-1">
-                              {engagementFeeBracket ? (
-                                (() => {
-                                  const brackets: Record<string, string> = {
-                                    "0-0.5m": "Engagement Fee Bracket up to $0.5M ($2,000)",
-                                    "0.5m-1m": "Engagement Fee Bracket $0.5M to $1M ($2,500)",
-                                    "1m-2m": "Engagement Fee Bracket $1M to $2M ($3,000)",
-                                    "over-2m": "Engagement Fee Bracket over $2M ($3,500)"
-                                  };
-                                  return brackets[engagementFeeBracket] || engagementFeeBracket;
-                                })()
-                              ) : (
-                                <span className="text-muted-foreground italic">Not set</span>
-                              )}
-                            </p>
+                        {editingInvoiceSettings ? (
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">Engagement Fee Bracket</label>
+                              <Select value={engagementFeeBracket} onValueChange={setEngagementFeeBracket}>
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue placeholder="Select bracket" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="0-0.5m">Engagement Fee Bracket up to $0.5M ($2,000)</SelectItem>
+                                  <SelectItem value="0.5m-1m">Engagement Fee Bracket $0.5M to $1M ($2,500)</SelectItem>
+                                  <SelectItem value="1m-2m">Engagement Fee Bracket $1M to $2M ($3,000)</SelectItem>
+                                  <SelectItem value="over-2m">Engagement Fee Bracket over $2M ($3,500)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div>
+                              <h4 className="text-sm font-medium text-muted-foreground mb-3">Engagement Fee Discount</h4>
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Discount Type</label>
+                                  <Select value={discountType} onValueChange={setDiscountType}>
+                                    <SelectTrigger className="mt-1">
+                                      <SelectValue placeholder="Select discount type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="recurring">Recurring Customer Discount</SelectItem>
+                                      <SelectItem value="referral">Referral Discount</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Discount Amount ($)</label>
+                                  <Input
+                                    value={discountAmount}
+                                    onChange={(e) => handleCurrencyInput(e.target.value, setDiscountAmount)}
+                                    placeholder="0"
+                                    className="mt-1"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={handleSaveInvoiceSettings}>
+                                <Save className="h-3 w-3 mr-1" />
+                                Save
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={handleCancelInvoiceSettingsEdit}>
+                                <X className="h-3 w-3 mr-1" />
+                                Cancel
+                              </Button>
+                            </div>
                           </div>
-                          
-                          <div>
-                            <h4 className="font-medium text-sm text-muted-foreground">Discount Type</h4>
-                            <p className="text-foreground mt-1">
-                              {discountType ? (
-                                discountType === "recurring" ? "Recurring Customer Discount" : "Referral Discount"
-                              ) : (
-                                <span className="text-muted-foreground italic">Not set</span>
-                              )}
-                            </p>
+                        ) : (
+                          <div className="space-y-4">
+                            <div>
+                              <h4 className="font-medium text-sm text-muted-foreground">Engagement Fee Bracket</h4>
+                              <p className="text-foreground mt-1">
+                                {engagementFeeBracket ? (
+                                  (() => {
+                                    const brackets: Record<string, string> = {
+                                      "0-0.5m": "Engagement Fee Bracket up to $0.5M ($2,000)",
+                                      "0.5m-1m": "Engagement Fee Bracket $0.5M to $1M ($2,500)",
+                                      "1m-2m": "Engagement Fee Bracket $1M to $2M ($3,000)",
+                                      "over-2m": "Engagement Fee Bracket over $2M ($3,500)"
+                                    };
+                                    return brackets[engagementFeeBracket] || engagementFeeBracket;
+                                  })()
+                                ) : (
+                                  <span className="text-muted-foreground italic">Not set</span>
+                                )}
+                              </p>
+                            </div>
+                            
+                            <div>
+                              <h4 className="font-medium text-sm text-muted-foreground">Discount Type</h4>
+                              <p className="text-foreground mt-1">
+                                {discountType ? (
+                                  discountType === "recurring" ? "Recurring Customer Discount" : "Referral Discount"
+                                ) : (
+                                  <span className="text-muted-foreground italic">Not set</span>
+                                )}
+                              </p>
+                            </div>
+                            
+                            <div>
+                              <h4 className="font-medium text-sm text-muted-foreground">Discount Amount</h4>
+                              <p className="text-lg font-semibold text-foreground">
+                                {discountAmount ? `$${formatCurrency(discountAmount)}` : <span className="text-muted-foreground italic">Not set</span>}
+                              </p>
+                            </div>
                           </div>
-                          
-                          <div>
-                            <h4 className="font-medium text-sm text-muted-foreground">Discount Amount</h4>
-                            <p className="text-lg font-semibold text-foreground">
-                              {discountAmount ? `$${formatCurrency(discountAmount)}` : <span className="text-muted-foreground italic">Not set</span>}
-                            </p>
-                          </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
 
