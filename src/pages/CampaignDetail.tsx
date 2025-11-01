@@ -845,6 +845,7 @@ const CampaignDetail = () => {
           contact_id: campaign?.contact_id,
           questionnaire_id: question.questionnaire_id,
           question_id: questionId,
+          question_code: question.code,
           value_text: value,
           is_confirmed: true,
         })
