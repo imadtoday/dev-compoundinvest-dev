@@ -519,6 +519,9 @@ const CampaignDetail = () => {
     if (!campaign.engagement_fee) missingFields.push("Engagement Fee");
     if (!campaign.success_fee) missingFields.push("Success Fee");
     
+    // Check engagement fee bracket
+    if (!(campaign as any).engagement_fee_bracket) missingFields.push("Engagement Fee Bracket");
+    
     // Check workflow 1 answers for questions 1, 2, 6, and 7
     const requiredQuestionCodes = ['current_focus', 'timeframe', 'budget_range', 'cities'];
     const workflow1AnswersList = answers?.filter(a => a.questions?.questionnaire_id === '2bf87f22-142d-4db7-aa2c-9dc6d63da39d') || [];
