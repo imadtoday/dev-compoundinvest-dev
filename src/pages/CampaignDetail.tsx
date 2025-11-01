@@ -222,6 +222,26 @@ const CampaignDetail = () => {
     refetchOnWindowFocus: true,
   });
 
+  const { data: invoices = [] } = useQuery({
+    queryKey: ["campaign-invoices", id],
+    queryFn: async () => {
+      if (!id) return [];
+      
+      const { data, error } = await supabase
+        .from('invoices' as any)
+        .select('*')
+        .eq('campaign_id', id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching invoices:', error);
+        return [];
+      }
+      return data || [];
+    },
+    enabled: !!id,
+  });
+
   const { data: cronSync } = useQuery({
     queryKey: ["cron-sync"],
     queryFn: async () => {
@@ -1654,7 +1674,7 @@ const CampaignDetail = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Workflow 3 - Invoices</CardTitle>
-                  <CardDescription>Invoice management and tracking</CardDescription>
+                  <CardDescription>{invoices.length} invoices created</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Sync Invoices Button */}
@@ -1677,6 +1697,52 @@ const CampaignDetail = () => {
                       </p>
                     )}
                   </div>
+
+                  {/* Existing Invoices List */}
+                  {invoices.length > 0 ? (
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-lg">Existing Invoices</h3>
+                      {invoices.map((invoice: any) => (
+                        <div key={invoice.id} className="border border-border rounded-lg p-4 max-w-full overflow-hidden">
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <h4 className="font-medium flex-1 break-words">Invoice</h4>
+                            <Badge 
+                              className="shrink-0"
+                              variant={
+                                invoice.invoice_status === 'paid' ? 'success' :
+                                invoice.invoice_status === 'sent' ? 'info' :
+                                invoice.invoice_status === 'draft' ? 'warning' :
+                                'default'
+                              }
+                            >
+                              {invoice.invoice_status.charAt(0).toUpperCase() + invoice.invoice_status.slice(1)}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">Created: {formatSydneyTime(invoice.created_at)}</p>
+                          {invoice.sent_at && (
+                            <p className="text-sm text-muted-foreground mb-3">Sent: {formatSydneyTime(invoice.sent_at)}</p>
+                          )}
+                          {invoice.paid_at && invoice.invoice_status === 'paid' && (
+                            <p className="text-sm text-muted-foreground mb-3">Paid: {formatSydneyTime(invoice.paid_at)}</p>
+                          )}
+                          {invoice.invoice_url && (
+                            <a 
+                              href={invoice.invoice_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                            >
+                              <Button variant="outline" size="sm">
+                                <FileText className="h-3 w-3 mr-1" />
+                                View Invoice
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No invoices created yet.</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
