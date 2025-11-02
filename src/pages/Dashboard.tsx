@@ -83,7 +83,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
           <Link to="/contacts" className="premium-card animate-slide-up hover:scale-105 transition-transform duration-200 cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">All Contacts</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Contacts</CardTitle>
               <div className="p-2 bg-primary/10 rounded-lg">
                 <Users className="h-5 w-5 text-primary" />
               </div>
