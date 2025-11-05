@@ -77,7 +77,7 @@ const CampaignsList = () => {
 
   const getWorkflowStatusBadgeStyle = (status: string) => {
     const lowerStatus = status.toLowerCase();
-    if (lowerStatus === 'complete' || lowerStatus === 'accepted') {
+    if (lowerStatus === 'complete' || lowerStatus === 'accepted' || lowerStatus === 'paid') {
       return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
     } else if (lowerStatus === 'intake_in_progress' || lowerStatus === 'sent' || lowerStatus === 'in_progress') {
       return 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200';
@@ -137,6 +137,7 @@ const CampaignsList = () => {
               <SelectItem value="all">All Workflows</SelectItem>
               <SelectItem value="workflow_1">Workflow 1</SelectItem>
               <SelectItem value="workflow_2">Workflow 2</SelectItem>
+              <SelectItem value="workflow_3">Workflow 3</SelectItem>
               <SelectItem value="workflow_4">Workflow 4</SelectItem>
             </SelectContent>
           </Select>
@@ -210,6 +211,7 @@ const CampaignsList = () => {
                           >
                             {campaign.status === 'workflow_1' ? 'Workflow 1' : 
                              campaign.status === 'workflow_2' ? 'Workflow 2' : 
+                             campaign.status === 'workflow_3' ? 'Workflow 3' : 
                              campaign.status === 'workflow_4' ? 'Workflow 4' :
                              campaign.status.replace('_', ' ').toUpperCase()}
                           </Badge>
@@ -225,12 +227,17 @@ const CampaignsList = () => {
                               {formatWorkflowStatus((campaign as any).workflow_2_status as string)}
                             </Badge>
                           )}
+                          {campaign.status === 'workflow_3' && (campaign as any).workflow_3_status && (
+                            <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_3_status as string)}`}>
+                              {formatWorkflowStatus((campaign as any).workflow_3_status as string)}
+                            </Badge>
+                          )}
                           {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
                             <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_4_status as string)}`}>
                               {formatWorkflowStatus((campaign as any).workflow_4_status as string)}
                             </Badge>
                           )}
-                          {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && campaign.status !== 'workflow_4' && (
+                          {campaign.status !== 'workflow_1' && campaign.status !== 'workflow_2' && campaign.status !== 'workflow_3' && campaign.status !== 'workflow_4' && (
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
