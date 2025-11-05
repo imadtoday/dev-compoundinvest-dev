@@ -58,17 +58,19 @@ const FaviconLoader = () => {
 };
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => (
-  <SidebarProvider>
-    <AppSidebar />
-    <SidebarInset>
-      <header className="h-12 flex items-center justify-between border-b border-border bg-background px-4">
-        <SidebarTrigger />
-        <ProfileDropdown />
-      </header>
-      <main className="p-6">
-        {children}
-      </main>
-    </SidebarInset>
+  <SidebarProvider defaultOpen={true}>
+    <div className="min-h-screen flex w-full">
+      <AppSidebar />
+      <SidebarInset className="flex-1">
+        <header className="h-12 flex items-center justify-between border-b border-border bg-background px-4">
+          <SidebarTrigger />
+          <ProfileDropdown />
+        </header>
+        <main className="p-6">
+          {children}
+        </main>
+      </SidebarInset>
+    </div>
   </SidebarProvider>
 );
 
