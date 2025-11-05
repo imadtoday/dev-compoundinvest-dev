@@ -459,7 +459,7 @@ const CampaignDetail = () => {
     if (sectionId === 'workflow3') {
       const status = (campaign as any)?.workflow_3_status;
       if (status === 'paid') return 'complete';
-      if (status === 'pending') return 'in_progress';
+      if (status === 'sent' || status === 'pending') return 'in_progress';
       return 'incomplete';
     }
     if (sectionId === 'workflow4') {
