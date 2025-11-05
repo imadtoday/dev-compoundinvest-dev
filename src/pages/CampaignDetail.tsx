@@ -280,6 +280,26 @@ const CampaignDetail = () => {
     };
   }, [id, queryClient]);
 
+  // Realtime updates for campaign workflow status changes
+  useEffect(() => {
+    if (!id) return;
+    const channel = supabase
+      .channel(`campaign:${id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'campaigns',
+        filter: `id=eq.${id}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, queryClient]);
+
   // Initialize invoice settings from campaign data
   useEffect(() => {
     if (campaign) {
