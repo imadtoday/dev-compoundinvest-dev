@@ -724,7 +724,7 @@ const CampaignDetail = () => {
     console.log('Starting invoice sync...');
     setIsSyncingInvoices(true);
     try {
-      const baseUrl = 'https://datatube.app.n8n.cloud/webhook-test/c5b6f833-d678-45df-95da-0e09c7f514c0';
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/c5b6f833-d678-45df-95da-0e09c7f514c0';
       const params = new URLSearchParams({
         campaignId: campaign?.id || '',
         timestamp: new Date().toISOString(),
