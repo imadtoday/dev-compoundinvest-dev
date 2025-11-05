@@ -1786,130 +1786,136 @@ const CampaignDetail = () => {
                   <CardDescription>{workflow4Answers.length} questions answered</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {workflow4Answers.length > 0 ? (
-                    <div className="space-y-4">
-                      {workflow4Answers.map((answer) => {
-                        const isEditing = editingQuestionId === answer.question_id || editingAnswer === answer.id;
-                        
-                        return (
-                          <div key={answer.id} className="border-b border-border pb-4 last:border-0">
-                            <div className="flex items-start justify-between gap-2 mb-3">
-                              <div className="flex-1">
-                                <div className="text-sm text-muted-foreground mb-2">Question:</div>
-                                <div className="font-medium">{renderFormattedText(answer.questions?.text || '')}</div>
-                              </div>
-                              {!isEditing && (
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost"
-                                  onClick={() => {
-                                    setEditingQuestionId(answer.question_id);
-                                    setEditingAnswer(answer.id);
-                                    // Get value from value_text, value_json, or interpreted_value
-                                    let currentValue = "";
-                                    if (answer.value_text) {
-                                      currentValue = answer.value_text;
-                                    } else if (answer.value_json) {
-                                      try {
-                                        const parsed = typeof answer.value_json === 'string' 
-                                          ? JSON.parse(answer.value_json) 
-                                          : answer.value_json;
-                                        if (parsed?.selected_values && Array.isArray(parsed.selected_values)) {
-                                          currentValue = parsed.selected_values.filter((v: string) => v && v.trim()).join(', ');
+                  {(campaign as any)?.workflow_4_status === 'in_progress' || (campaign as any)?.workflow_4_status === 'complete' ? (
+                    <>
+                      {workflow4Answers.length > 0 ? (
+                        <div className="space-y-4">
+                          {workflow4Answers.map((answer) => {
+                            const isEditing = editingQuestionId === answer.question_id || editingAnswer === answer.id;
+                            
+                            return (
+                              <div key={answer.id} className="border-b border-border pb-4 last:border-0">
+                                <div className="flex items-start justify-between gap-2 mb-3">
+                                  <div className="flex-1">
+                                    <div className="text-sm text-muted-foreground mb-2">Question:</div>
+                                    <div className="font-medium">{renderFormattedText(answer.questions?.text || '')}</div>
+                                  </div>
+                                  {!isEditing && (
+                                    <Button 
+                                      size="sm" 
+                                      variant="ghost"
+                                      onClick={() => {
+                                        setEditingQuestionId(answer.question_id);
+                                        setEditingAnswer(answer.id);
+                                        // Get value from value_text, value_json, or interpreted_value
+                                        let currentValue = "";
+                                        if (answer.value_text) {
+                                          currentValue = answer.value_text;
+                                        } else if (answer.value_json) {
+                                          try {
+                                            const parsed = typeof answer.value_json === 'string' 
+                                              ? JSON.parse(answer.value_json) 
+                                              : answer.value_json;
+                                            if (parsed?.selected_values && Array.isArray(parsed.selected_values)) {
+                                              currentValue = parsed.selected_values.filter((v: string) => v && v.trim()).join(', ');
+                                            }
+                                          } catch (e) {
+                                            console.error('Error parsing value_json for edit:', e);
+                                          }
+                                        } else if (answer.interpreted_value) {
+                                          currentValue = answer.interpreted_value;
                                         }
-                                      } catch (e) {
-                                        console.error('Error parsing value_json for edit:', e);
-                                      }
-                                    } else if (answer.interpreted_value) {
-                                      currentValue = answer.interpreted_value;
-                                    }
-                                    setEditValue(currentValue);
-                                  }}
-                                >
-                                  <Edit3 className="h-3 w-3 mr-1" />
-                                  Edit
-                                </Button>
-                              )}
-                            </div>
-                            {isEditing ? (
-                              <div className="space-y-2">
-                                <Textarea
-                                  value={editValue}
-                                  onChange={(e) => setEditValue(e.target.value)}
-                                  className="min-h-[80px]"
-                                />
-                                <div className="flex gap-2">
-                                  <Button 
-                                    size="sm" 
-                                    onClick={() => {
-                                      updateAnswerMutation.mutate({ answerId: answer.id, newValue: editValue });
-                                    }}
-                                  >
-                                    <Save className="h-3 w-3 mr-1" />
-                                    Save
-                                  </Button>
-                                  <Button 
-                                    size="sm" 
-                                    variant="outline"
-                                    onClick={() => {
-                                      setEditingAnswer(null);
-                                      setEditingQuestionId(null);
-                                      setEditValue("");
-                                    }}
-                                  >
-                                    <X className="h-3 w-3 mr-1" />
-                                    Cancel
-                                  </Button>
+                                        setEditValue(currentValue);
+                                      }}
+                                    >
+                                      <Edit3 className="h-3 w-3 mr-1" />
+                                      Edit
+                                    </Button>
+                                  )}
                                 </div>
+                                {isEditing ? (
+                                  <div className="space-y-2">
+                                    <Textarea
+                                      value={editValue}
+                                      onChange={(e) => setEditValue(e.target.value)}
+                                      className="min-h-[80px]"
+                                    />
+                                    <div className="flex gap-2">
+                                      <Button 
+                                        size="sm" 
+                                        onClick={() => {
+                                          updateAnswerMutation.mutate({ answerId: answer.id, newValue: editValue });
+                                        }}
+                                      >
+                                        <Save className="h-3 w-3 mr-1" />
+                                        Save
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={() => {
+                                          setEditingAnswer(null);
+                                          setEditingQuestionId(null);
+                                          setEditValue("");
+                                        }}
+                                      >
+                                        <X className="h-3 w-3 mr-1" />
+                                        Cancel
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="mt-2">
+                                    <div className="text-sm text-muted-foreground mb-1">Answer:</div>
+                                    <div className="text-foreground break-words font-medium">
+                                      {answer.question_code === 'upload_pre_approval' ? (() => {
+                                        let vj: any = answer.value_json;
+                                        try { if (typeof vj === 'string') vj = JSON.parse(vj); } catch {}
+                                        const filename = vj?.filename ?? vj?.file?.filename ?? vj?.file?.name ?? vj?.files?.[0]?.filename ?? vj?.files?.[0]?.name;
+                                        const fileUrl = vj?.file_url ?? vj?.file?.file_url ?? vj?.file?.url ?? vj?.files?.[0]?.file_url ?? vj?.files?.[0]?.url;
+                                        if (filename && fileUrl) {
+                                          return (
+                                            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                                              {filename}
+                                            </a>
+                                          );
+                                        }
+                                        if (fileUrl) {
+                                          const fallbackName = fileUrl.split('/').pop() || 'View file';
+                                          return (
+                                            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                                              {fallbackName}
+                                            </a>
+                                          );
+                                        }
+                                        return renderAnswerValue(answer);
+                                      })() : renderAnswerValue(answer)}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mt-2">
+                                      {formatSydneyTime(answer.created_at)}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                            ) : (
-                              <div className="mt-2">
-                                <div className="text-sm text-muted-foreground mb-1">Answer:</div>
-                                <div className="text-foreground break-words font-medium">
-                                  {answer.question_code === 'upload_pre_approval' ? (() => {
-                                    let vj: any = answer.value_json;
-                                    try { if (typeof vj === 'string') vj = JSON.parse(vj); } catch {}
-                                    const filename = vj?.filename ?? vj?.file?.filename ?? vj?.file?.name ?? vj?.files?.[0]?.filename ?? vj?.files?.[0]?.name;
-                                    const fileUrl = vj?.file_url ?? vj?.file?.file_url ?? vj?.file?.url ?? vj?.files?.[0]?.file_url ?? vj?.files?.[0]?.url;
-                                    if (filename && fileUrl) {
-                                      return (
-                                        <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
-                                          {filename}
-                                        </a>
-                                      );
-                                    }
-                                    if (fileUrl) {
-                                      const fallbackName = fileUrl.split('/').pop() || 'View file';
-                                      return (
-                                        <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
-                                          {fallbackName}
-                                        </a>
-                                      );
-                                    }
-                                    return renderAnswerValue(answer);
-                                  })() : renderAnswerValue(answer)}
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-2">
-                                  {formatSydneyTime(answer.created_at)}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : workflow4Questions.length > 0 ? (
-                    <div className="space-y-4">
-                      <div className="border-b border-border pb-4">
-                        <div className="text-sm text-muted-foreground mb-2">Question:</div>
-                        <div className="font-medium mb-3">{renderFormattedText(workflow4Questions[0].text)}</div>
-                        <div className="mt-2">
-                          <div className="text-sm text-muted-foreground mb-1">Answer:</div>
-                          <div className="text-muted-foreground italic">Not Answered</div>
+                            );
+                          })}
                         </div>
-                      </div>
-                    </div>
-                  ) : null}
+                      ) : workflow4Questions.length > 0 ? (
+                        <div className="space-y-4">
+                          <div className="border-b border-border pb-4">
+                            <div className="text-sm text-muted-foreground mb-2">Question:</div>
+                            <div className="font-medium mb-3">{renderFormattedText(workflow4Questions[0].text)}</div>
+                            <div className="mt-2">
+                              <div className="text-sm text-muted-foreground mb-1">Answer:</div>
+                              <div className="text-muted-foreground italic">Not Answered</div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : (
+                    <p className="text-muted-foreground">Workflow not started</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
