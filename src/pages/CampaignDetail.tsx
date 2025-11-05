@@ -737,9 +737,10 @@ const CampaignDetail = () => {
       if (response.ok) {
         // Wait a moment for the database to update before refreshing
         await new Promise(resolve => setTimeout(resolve, 1500));
-        // Refetch both queries to update the UI
+        // Refetch queries to update the UI including workflow status
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ["campaign-invoices", id] }),
+          queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] }),
           queryClient.refetchQueries({ queryKey: ["cron-sync"] })
         ]);
         toast({ title: "Success", description: "Invoices synced from platform" });
