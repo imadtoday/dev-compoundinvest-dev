@@ -85,7 +85,7 @@ const CampaignDetail = () => {
 
   const getWorkflowStatusBadgeStyle = (status: string) => {
     const lowerStatus = status.toLowerCase();
-    if (lowerStatus === 'complete' || lowerStatus === 'accepted') {
+    if (lowerStatus === 'complete' || lowerStatus === 'accepted' || lowerStatus === 'paid') {
       return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
     } else if (lowerStatus === 'intake_in_progress' || lowerStatus === 'sent' || lowerStatus === 'in_progress') {
       return 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200';
@@ -1183,14 +1183,20 @@ const CampaignDetail = () => {
                           {formatWorkflowStatus((campaign as any).workflow_2_status as string)}
                         </Badge>
                       )}
+                      {campaign.status === 'workflow_3' && (campaign as any).workflow_3_status && (
+                        <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_3_status as string)}`}>
+                          {formatWorkflowStatus((campaign as any).workflow_3_status as string)}
+                        </Badge>
+                      )}
                       {campaign.status === 'workflow_4' && (campaign as any).workflow_4_status && (
                         <Badge className={`font-medium px-3 py-1 ${getWorkflowStatusBadgeStyle((campaign as any).workflow_4_status as string)}`}>
                           {formatWorkflowStatus((campaign as any).workflow_4_status as string)}
                         </Badge>
                       )}
-                      {(!['workflow_1', 'workflow_2', 'workflow_4'].includes(campaign.status) || 
+                      {(!['workflow_1', 'workflow_2', 'workflow_3', 'workflow_4'].includes(campaign.status) || 
                         (campaign.status === 'workflow_1' && !(campaign as any).workflow_1_status) ||
                         (campaign.status === 'workflow_2' && !(campaign as any).workflow_2_status) ||
+                        (campaign.status === 'workflow_3' && !(campaign as any).workflow_3_status) ||
                         (campaign.status === 'workflow_4' && !(campaign as any).workflow_4_status)) && (
                         <span className="text-muted-foreground">-</span>
                       )}
