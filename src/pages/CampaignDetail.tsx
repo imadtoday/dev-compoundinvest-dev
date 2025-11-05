@@ -704,19 +704,30 @@ const CampaignDetail = () => {
     console.log('Starting invoice sync...');
     setIsSyncingInvoices(true);
     try {
-      // Webhook URL will be provided later
-      const baseUrl = 'WEBHOOK_URL_TO_BE_PROVIDED';
+      const baseUrl = 'https://datatube.app.n8n.cloud/webhook-test/c5b6f833-d678-45df-95da-0e09c7f514c0';
       const params = new URLSearchParams({
         campaignId: campaign?.id || '',
         timestamp: new Date().toISOString(),
       });
 
       console.log('Syncing invoices with params:', Object.fromEntries(params));
-      // const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
+      const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
+      console.log('Sync response:', response.status, response.ok);
       
-      // Temporary placeholder - will be implemented when webhook URL is provided
-      toast({ title: "Info", description: "Invoice sync will be available once webhook URL is configured" });
-      
+      if (response.ok) {
+        // Wait a moment for the database to update before refreshing
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Refetch both queries to update the UI
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["campaign-invoices", id] }),
+          queryClient.refetchQueries({ queryKey: ["cron-sync"] })
+        ]);
+        toast({ title: "Success", description: "Invoices synced from platform" });
+      } else {
+        const errorText = await response.text();
+        console.error('Sync error:', errorText);
+        throw new Error(`Webhook failed with status ${response.status}: ${errorText}`);
+      }
     } catch (error: any) {
       console.error('Failed to sync invoices:', error);
       toast({ title: "Error", description: `Failed to sync invoices: ${error.message}`, variant: "destructive" });
