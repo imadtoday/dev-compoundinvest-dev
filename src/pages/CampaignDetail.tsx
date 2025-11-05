@@ -1766,65 +1766,6 @@ const CampaignDetail = () => {
                   <CardDescription>{workflow4Answers.length} questions answered</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {(campaign as any)?.workflow_2_status !== 'accepted' && (
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 mb-4">
-                      <p className="text-sm text-yellow-700 dark:text-yellow-400">
-                        Workflow 2 must be completed before asking for purchasing entity details.
-                      </p>
-                    </div>
-                  )}
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleAskPurchasingEntity}
-                      variant="outline"
-                      disabled={isAskingPurchasingEntity || (campaign as any)?.workflow_2_status !== 'accepted'}
-                    >
-                      {isAskingPurchasingEntity ? "Sending..." : "Ask for Purchasing Entity Details"}
-                    </Button>
-                    <Button
-                      onClick={async () => {
-                        if (!confirm('Are you sure you want to delete all Workflow 4 answers? This cannot be undone.')) return;
-                        
-                        try {
-                          const { error: deleteError } = await supabase
-                            .from('campaign_answers')
-                            .delete()
-                            .eq('campaign_id', id)
-                            .in('question_id', workflow4Answers.map(a => a.question_id));
-                          
-                          if (deleteError) throw deleteError;
-
-                          const { error: updateError } = await supabase
-                            .from('campaigns')
-                            .update({ 
-                              workflow_4_status: null,
-                              status: 'workflow_2'
-                            } as any)
-                            .eq('id', id);
-                          
-                          if (updateError) throw updateError;
-                          
-                          toast({
-                            title: "Success",
-                            description: "Workflow 4 reset successfully",
-                          });
-                          
-                          queryClient.invalidateQueries({ queryKey: ['campaign-answers', id] });
-                          queryClient.invalidateQueries({ queryKey: ['campaign-detail', id] });
-                        } catch (error: any) {
-                          toast({
-                            title: "Error",
-                            description: error.message,
-                            variant: "destructive",
-                          });
-                        }
-                      }}
-                      variant="destructive"
-                    >
-                      Temporary Reset
-                    </Button>
-                  </div>
-                  
                   {workflow4Answers.length > 0 ? (
                     <div className="space-y-4">
                       {workflow4Answers.map((answer) => {
