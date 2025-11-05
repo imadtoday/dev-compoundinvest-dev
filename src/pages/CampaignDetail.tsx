@@ -133,6 +133,31 @@ const CampaignDetail = () => {
     enabled: !!id
   });
 
+  // Set up real-time subscription for campaign updates
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel('campaign-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'campaigns',
+          filter: `id=eq.${id}`
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['campaign-detail', id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, queryClient]);
+
   useEffect(() => {
     if (campaign) {
       setEngagementFee(campaign.engagement_fee ? formatCurrency(campaign.engagement_fee) : "");
