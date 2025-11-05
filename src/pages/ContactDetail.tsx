@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Save, User, Megaphone } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { formatStatus } from "@/lib/utils";
 
 const ContactDetail = () => {
   const { id } = useParams();
@@ -277,7 +278,7 @@ const ContactDetail = () => {
                           <div className="flex justify-between items-start">
                             <div>
                               <h4 className="font-medium text-primary hover:underline">{campaign.name || 'Unnamed Campaign'}</h4>
-                              <p className="text-sm text-muted-foreground mt-1">Status: <span className="font-medium">{campaign.status}</span></p>
+                              <p className="text-sm text-muted-foreground mt-1">Status: <span className="font-medium">{formatStatus(campaign.status)}</span></p>
                               <p className="text-sm text-muted-foreground">
                                 Created: {new Date(campaign.created_at).toLocaleDateString()}
                               </p>
