@@ -696,6 +696,7 @@ const CampaignDetail = () => {
         // Refetch both queries to update the UI
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ["campaign-proposals", id] }),
+          queryClient.invalidateQueries({ queryKey: ["campaign-detail", id] }),
           queryClient.refetchQueries({ queryKey: ["cron-sync"] })
         ]);
         toast({ title: "Success", description: "Proposals synced from platform" });
