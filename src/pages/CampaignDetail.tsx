@@ -42,7 +42,6 @@ const CampaignDetail = () => {
   // Proposal creation state
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [isCreatingProposal, setIsCreatingProposal] = useState(false);
-  const [isAskingPurchasingEntity, setIsAskingPurchasingEntity] = useState(false);
   const [isSyncingProposals, setIsSyncingProposals] = useState(false);
   const [isSyncingInvoices, setIsSyncingInvoices] = useState(false);
   const [watchProposals, setWatchProposals] = useState(false);
@@ -520,38 +519,6 @@ const CampaignDetail = () => {
       setter(formatted);
     } else {
       setter('');
-    }
-  };
-
-  const handleAskPurchasingEntity = async () => {
-    setIsAskingPurchasingEntity(true);
-    try {
-      const baseUrl = 'https://datatube.app.n8n.cloud/webhook/handleAskPurchasingEntity';
-      const params = new URLSearchParams({
-        campaignId: campaign?.id || '',
-        campaign_name: campaign?.name || '',
-        contact_id: campaign?.contacts?.id || '',
-        contact_first_name: campaign?.contacts?.first_name || '',
-        contact_last_name: campaign?.contacts?.last_name || '',
-        contact_email: campaign?.contacts?.email || '',
-        contact_phone: campaign?.contacts?.phone_e164 || '',
-        contact_address: campaign?.contacts?.address || '',
-        timestamp: new Date().toISOString(),
-      });
-
-      const response = await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET' });
-      if (response.ok) {
-        toast({ title: "Success", description: "Purchasing entity details request has been sent" });
-        // Refresh the campaign data and answers
-        queryClient.invalidateQueries({ queryKey: ["campaign", id] });
-        queryClient.invalidateQueries({ queryKey: ["campaign-answers", id] });
-      } else {
-        throw new Error(`Webhook failed with status ${response.status}`);
-      }
-    } catch (error: any) {
-      toast({ title: "Error", description: `Failed to send request: ${error.message}`, variant: "destructive" });
-    } finally {
-      setIsAskingPurchasingEntity(false);
     }
   };
 
