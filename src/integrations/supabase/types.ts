@@ -194,13 +194,20 @@ export type Database = {
           consent_received_at: string | null
           contact_id: string
           created_at: string
+          discount_amount: number | null
+          discount_type: string | null
           engagement_fee: number | null
+          engagement_fee_bracket: string | null
           external_conversation_sid: string | null
+          finance_pending_followup: string | null
+          finance_pre_approval_status: string | null
+          first_followup: string | null
           id: string
           last_question_id: number | null
           name: string | null
           notes: string | null
           pending_other_field: string | null
+          purchasing_entity_type: string | null
           scheduled_end: string | null
           scheduled_start: string | null
           skipped_questions: number[] | null
@@ -208,6 +215,10 @@ export type Database = {
           success_fee: number | null
           twilio_conversation_sid: string | null
           updated_at: string
+          workflow_1_status: string | null
+          workflow_2_status: string | null
+          workflow_3_status: string | null
+          workflow_4_status: string | null
         }
         Insert: {
           answered_questions?: number[] | null
@@ -219,13 +230,20 @@ export type Database = {
           consent_received_at?: string | null
           contact_id: string
           created_at?: string
+          discount_amount?: number | null
+          discount_type?: string | null
           engagement_fee?: number | null
+          engagement_fee_bracket?: string | null
           external_conversation_sid?: string | null
+          finance_pending_followup?: string | null
+          finance_pre_approval_status?: string | null
+          first_followup?: string | null
           id?: string
           last_question_id?: number | null
           name?: string | null
           notes?: string | null
           pending_other_field?: string | null
+          purchasing_entity_type?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
           skipped_questions?: number[] | null
@@ -233,6 +251,10 @@ export type Database = {
           success_fee?: number | null
           twilio_conversation_sid?: string | null
           updated_at?: string
+          workflow_1_status?: string | null
+          workflow_2_status?: string | null
+          workflow_3_status?: string | null
+          workflow_4_status?: string | null
         }
         Update: {
           answered_questions?: number[] | null
@@ -244,13 +266,20 @@ export type Database = {
           consent_received_at?: string | null
           contact_id?: string
           created_at?: string
+          discount_amount?: number | null
+          discount_type?: string | null
           engagement_fee?: number | null
+          engagement_fee_bracket?: string | null
           external_conversation_sid?: string | null
+          finance_pending_followup?: string | null
+          finance_pre_approval_status?: string | null
+          first_followup?: string | null
           id?: string
           last_question_id?: number | null
           name?: string | null
           notes?: string | null
           pending_other_field?: string | null
+          purchasing_entity_type?: string | null
           scheduled_end?: string | null
           scheduled_start?: string | null
           skipped_questions?: number[] | null
@@ -258,6 +287,10 @@ export type Database = {
           success_fee?: number | null
           twilio_conversation_sid?: string | null
           updated_at?: string
+          workflow_1_status?: string | null
+          workflow_2_status?: string | null
+          workflow_3_status?: string | null
+          workflow_4_status?: string | null
         }
         Relationships: [
           {
@@ -308,6 +341,7 @@ export type Database = {
           phone_e164: string | null
           source: string | null
           updated_at: string
+          xero_contact_id: string | null
         }
         Insert: {
           address?: string | null
@@ -320,6 +354,7 @@ export type Database = {
           phone_e164?: string | null
           source?: string | null
           updated_at?: string
+          xero_contact_id?: string | null
         }
         Update: {
           address?: string | null
@@ -332,8 +367,74 @@ export type Database = {
           phone_e164?: string | null
           source?: string | null
           updated_at?: string
+          xero_contact_id?: string | null
         }
         Relationships: []
+      }
+      cron_sync: {
+        Row: {
+          created_at: string
+          id: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          followup: string | null
+          id: string
+          invoice_status: string
+          invoice_url: string | null
+          paid_at: string | null
+          sent_at: string | null
+          updated_at: string
+          xero_invoice_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          followup?: string | null
+          id?: string
+          invoice_status?: string
+          invoice_url?: string | null
+          paid_at?: string | null
+          sent_at?: string | null
+          updated_at?: string
+          xero_invoice_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          followup?: string | null
+          id?: string
+          invoice_status?: string
+          invoice_url?: string | null
+          paid_at?: string | null
+          sent_at?: string | null
+          updated_at?: string
+          xero_invoice_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
@@ -408,6 +509,65 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      proposals: {
+        Row: {
+          accepted_at: string | null
+          betterproposals_proposal_id: string
+          campaign_id: string
+          created_at: string
+          followup_1: string | null
+          followup_2: string | null
+          id: string
+          proposal_editor_url: string | null
+          proposal_preview_url: string | null
+          proposal_status: string
+          proposal_url: string | null
+          sent_at: string | null
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          betterproposals_proposal_id: string
+          campaign_id: string
+          created_at?: string
+          followup_1?: string | null
+          followup_2?: string | null
+          id?: string
+          proposal_editor_url?: string | null
+          proposal_preview_url?: string | null
+          proposal_status?: string
+          proposal_url?: string | null
+          sent_at?: string | null
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          betterproposals_proposal_id?: string
+          campaign_id?: string
+          created_at?: string
+          followup_1?: string | null
+          followup_2?: string | null
+          id?: string
+          proposal_editor_url?: string | null
+          proposal_preview_url?: string | null
+          proposal_status?: string
+          proposal_url?: string | null
+          sent_at?: string | null
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       questionnaires: {
         Row: {
@@ -511,7 +671,7 @@ export type Database = {
         Returns: string
       }
       get_user_role: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
       has_role: {
@@ -521,10 +681,7 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_super_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_super_admin: { Args: never; Returns: boolean }
       upsert_contact: {
         Args: {
           p_email: string
@@ -544,6 +701,13 @@ export type Database = {
           phone_e164: string | null
           source: string | null
           updated_at: string
+          xero_contact_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "contacts"
+          isOneToOne: true
+          isSetofReturn: false
         }
       }
     }

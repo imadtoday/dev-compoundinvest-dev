@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -51,8 +51,7 @@ const CampaignDetail = () => {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [activeSection, setActiveSection] = useState('overview');
   // Scroll container refs
-  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   // Template ID to name mapping
   const getTemplateName = (templateId: string) => {
@@ -379,91 +378,32 @@ const CampaignDetail = () => {
     sectionRefs.current[sectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Scroll spy - robust using IntersectionObserver with ratio + nearest fallback
+  // Scroll spy - using native window scroll
   useEffect(() => {
     const sectionIds = ['overview', 'workflow1', 'workflow2', 'workflow3', 'workflow4', 'notes', 'transcript'];
 
-    let observer: IntersectionObserver | null = null;
-    let rafId = 0;
+    const handleScroll = () => {
+      const targetY = 150; // px from top of viewport
+      const distances = sectionIds
+        .map((id) => {
+          const el = sectionRefs.current[id];
+          if (!el) return { id, dist: Number.POSITIVE_INFINITY };
+          const rect = el.getBoundingClientRect();
+          return { id, dist: Math.abs(rect.top - targetY) };
+        })
+        .sort((a, b) => a.dist - b.dist);
 
-    const setup = () => {
-      const rootEl = (viewportRef.current ?? (document.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null));
-      if (!rootEl) {
-        rafId = requestAnimationFrame(setup);
-        return;
+      if (distances.length && distances[0].dist < 500) {
+        setActiveSection(distances[0].id);
       }
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          let bestId: string | null = null;
-          let bestRatio = 0;
-
-          entries.forEach((entry) => {
-            const id = (entry.target as HTMLElement).dataset.sectionId;
-            if (!id) return;
-            if (entry.isIntersecting && entry.intersectionRatio >= bestRatio) {
-              bestRatio = entry.intersectionRatio;
-              bestId = id;
-            }
-          });
-
-          if (bestId) {
-            setActiveSection(bestId);
-            return;
-          }
-
-          const targetY = 40; // px from top of scroll ROOT
-          const baseTop = rootEl.getBoundingClientRect().top;
-          const distances = sectionIds
-            .map((id) => {
-              const el = sectionRefs.current[id];
-              if (!el) return { id, dist: Number.POSITIVE_INFINITY };
-              const rect = el.getBoundingClientRect();
-              const topRelative = rect.top - baseTop;
-              return { id, dist: Math.abs(topRelative - targetY) };
-            })
-            .sort((a, b) => a.dist - b.dist);
-
-          if (distances.length) setActiveSection(distances[0].id);
-        },
-        {
-          root: rootEl,
-          rootMargin: '-40px 0px -50% 0px',
-          threshold: [0, 0.1, 0.25, 0.4, 0.5, 0.75, 1],
-        }
-      );
-
-      // Observe each section
-      sectionIds.forEach((id) => {
-        const el = sectionRefs.current[id];
-        if (el) {
-          el.setAttribute('data-section-id', id);
-          observer!.observe(el);
-        }
-      });
-
-      // Initial sync aligned to scroll root
-      setTimeout(() => {
-        const targetY = 40;
-        const baseTop = rootEl.getBoundingClientRect().top;
-        const distances = sectionIds
-          .map((id) => {
-            const el = sectionRefs.current[id];
-            if (!el) return { id, dist: Number.POSITIVE_INFINITY };
-            const rect = el.getBoundingClientRect();
-            const topRelative = rect.top - baseTop;
-            return { id, dist: Math.abs(topRelative - targetY) };
-          })
-          .sort((a, b) => a.dist - b.dist);
-        if (distances.length) setActiveSection(distances[0].id);
-      }, 100);
     };
 
-    setup();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Initial sync
+    setTimeout(handleScroll, 100);
 
     return () => {
-      if (observer) observer.disconnect();
-      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -1166,9 +1106,9 @@ const CampaignDetail = () => {
           </Card>
         </div>
 
-          {/* Right Side - Scrollable Content */}
-          <ScrollArea ref={scrollAreaRef} viewportRef={viewportRef} className="flex-1 min-w-0 h-[calc(100vh-180px)]">
-            <div className="space-y-6 pr-4 md:pr-6 lg:pr-8 break-words max-w-full min-w-0 overflow-x-hidden">
+          {/* Right Side - Content */}
+          <div className="flex-1 min-w-0">
+            <div className="space-y-6 break-words max-w-full min-w-0 overflow-x-hidden">
             {/* Campaign Overview Section */}
             <div ref={(el) => (sectionRefs.current['overview'] = el)}>
               <Card>
@@ -2055,7 +1995,7 @@ const CampaignDetail = () => {
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
       </div>
     </div>
   );
