@@ -1044,7 +1044,7 @@ const CampaignDetail = () => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Top Bar */}
       <div className="border-b border-border bg-card px-6 py-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <Link to="/campaigns">
               <Button variant="ghost" size="sm">
@@ -1077,10 +1077,10 @@ const CampaignDetail = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl w-full mx-auto flex gap-6 p-6">
+      <div className="max-w-6xl w-full mx-auto flex gap-4 p-4 lg:p-6">
         {/* Left Sidebar Navigation */}
-        <div className="w-64 flex-shrink-0">
-          <Card className="sticky top-6">
+        <div className="w-52 flex-shrink-0">
+          <Card className="sticky top-4">
             <CardContent className="p-4">
               <nav className="space-y-1">
                 {navSections.map((section) => {
